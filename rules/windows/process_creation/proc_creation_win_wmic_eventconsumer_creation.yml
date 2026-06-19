@@ -1,13 +1,17 @@
-title: New ActiveScriptEventConsumer Created Via Wmic.EXE
+title: NewActiveScriptEventConsumer Creation Attempt Via Wmic.EXE
 id: ebef4391-1a81-4761-a40a-1db446c0e625
 status: test
-description: Detects WMIC executions in which an event consumer gets created. This could be used to establish persistence
+description: |
+    Detects the attempt to create an ActiveScriptEventConsumer via WMIC.EXE.
+    An ActiveScriptEventConsumer is a built-in Windows Management Instrumentation (WMI) class that
+    automatically executes a predefined script (in VBScript or JScript) whenever a specific system event occurs.
+    Adversaries often abuse ActiveScriptEventConsumer to maintain persistence on a compromised host by executing a malicious script whenever a specific event occurs.
 references:
     - https://twitter.com/johnlatwc/status/1408062131321270282?s=12
     - https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/wp-windows-management-instrumentation.pdf
 author: Florian Roth (Nextron Systems)
 date: 2021-06-25
-modified: 2023-02-14
+modified: 2026-06-19
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -16,11 +20,14 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_img:
+        - OriginalFileName: 'wmic.exe'
+        - Image|endswith: '\WMIC.exe'
+    selection_cli:
         CommandLine|contains|all:
             - 'ActiveScriptEventConsumer'
             - ' CREATE '
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - Legitimate software creating script event consumers
 level: high

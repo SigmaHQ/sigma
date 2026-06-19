@@ -1,16 +1,20 @@
-title: Process Reconnaissance Via Wmic.EXE
+title: Potential Process Reconnaissance Via Wmic.EXE
 id: 221b251a-357a-49a9-920a-271802777cc0
 status: test
-description: Detects the execution of "wmic" with the "process" flag, which adversary might use to list processes running on the compromised host or list installed software hotfixes and patches.
+description: |
+    Detects the execution of "wmic" with the "process" flag, which might indicate an attempt to perform reconnaissance on running processes.
+    Adversaries may use wmic to query for running processes and their details as part of their reconnaissance efforts.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1047/T1047.md
     - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/wmic
 author: frack113
 date: 2022-01-01
-modified: 2023-02-14
+modified: 2025-06-10
 tags:
     - attack.execution
     - attack.t1047
+    - attack.discovery
+    - attack.t1057
 logsource:
     category: process_creation
     product: windows
@@ -25,6 +29,11 @@ detection:
             # Rule id 526be59f-a573-4eea-b5f7-f0973207634d for `wmic process call create #{process_to_execute}`
             - 'call'
             - 'create'
+    filter_main_terminate:
+        CommandLine|contains|all:
+            # Rule id 49d9671b-0a0a-4c09-8280-d215bfd30662 for `wmic path win32_process where processid=#{processid_to_terminate} call terminate`
+            - 'call'
+            - 'terminate'
     condition: all of selection* and not 1 of filter_*
 falsepositives:
     - Unknown
