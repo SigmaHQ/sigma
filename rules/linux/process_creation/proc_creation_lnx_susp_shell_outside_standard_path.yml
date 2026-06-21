@@ -1,0 +1,47 @@
+title: Shell Process Executed Outside Standard Binary Paths
+id: b9e4f2c1-7a35-4d08-c317-2e9f0b6a8d43
+status: experimental
+description: |
+    Detects shell processes (bash, sh, dash, zsh, ksh, fish, etc.) executed from paths outside standard system binary directories.
+    Legitimate shells reside under /bin, /usr/bin, or /usr/local/bin or some mounted overlay of those paths.
+    Execution from writable locations such as /tmp, /home, /dev/shm, or /var is a strong indicator of a dropped SUID shell, a staged payload, or a container/namespace escape technique.
+references:
+    - https://gtfobins.github.io/gtfobins/bash/#suid
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-24
+tags:
+    - attack.privilege-escalation
+    - attack.defense-evasion
+    - attack.execution
+    - attack.t1036
+    - attack.t1548.001
+    - attack.t1059.004
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith:
+            - '/bash'
+            - '/sh'
+            - '/dash'
+            - '/zsh'
+            - '/ksh'
+            - '/mksh'
+            - '/csh'
+            - '/tcsh'
+            - '/fish'
+    filter_main_standard_paths:
+        Image|startswith:
+            - '/bin/'
+            - '/usr/bin/'
+            - '/sbin/'
+            - '/usr/sbin/'
+            - '/usr/local/bin/'
+            - '/usr/local/sbin/'
+            - '/mnt/'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Custom shell installations in non-standard prefix paths (e.g. /opt, /snap, /nix)
+    - Container runtimes with overlayfs mounts that remap /bin
+level: medium # Can be updated to high after initial baselining and false positive validation
