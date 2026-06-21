@@ -1,0 +1,39 @@
+title: Suspicious Creation of AppLocker Policy Files
+id: c1c2f4e2-0f3d-4c8e-9b8a-6f2a1d9c4e77
+related:
+  - id: f2a8c3e4-1d5b-4a9c-8f6e-2b3c7d8a9f1e
+    type: similar
+status: experimental
+description: Detects suspicious creation of AppLocker policy files which may indicate tampering or attempts to disable application control.
+references:
+  - https://learn.microsoft.com/windows/security/threat-protection/applocker/applocker-overview
+author: Reinhard Westerholt
+date: 2026/03/02
+tags:
+  - attack.defense-evasion
+  - attack.t1562.002  # Disable or Modify Tools
+logsource:
+  product: windows
+  category: file_event
+detection:
+  selection_paths:
+    TargetFilename|contains: '\System32\AppLocker\'
+  selection_image:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+      - '\cmd.exe'
+      - '\wscript.exe'
+      - '\cscript.exe'
+      - '\mshta.exe'
+      - '\python.exe'
+      - '\rundll32.exe'
+      - '\7z.exe'
+  condition: selection_paths and selection_image
+fields:
+  - Image
+  - TargetFilename
+falsepositives:
+  - Legitimate GPO updates (gpscript.exe)
+  - Administrative changes via gpedit.msc
+level: high
