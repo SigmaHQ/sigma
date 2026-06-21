@@ -1,0 +1,27 @@
+title: Arbitrary File Download Via MSOXMLED.EXE
+id: 680a3448-ebd2-4117-bf25-38250f73e0d4
+status: experimental
+description: Detects usage of "MSOXMLED" (Microsoft Office XML Editor) to download arbitrary files
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/pull/458/files
+author: Cory Burrell
+date: 2026-06-20
+tags:
+    - attack.command-and-control
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\msoxmled.exe'
+        - OriginalFileName: 'msoxmled.exe'
+    selection_cli:
+        CommandLine|contains:
+            - 'ftp://'
+            - 'http://'
+            - 'https://'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
