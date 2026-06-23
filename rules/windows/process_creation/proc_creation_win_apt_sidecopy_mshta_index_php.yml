@@ -1,0 +1,30 @@
+title: SideCopy Mshta.EXE Fetching Remote HTA via index.php Endpoint
+id: 1f650100-d50e-4841-af42-75e5d18e106a
+status: experimental
+description: Detects execution of mshta.exe with a commandline referencing an "index.php" endpoint, which is a signature initial-access TTP used by the SideCopy APT group since at least 2019. The group lures victims with malicious LNK files (often disguised as PDF documents) that invoke mshta.exe to fetch a remote HTML Application (HTA) from a compromised web server via an index.php URL. This pattern is more specific than generic mshta HTTP detection rules and strongly correlates with SideCopy infrastructure.
+references:
+    - https://blog.talosintelligence.com/sidecopy/
+    - https://www.seqrite.com/blog/goodbye-hta-hello-msi-new-ttps-and-clusters-of-an-apt-driven-by-multi-platform-attacks/
+    - https://thehackernews.com/2026/02/apt36-and-sidecopy-launch-cross.html
+    - https://cybersrcc.com/2025/05/02/pakistan-linked-sidecopy-hackers-escalate-indian-cyberattacks-with-curlback-rat-and-spark-rat/
+author: Pyhroff
+date: 2026-06-23
+tags:
+    - attack.initial-access
+    - attack.execution
+    - attack.defense-evasion
+    - attack.t1218.005
+    - attack.t1566.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\mshta.exe'
+        - OriginalFileName: 'MSHTA.EXE'
+    selection_cli:
+        CommandLine|contains: 'index.php'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely. Legitimate applications rarely invoke mshta.exe against an index.php endpoint. Internal web applications using PHP are theoretically possible but would be unusual in this context.
+level: high

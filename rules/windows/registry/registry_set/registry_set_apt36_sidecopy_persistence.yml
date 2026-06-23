@@ -1,0 +1,27 @@
+title: APT36/SideCopy CrimsonRAT and ElizaRAT Registry Persistence
+id: 727bc0c1-da26-4d46-a4bf-aff11117a949
+status: experimental
+description: Detects registry modifications associated with APT36 (Transparent Tribe) and SideCopy persistence mechanisms. CrimsonRAT stores configuration under HKCU\Software\CrimsonRAT, ElizaRAT uses HKLM\SYSTEM\ElizaRAT\Persistence, and the CapraStart run key ensures autostart on logon. These are signature artifacts of Pakistan-linked campaigns targeting Indian and Afghan government entities.
+references:
+    - https://www.seqrite.com/blog/operation-xenofiscal-sidecopy-deploying-persistent-xenorat-targeting-the-mof-afghanistan/
+    - https://thehackernews.com/2026/02/apt36-and-sidecopy-launch-cross.html
+    - https://freemindtronic.com/apt36-cyberespionage-group-technical-reference-guide-v1-1/
+    - https://arxiv.org/html/2510.04118v1
+author: Pyhroff
+date: 2026-06-23
+tags:
+    - attack.persistence
+    - attack.t1547.001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains:
+            - '\Software\CrimsonRAT'
+            - '\SYSTEM\ElizaRAT\Persistence'
+            - '\CurrentVersion\Run\CapraStart'
+    condition: selection
+falsepositives:
+    - Unlikely. These registry paths are not used by any known legitimate software.
+level: high

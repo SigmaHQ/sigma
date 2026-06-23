@@ -1,0 +1,27 @@
+title: SideCopy XenoRAT Scheduled Task Persistence
+id: 996bc437-e877-4cfb-8824-1273b02663b1
+status: experimental
+description: Detects creation of the scheduled task named "XenoUpdateManager", which is used by the SideCopy APT group (Pakistan-linked) to persist XenoRAT on compromised hosts. The task name is a hardcoded artifact confirmed across multiple SideCopy campaigns targeting Afghan and Indian government networks in 2025-2026.
+references:
+    - https://www.seqrite.com/blog/operation-xenofiscal-sidecopy-deploying-persistent-xenorat-targeting-the-mof-afghanistan/
+    - https://thehackernews.com/2026/06/pakistan-linked-sidecopy-targets.html
+    - https://socprime.com/active-threats/operation-xenofiscal-sidecopy-deploys-persistent-xenorat-against-afghanistans-ministry-of-finance/
+author: Pyhroff
+date: 2026-06-23
+tags:
+    - attack.persistence
+    - attack.execution
+    - attack.t1053.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\schtasks.exe'
+        - OriginalFileName: 'schtasks.exe'
+    selection_task:
+        CommandLine|contains: 'XenoUpdateManager'
+    condition: all of selection_*
+falsepositives:
+    - No legitimate software is known to create a scheduled task named XenoUpdateManager.
+level: high
