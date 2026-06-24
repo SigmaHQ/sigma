@@ -61,10 +61,10 @@ Others provide excellent analyses, include IOCs and YARA rules to detect the mal
 
 ## 🏗️ Rule Creation
 
-To start writing Sigma rules please check the following high level guide along with the sigma specification:
+To start writing Sigma rules please check the following getting started guide along with the sigma specification:
 
-* [Rule Creation High‐Level Guide]([https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide](https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-High%E2%80%90Level-Guide))
-* [Sigma Specification](https://github.com/SigmaHQ/sigma-specification)
+* [Getting Started Guide](https://sigmahq.io/docs/guide/about.html)
+* [Sigma Specification](https://github.com/SigmaHQ/sigma-specification/blob/main/specification/sigma-rules-specification.md)
 
 ## 🔎 Contributing & Making PRs
 
@@ -72,11 +72,14 @@ Please refer to the [CONTRIBUTING](./CONTRIBUTING.md) guide for detailed instruc
 
 ## 📦 Rule Packages
 
-You can download the latest rule packages from the [release page](https://github.com/SigmaHQ/sigma/releases/latest) and start leveraging Sigma rules today.
+You can download the latest rule packages from the [release page](https://github.com/SigmaHQ/sigma/releases/latest) and start leveraging Sigma rules today. New rules are also released on a regular basis, so check back often for the latest detections.
 
 ## 🧬 Rule Usage and Conversion
 
-* You can start converting Sigma rules today using [Sigma CLI](https://github.com/SigmaHQ/sigma-cli) or [sigconverter.io](https://sigconverter.io) the GUI interface
+* You can start converting Sigma rules today using:
+  * [Sigma CLI](https://github.com/SigmaHQ/sigma-cli) - the official command-line converter
+  * [sigconverter.io](https://sigconverter.io) - web-based GUI converter
+  * [Detection Studio](https://detection.studio/) - web-based GUI converter
 
 * To integrate Sigma rules in your own toolchain or products use [pySigma](https://github.com/SigmaHQ/pySigma).
 
@@ -84,46 +87,63 @@ You can download the latest rule packages from the [release page](https://github
 
 If you find a false positive or would like to propose a new detection rule idea but do not have the time to create one, please create a new issue on the [GitHub repository](https://github.com/SigmaHQ/sigma/issues/new/choose) by selecting one of the available templates.
 
+## 💬 Community
+
+Join the Sigma community on [Discord](https://discord.gg/UcDN25s8) to discuss detection engineering, ask questions, share ideas, and collaborate with other practitioners. We also use Discord for announcements such as new releases and other project updates.
+
+## 🌐 Official Resources
+
+* [sigmahq.io](https://sigmahq.io/) - Official Sigma website
+* [SigmaHQ Blog](https://blog.sigmahq.io/) - Official blog covering detection engineering, rule releases, and Sigma updates
+* [Phoenix - Sigma Rule Intelligence Platform](https://sigma.nasbench.dev/) - Search, analyze, and understand Sigma rules mapped to MITRE ATT&CK
+
 ## 📚 Resources & Further Reading
 
 * [Hack.lu 2017 Sigma - Generic Signatures for Log Events by Thomas Patzke](https://www.youtube.com/watch?v=OheVuE9Ifhs)
-* [MITRE ATT&CK® and Sigma Alerting SANS Webcast Recording](https://www.sans.org/webcasts/mitre-att-ck-sigma-alerting-110010 "MITRE ATT&CK® and Sigma Alerting")
 * [Sigma - Generic Signatures for SIEM Systems by Florian Roth](https://www.slideshare.net/secret/gvgxeXoKblXRcA)
+* [50 Shades of Sigma by Florian Roth](https://www.slideshare.net/FlorianRoth2/50-shades-of-sigma)
+* [Introducing Sigma Specification v2.0 by Nasreddine Bencherchali](https://blog.sigmahq.io/introducing-sigma-specification-v2-0-25f81a926ff0)
+* [SIGMA-Resources - Curated list of resources to learn and understand Sigma rules](https://github.com/nasbench/SIGMA-Resources)
+* [The Ultimate Guide to Sigma Rules by Graylog](https://graylog.org/post/the-ultimate-guide-to-sigma-rules/)
+* [Introduction to Sigma Rules by Intezer](https://intezer.com/blog/threat-hunting/intro-to-sigma-rules/)
 
 ## Projects or Products that use or integrate Sigma rules
-* [AlphaSOC](https://docs.alphasoc.com/detections_and_findings/sigma_community/) - Leverages Sigma rules to increase coverage across all supported log sources
+* [AlphaSOC](https://docs.alphasoc.com/detections_and_findings/sigma/introduction/) - Leverages Sigma rules to increase coverage across all supported log sources
 * [alterix](https://github.com/mtnmunuklu/alterix) - Converts Sigma rules to the query language of CRYPTTECH's SIEM
 * [AttackIQ](https://www.attackiq.com/2024/01/10/sigmaiq-attackiqs-latest-innovation-for-actionable-detections/) - Sigma Rules integrated in AttackIQ's platform, and [SigmAIQ](https://github.com/AttackIQ/SigmAIQ) for Sigma rule conversion and LLM apps
-* [Atomic Threat Coverage](https://github.com/atc-project/atomic-threat-coverage) (Since December 2018)
-* [AttackRuleMap - Mapping of Atomic Red Team tests and Sigma Rules](https://attackrulemap.com/)
+* [Atomic Threat Coverage](https://github.com/atc-project/atomic-threat-coverage) - Automatically maps Sigma rules to MITRE ATT&CK techniques, Atomic Red Team tests, and incident response playbooks (since December 2018)
+* [ATR (Agent Threat Rules)](https://github.com/Agent-Threat-Rule/agent-threat-rules) - Open MIT-licensed detection rule format for AI agent security threats (prompt injection, tool poisoning, context exfiltration). Reference CLI exports ATR rules to Sigma format via `atr convert sigma`.
+* [AttackRuleMap](https://attackrulemap.com/) - Maps Atomic Red Team attack simulations to open-source Sigma detection rules for coverage assessment
 * [Confluent Sigma](https://github.com/confluentinc/confluent-sigma) - Kafka Streams supported Sigma rules
-* [Detection Studio](https://detection.studio/?ref=sigmahq_readme) - Convert Sigma rules to any supported SIEM.
-* [IBM QRadar](https://community.ibm.com/community/user/security/blogs/gladys-koskas1/2023/08/02/qradar-natively-supports-sigma-for-rules-creation)
-* [Impede Detection Platform](https://impede.ai/)
-* [Joe Sandbox](https://www.joesecurity.org/blog/8225577975210857708)
-* [LimaCharlie](https://limacharlie.io/)
-* [MISP](http://www.misp-project.org/2017/03/26/MISP.2.4.70.released.html) (Since Version 2.4.70, March 2017)
-* [Nextron's Aurora Agent](https://www.nextron-systems.com/aurora/)
+* [Detection Studio](https://detection.studio/?ref=sigmahq_readme) - Convert Sigma rules to any supported SIEM
+* [Exeon.UEBA](https://exeon.com/ueba/) - User and Entity Behavior Analytics (UEBA) solution from Exeon which provides a built-in Sigma detection engine
+* [IBM QRadar](https://community.ibm.com/community/user/security/blogs/gladys-koskas1/2023/08/02/qradar-natively-supports-sigma-for-rules-creation) - Natively ingests Sigma rules for real-time detection via the YARA and Sigma Rules Manager app
+* [Joe Sandbox](https://www.joesecurity.org/blog/8225577975210857708) - Automated malware analysis platform that applies Sigma rules during sandbox execution to detect threats in behavioral logs
+* [LimaCharlie](https://limacharlie.io/) - SecOps cloud platform with native Sigma rule support and automatic conversion to its Detection & Response rule format
+* [MISP](http://www.misp-project.org/2017/03/26/MISP.2.4.70.released.html) - Open-source threat intelligence sharing platform with native Sigma rule support (since version 2.4.70, March 2017)
+* [Nextron's Aurora Agent](https://www.nextron-systems.com/aurora/) - Lightweight Sigma-based EDR agent using ETW for real-time endpoint detection
 * [Nextron's THOR Scanner](https://www.nextron-systems.com/thor/) - Scan with Sigma rules on endpoints
-* [RANK VASA](https://globenewswire.com/news-release/2019/03/04/1745907/0/en/RANK-Software-to-Help-MSSPs-Scale-Cybersecurity-Offerings.html)
-* [Saeros](https://github.com/Saeros-Security/Saeros)
-* [Security Onion](https://docs.securityonion.net/en/latest/sigma.html)
+* [RANK VASA](https://globenewswire.com/news-release/2019/03/04/1745907/0/en/RANK-Software-to-Help-MSSPs-Scale-Cybersecurity-Offerings.html) - AI-based network threat detection platform that uses Sigma rules to identify security anomalies for MSSPs
+* [Saeros](https://github.com/Saeros-Security/Saeros) - Open-source HIDS for Windows and Active Directory with local Sigma rule matching via ETW
+* [Security Onion](https://docs.securityonion.net/en/3/main/sigma/) - Open-source network security monitoring platform with built-in Sigma detection and automatic daily rule updates
 * [Sekoia.io XDR](https://www.sekoia.io) - XDR supporting Sigma and Sigma Correlation rules languages
-* [sigma2stix](https://github.com/muchdogesec/sigma2stix) - Converts the entire SigmaHQ Ruleset into STIX 2.1 Objects.
-  * A versioned archive of sigma2stix STIX 2.1 data is also available to [download here](https://github.com/muchdogesec/cti_knowledge_base_store/tree/main/sigma-rules).
+* [sigma2stix](https://github.com/muchdogesec/sigma2stix) - Converts the entire SigmaHQ Ruleset into STIX 2.1 Objects
 * [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion
-* [SOC Prime](https://my.socprime.com/sigma/)
-* [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
-* [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35)
+* [SOC Prime](https://my.socprime.com/sigma/) - Threat detection marketplace hosting community Sigma rules with translation to 25+ SIEM, EDR, and XDR platforms
+* [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) - Splunk app providing saved searches derived from converted Sigma rules
+* [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35) - Open-source collaborative forensic timeline analysis tool that uses Sigma rules to tag and detect events
+* [VirusTotal](https://docs.virustotal.com/docs/crowdsourced-sigma-rules) - Whenever a sample matches any open-source Sigma rules, the matching rules are displayed as part of the file report
 * [ypsilon](https://github.com/P4T12ICK/ypsilon) - Automated Use Case Testing
 
 ## 📜 Maintainers
 
-* [Nasreddine Bencherchali (@nas_bench)](https://twitter.com/nas_bench)
-* [Florian Roth (@cyb3rops)](https://twitter.com/cyb3rops)
-* [Christian Burkard (@phantinuss)](https://twitter.com/phantinuss)
-* [François Hubaut (@frack113)](https://twitter.com/frack113)
-* [Thomas Patzke (@blubbfiction)](https://twitter.com/blubbfiction)
+* [Nasreddine Bencherchali (@nas_bench)](https://x.com/nas_bench)
+* [Florian Roth (@cyb3rops)](https://x.com/cyb3rops)
+* [Christian Burkard (@phantinuss)](https://x.com/phantinuss)
+* [François Hubaut (@frack113)](https://x.com/frack113)
+* [Thomas Patzke (@blubbfiction)](https://x.com/blubbfiction)
+* [Mohamed Ashraf (@X__Junior)](https://x.com/X__Junior)
+* [Swachchhanda Shrawan Poudel (@\_swachchhanda\_)](https://x.com/_swachchhanda_)
 
 ## Credits
 
