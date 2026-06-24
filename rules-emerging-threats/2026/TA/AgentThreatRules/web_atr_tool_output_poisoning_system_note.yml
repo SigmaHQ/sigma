@@ -1,0 +1,40 @@
+title: AI Agent Tool Output Poisoning - Injected System Notes
+id: 674d45e1-a3cf-4d5d-9289-6c58182986e0
+status: experimental
+description: |
+    Detects pseudo-system instructions embedded in tool output that an LLM agent will subsequently consume. Attackers control upstream content (web pages, retrieved documents, search results, third-party API responses) and inject markers like "(system note: ...)" or "Additional instructions:" so that the model treats the smuggled text as a privileged directive.
+    This indirect injection vector is one of the most common ways agents are compromised today and is often invisible at the user-input layer.
+    Derived from Agent Threat Rules (ATR) ATR-2026-00091.
+references:
+    - https://github.com/Agent-Threat-Rule/agent-threat-rules
+    - https://kai-greshake.de/posts/inject-my-pdf/
+    - https://arxiv.org/abs/2302.12173
+author: Adam Lin (panguard.ai)
+date: 2026-05-09
+tags:
+    - attack.execution
+    - attack.t1059
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_method:
+        cs-method:
+            - 'POST'
+            - 'GET'
+    keywords:
+        - '(system note:'
+        - '(system message:'
+        - '(important system note:'
+        - 'additional instructions:'
+        - 'additional%20instructions%3A'
+        - '[ADMIN OVERRIDE]'
+        - '[SYSTEM]'
+        - 'note to the assistant:'
+        - 'note%20to%20the%20assistant'
+        - 'developer note:'
+    condition: selection_method and keywords
+falsepositives:
+    - Technical documentation, blog posts, or release notes that legitimately include phrases like "system note" or "developer note"
+    - Internal annotations on enterprise content where these markers are part of normal authoring style
+level: medium

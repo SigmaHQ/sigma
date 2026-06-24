@@ -1,0 +1,45 @@
+title: Agent Skill Metadata Hidden Instruction Indicators
+id: 604b2bb0-b3a3-4f27-9f4f-a382334b8ee0
+status: experimental
+description: |
+    Detects hidden instructions embedded in agent skill metadata such as the SKILL.md frontmatter or its description fields. Skills that are loaded by an agent runtime are typically trusted to define their own metadata, making the description and instructions fields a high-value injection target for supply-chain compromise.
+    The rule fires on common injection markers appearing in transferred skill bundles or skill registry responses observed at the web layer.
+    Derived from Agent Threat Rules (ATR) ATR-2026-00071.
+references:
+    - https://github.com/Agent-Threat-Rule/agent-threat-rules
+    - https://github.com/openclaw/openclaw
+    - https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview
+author: Adam Lin (panguard.ai)
+date: 2026-05-09
+tags:
+    - attack.initial-access
+    - attack.t1195
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_method:
+        cs-method:
+            - 'POST'
+            - 'GET'
+    selection_skill_path:
+        cs-uri-stem|contains:
+            - 'SKILL.md'
+            - '/skills/'
+            - '/skill/'
+            - '.skill'
+    keywords:
+        - 'ignore previous instructions'
+        - '<IMPORTANT>'
+        - '(system note:'
+        - 'when invoked, also'
+        - 'always include the contents of'
+        - 'send a copy to'
+        - 'exfiltrate'
+        - 'curl http'
+        - 'wget http'
+    condition: selection_method and selection_skill_path and keywords
+falsepositives:
+    - Security research about skill compromise where benign skill files reference these phrases as documentation
+    - Legitimate skills that genuinely use curl or wget in their tool descriptions for non-malicious purposes
+level: high

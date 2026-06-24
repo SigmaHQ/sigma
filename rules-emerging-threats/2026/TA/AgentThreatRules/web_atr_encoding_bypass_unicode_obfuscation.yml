@@ -1,0 +1,41 @@
+title: AI Agent Prompt Injection - Unicode Tag and Zero-Width Obfuscation
+id: a1ef2de1-f41d-437b-8ba4-e1068c5ceda7
+status: experimental
+description: |
+    Detects use of invisible Unicode characters in user input to LLM agents. The Unicode Tags block (U+E0000 to U+E007F) and zero-width characters such as U+200B, U+200C, U+200D, and the byte-order mark U+FEFF can carry hidden instructions that the model still tokenizes and acts on, while remaining invisible to a human reviewer.
+    The URL-encoded sequences below match the UTF-8 byte patterns of these characters as they would appear in HTTP query strings.
+    Derived from Agent Threat Rules (ATR) ATR-2026-00052.
+references:
+    - https://github.com/Agent-Threat-Rule/agent-threat-rules
+    - https://embracethered.com/blog/posts/2024/hiding-and-finding-text-with-unicode-tags/
+    - https://www.unicode.org/charts/PDF/UE0000.pdf
+author: Adam Lin (panguard.ai)
+date: 2026-05-09
+tags:
+    - attack.stealth
+    - attack.t1027
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_method:
+        cs-method:
+            - 'POST'
+            - 'GET'
+    keywords:
+        # zero-width space U+200B
+        - '%E2%80%8B'
+        # zero-width non-joiner U+200C
+        - '%E2%80%8C'
+        # zero-width joiner U+200D
+        - '%E2%80%8D'
+        # byte order mark U+FEFF
+        - '%EF%BB%BF'
+        # Unicode tag block U+E0000 to U+E007F (UTF-8 prefix bytes)
+        - '%F3%A0%80'
+        - '%F3%A0%81'
+    condition: selection_method and keywords
+falsepositives:
+    - Legitimate use of zero-width joiners in scripts that require them (Indic, Arabic, certain emoji sequences)
+    - Pasted content from rich-text sources that includes the byte-order mark
+level: medium
