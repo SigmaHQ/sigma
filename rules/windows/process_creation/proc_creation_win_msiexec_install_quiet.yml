@@ -10,7 +10,7 @@ references:
     - https://twitter.com/_st0pp3r_/status/1583914244344799235
 author: frack113
 date: 2022-01-16
-modified: 2024-12-01
+modified: 2026-05-07
 tags:
     - attack.stealth
     - attack.t1218.007
@@ -31,18 +31,22 @@ detection:
             - '-j'
     selection_quiet:
         CommandLine|contains|windash: '-q'
-    filter_user_temp:
-        # The %temp% is a very common location for installers
-        ParentImage|startswith: 'C:\Users\'
-        ParentImage|contains: '\AppData\Local\Temp\'
-    filter_system_temp:
+    filter_main_system_temp:
         ParentImage|startswith: 'C:\Windows\Temp\'
-    filter_ccm:
+    filter_main_ccm:
         ParentImage: 'C:\Windows\CCM\Ccm32BitLauncher.exe'
         IntegrityLevel:
             - 'System'
             - 'S-1-16-16384'
-    condition: all of selection_* and not 1 of filter_*
+    filter_optional_user_temp:
+        # The %temp% is a very common location for installers
+        ParentImage|startswith: 'C:\Users\'
+        ParentImage|contains: '\AppData\Local\Temp\'
+    filter_optional_wsl:
+        # C:\WINDOWS\system32\msiexec.exe /quiet /i "C:\Users\xodih\AppData\Local\Temp\wsl.2.6.3.0.arm64 (2).msi" SKIPVALIDATION=1 /L*V C:\Users\xodih\AppData\Local\Temp\wsl-install-logs.txt
+        ParentImage|endswith: 'C:\Windows\System32\wsl.exe'
+        Image|endswith: 'C:\Windows\System32\msiexec.exe'
+    condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - WindowsApps installing updates via the quiet flag
 level: medium
