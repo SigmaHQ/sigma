@@ -1,0 +1,31 @@
+title: Potential NTP Amplification DDoS Attack
+id: a766af35-7619-4cc8-9182-18c36debd35c
+status: experimental
+description: |
+    Detects a high volume of inbound NTP traffic from port 123, which may indicate an NTP amplification attack.
+    Attackers exploit the NTP monlist command to generate large responses from NTP servers directed at the victim.
+references:
+    - https://attack.mitre.org/techniques/T1498/002/
+    - https://flowtriq.com
+author: Jacob Masse
+date: 2026-06-25
+tags:
+    - attack.impact
+    - attack.t1498
+    - attack.t1498.002
+logsource:
+    category: firewall
+detection:
+    selection:
+        src_port: 123
+        protocol: UDP
+        action:
+            - deny
+            - drop
+            - blocked
+            - 3
+    condition: selection | count(src_ip) by dst_ip > 50
+falsepositives:
+    - Legitimate NTP synchronization traffic from multiple time servers
+    - NTP pool configurations polling several servers simultaneously
+level: high

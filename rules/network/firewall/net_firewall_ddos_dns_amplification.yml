@@ -1,0 +1,31 @@
+title: Potential DNS Amplification DDoS Attack
+id: 37766f33-2cd7-4d55-a18f-19d5ca17a1de
+status: experimental
+description: |
+    Detects inbound DNS response traffic on port 53 from external sources that may indicate a DNS amplification attack.
+    In DNS amplification, attackers send small queries with a spoofed source IP to open DNS resolvers, which reply with large responses to the victim.
+references:
+    - https://attack.mitre.org/techniques/T1498/002/
+    - https://flowtriq.com
+author: Jacob Masse
+date: 2026-06-25
+tags:
+    - attack.impact
+    - attack.t1498
+    - attack.t1498.002
+logsource:
+    category: firewall
+detection:
+    selection:
+        src_port: 53
+        protocol: UDP
+        action:
+            - deny
+            - drop
+            - blocked
+            - 3
+    condition: selection | count(src_ip) by dst_ip > 50
+falsepositives:
+    - Legitimate DNS responses from multiple resolvers during high query volume
+    - DNS zone transfers between authoritative servers
+level: high

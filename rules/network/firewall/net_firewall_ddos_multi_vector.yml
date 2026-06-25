@@ -1,0 +1,45 @@
+title: Potential Multi-Vector DDoS Attack
+id: 46e6c864-4ae6-4433-8554-bec97ee23a71
+status: experimental
+description: |
+    Detects multiple protocol types being dropped or denied toward a single destination, which may indicate a multi-vector DDoS attack.
+    Sophisticated attackers often combine UDP, TCP, and ICMP floods simultaneously to overwhelm different layers of the target's defenses.
+references:
+    - https://attack.mitre.org/techniques/T1498/
+    - https://attack.mitre.org/techniques/T1499/
+    - https://flowtriq.com
+author: Jacob Masse
+date: 2026-06-25
+tags:
+    - attack.impact
+    - attack.t1498
+    - attack.t1499
+logsource:
+    category: firewall
+detection:
+    selection_udp:
+        protocol: UDP
+        action:
+            - deny
+            - drop
+            - blocked
+            - 3
+    selection_tcp:
+        protocol: TCP
+        action:
+            - deny
+            - drop
+            - blocked
+            - 3
+    selection_icmp:
+        protocol: ICMP
+        action:
+            - deny
+            - drop
+            - blocked
+            - 3
+    condition: selection_udp | count(src_ip) by dst_ip > 50 and selection_tcp | count(src_ip) by dst_ip > 50 and selection_icmp | count(src_ip) by dst_ip > 20
+falsepositives:
+    - Large-scale network scans targeting a single host across multiple protocols
+    - Misconfigured firewall rules generating excessive deny logs during normal traffic
+level: critical

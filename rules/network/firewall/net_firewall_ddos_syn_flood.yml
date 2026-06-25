@@ -1,0 +1,33 @@
+title: Potential SYN Flood DDoS Attack
+id: d96ec615-8f65-443b-8288-ae7fea4faeff
+status: experimental
+description: |
+    Detects a high rate of TCP SYN packets being dropped or denied by the firewall, which may indicate a SYN flood DDoS attack.
+    SYN floods exploit the TCP handshake by sending a large number of SYN requests without completing the connection.
+references:
+    - https://attack.mitre.org/techniques/T1499/001/
+    - https://flowtriq.com
+author: Jacob Masse
+date: 2026-06-25
+tags:
+    - attack.impact
+    - attack.t1499
+    - attack.t1499.001
+logsource:
+    category: firewall
+detection:
+    selection:
+        tcp_flags|contains: 'SYN'
+        action:
+            - deny
+            - drop
+            - blocked
+            - 3
+    filter_syn_ack:
+        tcp_flags|contains: 'ACK'
+    condition: selection and not filter_syn_ack | count(src_ip) by dst_ip > 200
+falsepositives:
+    - High-traffic web servers during legitimate traffic spikes
+    - Load balancer health checks generating SYN-heavy patterns
+    - Misconfigured applications creating excessive connections
+level: high

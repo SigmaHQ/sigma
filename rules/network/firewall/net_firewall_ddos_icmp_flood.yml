@@ -1,0 +1,30 @@
+title: Potential ICMP Flood DDoS Attack
+id: 00f1b779-300a-4f52-b7ba-5ee5d120e7db
+status: experimental
+description: |
+    Detects a high volume of ICMP packets targeting a single destination, which may indicate an ICMP flood (ping flood) DDoS attack.
+    ICMP floods attempt to overwhelm the target with echo request packets, consuming bandwidth and processing resources.
+references:
+    - https://attack.mitre.org/techniques/T1498/001/
+    - https://flowtriq.com
+author: Jacob Masse
+date: 2026-06-25
+tags:
+    - attack.impact
+    - attack.t1498
+    - attack.t1498.001
+logsource:
+    category: firewall
+detection:
+    selection:
+        protocol: ICMP
+        action:
+            - deny
+            - drop
+            - blocked
+            - 3
+    condition: selection | count(src_ip) by dst_ip > 100
+falsepositives:
+    - Network monitoring tools performing ICMP-based health checks
+    - Legitimate traceroute or ping operations from multiple sources
+level: high

@@ -1,0 +1,32 @@
+title: Potential UDP Flood DDoS Attack
+id: 92e69e8b-5abd-4d58-ac33-ff98b3df8298
+status: experimental
+description: |
+    Detects a high volume of inbound UDP packets targeting a single destination, which may indicate a UDP flood DDoS attack.
+    UDP floods overwhelm targets by sending large numbers of UDP datagrams to random or specific ports.
+references:
+    - https://attack.mitre.org/techniques/T1498/001/
+    - https://flowtriq.com
+author: Jacob Masse
+date: 2026-06-25
+tags:
+    - attack.impact
+    - attack.t1498
+    - attack.t1498.001
+logsource:
+    category: firewall
+detection:
+    selection:
+        dst_port|gte: 1
+        protocol: UDP
+        action:
+            - deny
+            - drop
+            - blocked
+            - 3
+    condition: selection | count(src_ip) by dst_ip > 100
+falsepositives:
+    - Legitimate high-volume UDP services such as streaming media, VoIP, or gaming
+    - Network scanning or vulnerability assessments
+    - DNS resolver traffic during peak usage
+level: high

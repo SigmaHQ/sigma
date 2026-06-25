@@ -1,0 +1,37 @@
+title: Potential TCP RST/FIN Flood DDoS Attack
+id: 545cc0c9-c196-40f2-9d26-d80b823d5aa2
+status: experimental
+description: |
+    Detects a high volume of TCP packets with RST or FIN flags from multiple sources to a single destination.
+    RST/FIN floods attempt to exhaust server resources by forcing the target to process connection teardown packets at a high rate.
+references:
+    - https://attack.mitre.org/techniques/T1499/001/
+    - https://flowtriq.com
+author: Jacob Masse
+date: 2026-06-25
+tags:
+    - attack.impact
+    - attack.t1499
+    - attack.t1499.001
+logsource:
+    category: firewall
+detection:
+    selection_rst:
+        tcp_flags|contains: 'RST'
+        action:
+            - deny
+            - drop
+            - blocked
+            - 3
+    selection_fin:
+        tcp_flags|contains: 'FIN'
+        action:
+            - deny
+            - drop
+            - blocked
+            - 3
+    condition: 1 of selection_* | count(src_ip) by dst_ip > 150
+falsepositives:
+    - Servers closing a large number of legitimate connections simultaneously
+    - Network devices sending RST packets during maintenance windows
+level: high
