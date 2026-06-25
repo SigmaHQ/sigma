@@ -1,0 +1,70 @@
+title: Brute Force Protection - Critical Settings Manipulated
+id: 8225da40-075e-442e-93cf-b1c21ed2638a
+status: experimental
+description: |
+    Detects when Brute Force Protection is disabled or its response logic is removed,
+    allowing credential stuffing attacks to occur without blocking.
+references:
+    - https://auth0.com/docs/secure/attack-protection/brute-force-protection
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-08-19
+modified: 2025-08-19
+tags:
+    - attack.defense-evasion
+    - attack.t1562
+    - attack.t1562.007
+logsource:
+    product: auth0
+    service: attack_protection
+detection:
+    selection:
+        data.type: sapi
+        data.description: "Update Brute-force settings"
+    filter_1:
+        data.details.response.body.enabled: false
+    filter_2:
+        data.details.response.body.shields{}: "block"
+    condition: (selection and filter_1) or (selection and not filter_2)
+fields:
+    - data.type
+    - data.description
+    - data.ip
+    - data.details.response.body.enabled
+    - data.details.response.body.shields{}
+    - data.details.response.body.mode
+falsepositives:
+    - Admins testing protection modes during setup
+    - Legitimate configuration changes during maintenance
+    - Temporary disabling for troubleshooting purposes
+level: medium
+explanation: |
+    Brute-force protection can be bypassed if the `block` shield is removed.
+    This detection alerts when the feature is fully turned off or misconfigured.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type=sapi data.description="Update Brute-force settings"
+    | sort - _time | head 1
+    | rename data.details.response.body.shields{} as shields
+    | rename data.details.response.body.enabled as brute_force_enabled
+    | rename data.details.response.body.mode as brute_force_blocking_mode
+    | eval brute_force_blocking = if(isnotnull(mvfind(shields, "block")), "true", "false")
+    | eval brute_force_user_notifications_on = if(isnotnull(mvfind(shields, "user_notification")), "true", "false")
+    | eval brute_force_both_responses_on = if(match(brute_force_blocking_mode,"^count_per_identifier$") AND match(brute_force_blocking, "true"), "true", "false")
+    | eval brute_force_only_ip_specific_blocking = if(match(brute_force_blocking_mode,"count_per_identifier_and_ip") AND match(brute_force_blocking, "true"), "true", "false")
+    | eval brute_force_regardless_ip_blocking = if(match(brute_force_blocking, "false") AND match(brute_force_blocking_mode,"^count_per_identifier$"), "true", "false")
+    | eval brute_force_all_responses_disabled = if ((brute_force_only_ip_specific_blocking = "false" AND brute_force_regardless_ip_blocking = "false"), "true", "false")
+    | where brute_force_enabled = "false" OR (brute_force_enabled="true" AND brute_force_all_responses_disabled="true")
+    | table _time, data.ip, brute_force_enabled, brute_force_only_ip_specific_blocking,
+             brute_force_regardless_ip_blocking, brute_force_user_notifications_on,
+             brute_force_all_responses_disabled
+
+    Tenant Logs Query:
+    type: "sapi" AND description: "Update Brute-force settings"
+comments:
+    - Extend detection to monitor the state of user notifications.
+    - Use enrichment to validate config changes against change requests or approvals.
+    - Combine with attack surface monitoring.
+    - Prevention - Enforce MFA and change control for attack protection features.
+    - Prevention - Log all changes from non-approved IPs or roles.

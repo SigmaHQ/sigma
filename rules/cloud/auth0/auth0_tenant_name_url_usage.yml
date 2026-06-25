@@ -1,0 +1,64 @@
+title: Risk for misconfiguration - use of Auth0 tenant name URL.
+id: fa664cf9-7b36-438e-8670-7f0dafb425d1
+status: experimental
+description: |
+    Detects the use of Auth0 canonical domain/tenant name url, when a custom domain is configured.
+    When a custom domain is configured, there is often no reason for legitimate applications to use the default Auth0 domain.
+    An attempt to access the tenant using the default Auth0 domain may indicate a misconfiguration or an attack.
+    Bypassing of a custom domain can lead to circumventing of such protections as WAF, IP filters, and advanced logging.
+references:
+    - https://auth0.com/docs/customize/custom-domains
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.defense-evasion
+    - attack.t1562
+    - attack.t1562.007
+logsource:
+    product: auth0
+    service: oidc_oauth2
+detection:
+    selection:
+        data.type:
+            - s  # successful login
+            - f  # failed login
+            - fs # failed signup
+            - ss # successful signup
+            - w # warning during login
+            - fp # failed login (incorrect password)
+            - scoa # successful cross-origin authentication
+            - fcoa # failed cross-origin authentication
+            - sepft # successful exchange of password for token
+            - fepft # failed exchange of password for token
+        data.hostname: "{your-tenant-url}"  # e.g. your-tenant.auth0.com
+    condition: selection
+fields:
+    - data.type
+    - data.hostname
+    - data.client_id
+    - data.client_name
+    - data.log_id
+    - data.ip
+falsepositives:
+    - Legitimate use of the Auth0 tenant name URL during testing or development
+    - Misconfigured applications that haven't been updated to use custom domain
+    - Emergency access scenarios when custom domain is unavailable
+level: low
+explanation: |
+    The query below collects log entries corresponding to authentication events, e.g. s-successful login, f-failed login, etc.
+    It filters those requests that use the Auth0 tenant name URL by checking "data.hostname".
+    The splunk query below displays clients/applications and log references.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type IN ("s", "f", "fs", "ss", "w", "fp", "scoa", "fcoa", "sepft", "fepft")
+    data.hostname="{your-tenant-url}"
+    | table _time, data.client_id, data.client_name, data.log_id
+
+    Tenant Logs Query:
+    type: (s f fs ss f u fp scoa fcoa sepft fepft) AND hostname: {your-tenant-url}
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant_name.
+    - Prevention - When any sort of a reverse proxy (e.g. WAF) is used in front of the tenant and IPs of this proxy can be listed, Auth0 Network ACL (Access Control List) can be applied to block any entries from unrecognized IPs.

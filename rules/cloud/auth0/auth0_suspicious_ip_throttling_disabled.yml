@@ -1,0 +1,68 @@
+title: Suspicious IP Throttling - critical settings manipulated
+id: 8cfcd740-acf4-497c-9aa8-0550ddfc43cd
+status: experimental
+description: |
+    Detects when a threat actor manipulates the critical settings of Suspicious IP Throttling, such as disabling the feature or setting it to a monitoring mode where no blocking occurs.
+    This can allow malicious IPs to bypass protections and continue attacks without being blocked.
+references:
+    - https://auth0.com/docs/secure/attack-protection/suspicious-ip-throttling
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.defense-evasion
+    - attack.t1562
+    - attack.t1562.007
+logsource:
+    product: auth0
+    service: attack_protection
+detection:
+    selection:
+        data.type: sapi
+        data.description: "Update Suspicious IP Throttling settings"
+    filter:
+        data.details.response.body.enabled:
+            - false
+        # Alternatively, if the feature is set to monitoring mode (no blocking or no admin notifications)
+        # we can check for shields not containing "block" or "admin_notification"
+    condition: selection or filter
+fields:
+    - data.type
+    - data.description
+    - data.ip
+    - data.details.response.body.enabled
+    - data.details.response.body.shields{}
+falsepositives:
+    - Legitimate configuration changes by administrators
+    - Temporary disabling for maintenance or troubleshooting
+    - When custom domain has not been configured, all authentication happens through the canonical domain
+level: low
+explanation: |
+    The query filters for an event indicating a change of Suspicious IP Throttling settings.
+    The splunk query below alerts when the feature is completely disabled or set into a monitoring mode, i.e. no blocking of IP is enabled or/and notifications to admin are turned off.
+    It displays the modifying IP, the enabled mode, and that status of admin notifications.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type="sapi" data.description="Update Suspicious IP Throttling settings"
+    | rename data.details.response.body.shields{} as shields
+    | rename data.details.response.body.enabled as susp_ip_throttling_enabled
+    | eval susp_ip_throttling_blocking = if(isnotnull(mvfind(shields, "block")), "true", "false")
+    | eval susp_ip_throttling_admin_notifications = if(isnotnull(mvfind(shields, "admin_notification")), "true", "false")
+    | where susp_ip_throttling_enabled = "false" OR
+            (susp_ip_throttling_enabled = "true" AND
+            (susp_ip_throttling_blocking="false" OR
+            susp_ip_throttling_admin_notifications="false"))
+    | table data.ip, shields, susp_ip_throttling_enabled, susp_ip_throttling_blocking, susp_ip_throttling_admin_notifications
+
+    Tenant Logs Query:
+    type: "sapi" AND description: "Update Suspicious IP Throttling settings"
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant name.
+    - Limit the detection to actions conducted from not white-listed IPs and/or particular users.
+    - Adjust the "where" clauses when needed, i.e. if admin notifications are supposed to be disabled and not triggering an alert (susp_ip_throttling_admin_notifications).
+    - Prevention - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
+    - Prevention - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.
+    - Prevention - Control Management API scopes that allow modification of attack protection features - update:attack_protection.
+    - Prevention - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".

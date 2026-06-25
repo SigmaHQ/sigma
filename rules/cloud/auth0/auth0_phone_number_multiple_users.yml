@@ -1,0 +1,53 @@
+title: Risk for account takeover - phone number registered to multiple users
+id: f9cddc9d-ac1c-41a1-ba4e-003984528f57
+status: experimental
+description: |
+    Detects when an adversary tries to register the same phone number (for the SMS delivery) as a second factor (MFA) to multiple compromised accounts in order to maintain persistence.
+    Monitors for suspicious phone number reuse patterns across different user accounts.
+references:
+    - https://auth0.com/docs/secure/multi-factor-authentication/configure-sms-voice-notifications
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.persistence
+    - attack.t1098
+logsource:
+    product: auth0
+    service: mfa
+detection:
+    selection:
+        data.type: gd_enrollment_complete
+        data.description: "Guardian - Enrollment complete (sms)"
+    condition: selection
+fields:
+    - data.type
+    - data.description
+    - data.user_id
+    - data.ip
+    - data.details.authenticator.phone_number
+falsepositives:
+    - Legitimate users with multiple accounts using the same phone number (e.g., personal and work accounts)
+    - Family members sharing the same phone number for MFA
+    - Users with similar emails/names indicating intentional registration
+level: medium
+explanation: |
+    The query below collects entries from the tenant logs where the phone number is registered.
+    The splunk query below groups users by a phone number, i.e. collects users with the same phone number.
+    It returns phone numbers where the number of users is greater than 1.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.description="Guardian - Enrollment complete (sms)"
+    data.type=gd_enrollment_complete
+    | stats dc(data.user_id) as users_count values(data.ip) by data.details.authenticator.phone_number
+    | where users_count > 1
+
+    Tenant Logs Query:
+    type: "gd_enrollment_complete" AND description: "Guardian - Enrollment complete (sms)"
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant_name.
+    - To filter out false positives, look at the users' emails or users' names. If the emails/names look similar, e.g. one personal email (jane.parker@gmail.com) and one work email (jparker@company.com), then it is likely that the phone number is registered to multiple users intentionally.
+    - Prevention - Require strong MFA factors and do not allow factors such as email or SMS.
+    - Prevention - Deploy a send-phone-message action implementing a logic to validate that a phone number is registered only once.

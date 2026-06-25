@@ -1,0 +1,74 @@
+title: Unrecognized IP in attack protection allowlists
+id: 51edb3ec-115b-4256-9355-c5953722e4f9
+status: experimental
+description: |
+    Detects when new IPs are added into any attack protection allowlist.
+    Since allowlists suspend some controls, they should be closely monitored for unrecognized IPs.
+    A threat actor can try to add a malicious IP in order to bypass attack protection features.
+references:
+    - https://auth0.com/docs/secure/attack-protection
+    - https://auth0.com/docs/secure/attack-protection/playbooks
+    - https://auth0.com/docs/api/management/v2/attack-protection/patch-suspicious-ip-throttling
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.defense-evasion
+    - attack.t1562
+    - attack.t1562.007
+    - detection.threat-hunting
+logsource:
+    product: auth0
+    service: management_api
+detection:
+    selection:
+        data.type: sapi
+        data.tenant_name: '*'
+        data.description:
+            - Update Brute-force settings
+            - Create or update the anomaly detection captcha
+            - Update Suspicious IP Throttling settings
+    filter:
+        data.request.body.allowlist:
+            - '192.0.2.0/24'
+    condition: selection and not filter
+fields:
+    - data.type
+    - data.description
+    - data.tenant_name
+    - data.details.request.body.allowlist{}
+    - data.ip
+falsepositives:
+    - Legitimate updates by an administrator during configuration changes
+    - Addition of known corporate IP addresses to allowlists
+    - Emergency allowlist updates during security incidents
+level: medium
+explanation: |
+    The query checks for log entries that modify settings related to brute-force protection, bot detection, or suspicious IP throttling.
+    It collects allowed IPs from the request body and looks them up.
+    The splunk detection is based on the assumption that the recognized IP addresses are maintained in an external file.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type="sapi"
+    data.description IN ("Update Brute-force settings", "Create or update the anomaly detection captcha",
+    "Update Suspicious IP Throttling settings")
+    | stats values(data.details.request.body.allowlist{}) as allowed_ips
+    | mvexpand allowed_ips
+    | lookup {your-csv-file-with-recognized-ips} ip_address AS allowed_ips OUTPUT ip_address as is_known_ip
+    | where isnull(is_known_ip)
+    | dedup allowed_ips
+    | stats values(allowed_ips) as ips_not_in_csv
+
+    Tenant Logs Query:
+    type:"sapi" AND (description: "Create or update the anomaly detection captcha"
+    OR description: "Update Brute-force settings"
+    OR description: "Update Suspicious IP Throttling settings")
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant name and the file name containing recognized IPs, i.e. IPs allowed to be excluded from the Attack protection features.
+    - This rule is designed for threat hunting and to be a starting point for further investigation. It is expected to be correlated with a list of known/trusted IPs.
+    - Prevention - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
+    - Prevention - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.
+    - Prevention - Control Management API scopes that allow modification of attack protection features - update:attack_protection.
+    - Prevention - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
