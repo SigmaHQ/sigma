@@ -1,0 +1,42 @@
+title: Suspicious QoS ThrottleRate Set to Abnormally Low Value
+id: 87249584-7a6b-43c8-83b4-6a0a3941b1f4
+status: experimental
+description: |
+    Detects suspicious setting of Windows QoS ThrottleRate policies to abnormally low values that would effectively
+    cut off network access for targeted processes. The technique sets a ThrottleRate registry value to an abnormally
+    low value under the QoS Group Policy key, causing TCP/UDP connections for matched processes to time out and
+    cutting off security agent telemetry. Legitimate QoS policies use human-scale bandwidth values; a throttle rate
+    at or below 1KB/s (0-1024 bytes/sec) is too low for any real administrative use and is a strong indicator of deliberate
+    tampering to starve a process of network access - commonly targeting EDR, AV, or other security services to
+    suppress telemetry or block cloud lookups.
+references:
+    - https://github.com/TwoSevenOneT/EDRChoker/
+    - https://www.zerosalarium.com/2026/06/edrchoker-choking-telemetry-stream-block-edr.html
+    - https://learn.microsoft.com/en-us/previous-versions/windows/desktop/qoswmiprov/msft-netqospolicysettingdata
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-06-09
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_registry:
+        TargetObject|contains: '\Software\Policies\Microsoft\Windows\QoS\'
+        TargetObject|endswith: '\ThrottleRate'
+    selection_low_rate:
+        # Sysmon formats REG_QWORD as two 32-bit halves: QWORD (0x<high>-0x<low>)
+        # High half 0x00000000 + low half prefixes 0x000000-0x000003 catch values 0-1023 (below 1KB/s); 1024 (1KB/s) is handled explicitly below.
+        # Observed EDRChoker value: QWORD (0x00000000-0x00000001)
+        - Details|startswith:
+              - 'QWORD (0x00000000-0x000000'  # 0-255
+              - 'QWORD (0x00000000-0x000001'  # 256-511
+              - 'QWORD (0x00000000-0x000002'  # 512-767
+              - 'QWORD (0x00000000-0x000003'  # 768-1023
+        - Details: 'QWORD (0x00000000-0x00000400)'  # 1024 (1KB/s)
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_susp_low_qos_throttle_rate/info.yml
