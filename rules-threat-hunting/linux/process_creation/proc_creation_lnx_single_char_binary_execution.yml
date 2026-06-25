@@ -1,0 +1,30 @@
+title: Single Character Binary Execution - Linux
+id: d9f65919-9d42-4f5a-86a4-7d894258e5a7
+related:
+    - id: 87376963-de41-4a56-8694-7412118697eb
+      type: similar
+    - id: bab56d17-5154-416f-bea0-a725fdd18f42
+      type: similar
+status: experimental
+description: |
+    Detects execution of binaries with single-character names (e.g., 'a', 'x').
+    Attackers may use short filenames to evade detection, reduce forensic footprint, or as quick implants.
+references:
+    - https://cert.pl/uploads/docs/CERT_Polska_Energy_Sector_Incident_Report_2025.pdf
+author: Norbert Jasniewicz (AlphaSOC)
+date: 2026-02-14
+tags:
+    - attack.defense-evasion
+    - attack.t1036
+    - detection.threat-hunting
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '/?'
+    condition: selection
+falsepositives:
+    - Legitimate software using single-character executable names
+    - Some compilers may generate single character binaries by default
+level: low
