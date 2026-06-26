@@ -1,0 +1,50 @@
+title: Brute Force Authentication Attempts For Single Account
+id: 34fb5c3a-2ff6-487d-bfa3-717763f30b2c
+status: experimental
+description: |
+    Detects a potential brute force / password guessing attack against a single account
+    by counting failed logon events (EventID 4625) per target account and source IP within
+    any 5 minute window. Triggers when an account accumulates more than 4 failed logons from
+    a single source IP in that window. Grouping by source IP surfaces who is attempting to
+    access the account.
+    Note: grouping by source means a distributed attempt spread across many source IPs (each
+    below the threshold) will not trigger this rule - that pattern is better covered by a
+    separate rule grouping only by TargetUserName or counting distinct source IPs.
+references:
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4625
+author: Hydra2113
+date: 2026-06-25
+tags:
+    - attack.credential-access
+    - attack.t1110
+correlation:
+    type: event_count
+    rules:
+        - failed_logon_attempts_4625
+    group-by:
+        - TargetUserName       # account being targeted
+        - TargetDomainName     # account identity - disambiguates same username across domains
+        - IpAddress            # source of the attempts (who is trying to access the account)
+    timespan: 5m
+    condition:
+        gte: 5   # "more than 4" failed logons within the timespan
+falsepositives:
+    - Users repeatedly mistyping their password (e.g. after a recent password change)
+    - Misconfigured applications or service accounts retrying with stale credentials
+    - Account lockout testing or vulnerability scanners
+level: high
+---
+title: Failed Logon Attempts For Single Account
+id: 28ed487c-6a7d-42ca-a121-608ce523856c
+name: failed_logon_attempts_4625
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4625
+    # Note: this base rule intentionally matches all failed logons. Reduce noise as per your
+    # environment by adding a filter here - e.g. excluding machine/computer accounts
+    # (TargetUserName|endswith: '$'), known vulnerability scanners, or service accounts with
+    # stale credentials - then update the condition to "selection and not filter".
+    condition: selection
