@@ -37,6 +37,18 @@ level: high
 title: Failed Logon Attempts For Single Account
 id: 28ed487c-6a7d-42ca-a121-608ce523856c
 name: failed_logon_attempts_4625
+status: experimental
+description: |
+    Base rule that matches Windows failed logon events (EventID 4625). It is referenced by the
+    "Brute Force Authentication Attempts For Single Account" correlation rule and is not intended
+    to generate alerts on its own.
+references:
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4625
+author: Hydra2113
+date: 2026-06-25
+tags:
+    - attack.credential-access
+    - attack.t1110
 logsource:
     product: windows
     service: security
@@ -48,3 +60,7 @@ detection:
     # (TargetUserName|endswith: '$'), known vulnerability scanners, or service accounts with
     # stale credentials - then update the condition to "selection and not filter".
     condition: selection
+falsepositives:
+    - Users mistyping their password
+    - Service accounts with stale/cached credentials after a password change
+level: informational
