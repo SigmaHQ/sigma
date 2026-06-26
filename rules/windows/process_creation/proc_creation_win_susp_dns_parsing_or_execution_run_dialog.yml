@@ -1,0 +1,66 @@
+title: Suspicious DNS Parsing Or Execution Chain Via Run Dialog
+id: b2b0c81d-9811-4788-94af-52021df33f39
+status: experimental
+description: |
+    Detects suspicious command lines executed via the Windows Run dialog
+    that combine DNS lookup commands with output parsing or execution
+    primitives commonly seen in ClickFix-style staging activity.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2025/08/21/think-before-you-clickfix-analyzing-the-clickfix-social-engineering-technique/
+    - https://thehackernews.com/2026/02/microsoft-discloses-dns-based-clickfix.html
+author: Davide Ciacciolo (Gyala S.r.l.), Andrea Ottolino (Gyala S.r.l.)
+date: 2026-02-16
+tags:
+    - attack.execution
+    - attack.t1204.004
+    - attack.t1059.001
+    - attack.t1059.003
+    - attack.command-and-control
+    - attack.t1071.004
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\explorer.exe'
+    selection_shell:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+    selection_dns:
+        CommandLine|contains:
+            - 'nslookup'
+            - 'Resolve-DnsName'
+            - 'certutil -dns'
+            - 'dig'
+    selection_parsing:
+        CommandLine|contains:
+            - 'for /f'
+            - 'tokens='
+            - 'delims='
+            - 'more'
+            - 'findstr'
+            - 'Select-String'
+            - 'Out-String'
+    selection_execution:
+        CommandLine|contains:
+            - '| cmd'
+            - '| powershell'
+            - '| pwsh'
+            - 'iex'
+            - 'Invoke-Expression'
+            - 'Invoke-Command'
+            - 'iwr'
+            - 'Invoke-WebRequest'
+            - 'curl'
+            - 'wget'
+            - 'Start-BitsTransfer'
+            - 'WebClient'
+            - 'DownloadString'
+            - 'DownloadFile'
+    condition: selection_parent and selection_shell and selection_dns and (selection_parsing or selection_execution)
+falsepositives:
+    - Unknown
+level: high
