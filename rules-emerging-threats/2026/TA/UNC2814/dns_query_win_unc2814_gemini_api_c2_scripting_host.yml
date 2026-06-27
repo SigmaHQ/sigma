@@ -1,0 +1,40 @@
+title: UNC2814 LLM API Abuse - Gemini Endpoint C2 From Scripting Host
+id: 18100830-e9ec-4a11-b242-6cc2299c1736
+status: experimental
+description: |
+    Detects a DNS query for the Google Gemini API host (generativelanguage.googleapis.com)
+    issued by a Windows scripting or living-off-the-land host (wscript, cscript, mshta,
+    powershell, pwsh, rundll32, regsvr32) rather than a browser or a known SDK runtime.
+    The UNC2814 AI-malware family (PROMPTFLUX, PROMPTSPY, HONESTCUE) calls the Gemini API at
+    runtime to mutate payloads, drive on-device navigation, or obfuscate code rather than
+    embedding that logic statically, so a consumer LLM endpoint resolved by a scripting host
+    is uncommon outside of AI-augmented malware. UNC2814 is tracked by the Google Threat
+    Intelligence Group as a PRC-nexus cluster.
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/ai-vulnerability-exploitation-initial-access
+author: WRG-11
+date: 2026-06-27
+tags:
+    - attack.command-and-control
+    - attack.t1102.002
+    - attack.t1071.001
+logsource:
+    category: dns_query
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\rundll32.exe'
+            - '\regsvr32.exe'
+        QueryName|endswith: 'generativelanguage.googleapis.com'
+    condition: selection
+falsepositives:
+    - Administrative automation that legitimately calls the Gemini API from PowerShell or another scripting host - allowlist the specific script path or signed automation account before deploying broadly.
+    - Internal AI tooling or chatbots packaged behind a scripting host.
+    - Security or red-team tooling exercising LLM API endpoints during an authorised engagement.
+level: high
