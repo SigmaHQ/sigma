@@ -1,0 +1,31 @@
+title: AWS IAM Critical Managed Policy Attachment
+id: c65918ba-4482-4236-9064-b720e0776518
+status: experimental
+description: Detects when a highly privileged AWS managed policy is attached to a user, role, or group.
+references:
+    - https://rhinosecuritylabs.com/aws/aws-privilege-escalation-methods-mitigation/
+    - https://hackingthe.cloud/aws/exploitation/iam_privilege_escalation/
+    - https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html
+author: Vladimir Novikov
+date: 2026-05-16
+tags:
+    - attack.privilege-escalation
+    - attack.t1098.003
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: iam.amazonaws.com
+        eventName:
+            - AttachUserPolicy
+            - AttachRolePolicy
+            - AttachGroupPolicy
+        requestParameters.policyArn:
+            - 'arn:aws:iam::aws:policy/AdministratorAccess'
+            - 'arn:aws:iam::aws:policy/PowerUserAccess'
+            - 'arn:aws:iam::aws:policy/IAMFullAccess'
+    condition: selection
+falsepositives:
+    - Legitimate administrative setup by authorised personnel.
+level: critical
