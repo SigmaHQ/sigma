@@ -12,9 +12,51 @@ detection:
         cs-method: 'GET'
         cs-host:
             - 'nabassisthelp.com' # bank phishing
-            - 'rexawin.com' # online casino
-            - 'merowin.com' # online casino
             - 'weartheshield.com' # indonesian scam casino
             - 'maxgetcontact.com' # impersonation of a legitimate messenger
+            - 'payme-paypal.com' # paypal login phishing
+
+            # sites connected to immortal.st malware family 
+            - 'roblox.com.bz'
+            - 'immortal.st'
+
     condition: selection
+level: medium
+---
+title: Request to scam casino domain
+id: ae762c17-31b8-40a9-821d-46394525a98d
+status: experimental
+author: Owen Ross @Dev2023-Op
+description: Detects suspicious web requests through proxy
+references:
+    - https://virustotal.com
+logsource:
+    category: proxy
+detection:
+    selection-a:
+        c-uri|contains:
+            # lv88 casino chain
+            - 'vi-vn'
+            - '/vi-vn'
+
+            - 'lobby'
+    selection-b:
+        cs-method: 'GET'
+        cs-host:
+            # sites connected to rexawin chain
+            - 'rexawin.com' # online casino
+            - 'merowin.com' # online casino
+
+            # sites connected to LV88 online casino
+            - 'cordalas.sa.com'
+            - 'picsmashplugin.com'
+            - 'ahilab.co'
+            - 'vueloshorizonte.com.co'
+            - 'idn88bet.com'
+            - 'dolphinblower.in'
+            - 'clicknce.com.co'
+            - 'scooterhouse.nl'
+            - 'doga-mori.info'
+
+    condition: selection-a or selection-b
 level: medium
