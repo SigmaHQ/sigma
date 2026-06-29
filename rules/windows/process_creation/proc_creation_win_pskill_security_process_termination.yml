@@ -1,0 +1,42 @@
+title: Security Software Termination Via PsKill
+id: 130f6033-d9db-4df8-81c3-8eda43f05f0d
+status: experimental
+description: |
+    Detects the Sysinternals PsKill utility being used to terminate security, EDR or antivirus processes - a defense-evasion / impair-defenses technique.
+references:
+    - https://learn.microsoft.com/en-us/sysinternals/downloads/pskill
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.stealth
+    - attack.t1685
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\pskill.exe'
+              - '\pskill64.exe'
+        - OriginalFileName: 'pskill.exe'
+    selection_target:
+        CommandLine|contains:
+            - 'MsMpEng'
+            - 'MsSense'
+            - 'SenseIR'
+            - 'CSFalcon'
+            - 'CSAgent'
+            - 'SentinelAgent'
+            - 'SentinelOne'
+            - 'CylanceSvc'
+            - 'xagt'
+            - 'Sophos'
+            - 'CarbonBlack'
+            - 'MBAMService'
+            - 'WinDefend'
+            - 'SecurityHealthService'
+            - 'Defender'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high
