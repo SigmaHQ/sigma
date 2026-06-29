@@ -1,0 +1,40 @@
+title: Certificate-Based TGT Request for User Account - Potential ADCS ESC1 Abuse
+id: 456dbc3f-5995-4904-bd9c-7542c4b05701
+status: experimental
+description: |
+    Detects a Kerberos TGT request (Event 4768) that was authenticated with an X.509 certificate (PKINIT) for a non-machine (user) account.
+    When AD CS certificate templates allow the enrollee to supply an arbitrary Subject Alternative Name (ESC1), an attacker can request a certificate that impersonates a privileged user and then use that certificate to obtain a Kerberos TGT via PKINIT.
+    The presence of populated certificate fields (CertIssuerName / CertSerialNumber / CertThumbprint) on a TGT request for a user account is a strong indicator of certificate-based impersonation.
+    This complements the existing ESC8/PetitPotam machine-account certificate TGT detection by focusing on user accounts (ESC1 path).
+references:
+    - https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4768
+    - https://github.com/ly4k/Certipy
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.credential-access
+    - attack.privilege-escalation
+    - attack.t1649
+    - attack.t1078.002
+logsource:
+    product: windows
+    service: security
+    definition: 'The advanced audit policy setting "Account Logon > Kerberos Authentication Service" must be configured for Success'
+detection:
+    selection:
+        EventID: 4768
+        CertThumbprint|contains: '*'
+    filter_main_machine:
+        TargetUserName|endswith: '$'
+    filter_main_empty_thumbprint:
+        CertThumbprint: ''
+    filter_main_local:
+        IpAddress:
+            - '::1'
+            - '127.0.0.1'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Environments using smart card (PKINIT) logon for interactive users will generate these events legitimately and must be baselined or filtered
+    - Certificate-based authentication for VPN or Wi-Fi (EAP-TLS) where the same accounts are used
+level: high

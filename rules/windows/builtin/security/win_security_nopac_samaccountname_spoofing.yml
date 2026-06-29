@@ -1,0 +1,32 @@
+title: Machine Account sAMAccountName Spoofing - Potential noPac (CVE-2021-42278)
+id: 6264093b-ba82-41d1-8f07-ea431113ce4a
+status: experimental
+description: |
+    Detects an account rename (Event 4781) where a machine account (old name ends with '$') is renamed to a value that no longer ends with '$'.
+    This is the core primitive of CVE-2021-42278 (sAMAccountName spoofing), the first half of the noPac exploit chain. The attacker renames a controlled machine account's sAMAccountName to match a domain controller name without the trailing '$' (e.g. 'ATTACKPC$' -> 'DC01'). When combined with CVE-2021-42287 (KDC PAC confusion), the KDC fails to find the spoofed account, falls back to appending '$', and issues a ticket for the real domain controller account, leading to full domain compromise.
+references:
+    - https://www.crowdstrike.com/blog/how-to-defend-against-samaccountname-spoofing/
+    - https://github.com/cube0x0/noPac
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4781
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.privilege-escalation
+    - attack.persistence
+    - attack.t1078.002
+    - cve.2021-42278
+    - cve.2021-42287
+logsource:
+    product: windows
+    service: security
+    definition: 'The advanced audit policy setting "Account Management > User Account Management" must be configured for Success'
+detection:
+    selection:
+        EventID: 4781
+        OldTargetUserName|endswith: '$'
+    filter_main_still_machine:
+        NewTargetUserName|endswith: '$'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Legitimate administrative rename of a computer object to a user-style name (rare); validate the actor in SubjectUserName and the new name against domain controller names
+level: high

@@ -1,0 +1,36 @@
+title: Authentication Coercion via Named Pipe Access by Anonymous Logon
+id: 1c029cf2-61fe-4ad8-82d1-814acd4db58b
+status: experimental
+description: |
+    Detects anonymous access to RPC named pipes commonly abused to coerce machine authentication, observed via Detailed File Share auditing (Event 5145) over the IPC$ share.
+    Forced-authentication tools target specific MS-RPC interfaces exposed through named pipes: lsarpc / efsrpc (MS-EFSRPC, PetitPotam), netdfs (MS-DFSNM, DFSCoerce), spoolss (MS-RPRN / MS-PAR, PrinterBug / SpoolSample) and fssagentrpc (MS-FSRVP, ShadowCoerce). When the requesting session is an ANONYMOUS LOGON, this is a strong indicator of a coercion attempt that frequently precedes an NTLM relay (e.g. to AD CS for ESC8).
+    This expands on the existing lsarpc-only PetitPotam network-share detection to cover the broader set of coercion pipes.
+references:
+    - https://github.com/topotam/PetitPotam
+    - https://github.com/Wh04m1001/DFSCoerce
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5145
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.credential-access
+    - attack.t1187
+    - attack.t1557.001
+logsource:
+    product: windows
+    service: security
+    definition: 'The advanced audit policy setting "Object Access > Detailed File Share" must be configured for Success/Failure'
+detection:
+    selection:
+        EventID: 5145
+        ShareName|endswith: '\IPC$'
+        SubjectUserName: 'ANONYMOUS LOGON'
+        RelativeTargetName:
+            - 'lsarpc'
+            - 'efsrpc'
+            - 'netdfs'
+            - 'spoolss'
+            - 'fssagentrpc'
+    condition: selection
+falsepositives:
+    - Some legitimate inter-host RPC operations can touch these pipes; the ANONYMOUS LOGON condition makes benign matches uncommon but baseline before alerting
+level: high

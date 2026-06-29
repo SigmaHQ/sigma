@@ -1,0 +1,34 @@
+title: Kerberos DES Encryption Downgrade - Potential Forged Ticket
+id: d4d97320-3c49-4ed7-bf4c-40d6b03f8258
+status: experimental
+description: |
+    Detects Kerberos authentication (Event 4768 AS-REQ) or service ticket (Event 4769 TGS-REQ) requests that use the deprecated DES encryption types DES-CBC-CRC (0x01) or DES-CBC-MD5 (0x03).
+    DES is disabled by default on modern domain controllers (Windows Server 2008 and later) and is essentially never used by legitimate clients. Forged Golden and Silver tickets, as well as legacy hacking tools, may downgrade ticket encryption to DES. Any DES Kerberos ticket activity in a modern domain warrants investigation as a potential forged-ticket or encryption-downgrade attack.
+references:
+    - https://adsecurity.org/?p=2293
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4769
+    - https://www.thehacker.recipes/ad/movement/kerberos/forged-tickets
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.credential-access
+    - attack.t1558.001
+    - attack.t1558.002
+logsource:
+    product: windows
+    service: security
+    definition: 'The advanced audit policy settings "Account Logon > Kerberos Authentication Service" and "Account Logon > Kerberos Service Ticket Operations" must be configured for Success'
+detection:
+    selection:
+        EventID:
+            - 4768
+            - 4769
+        TicketEncryptionType:
+            - '0x1'
+            - '0x3'
+    filter_main_machine:
+        ServiceName|endswith: '$'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Very old legacy systems or appliances that genuinely only support DES (should be remediated rather than excluded)
+level: high
