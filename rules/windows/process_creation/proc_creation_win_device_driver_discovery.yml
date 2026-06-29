@@ -1,0 +1,51 @@
+title: Device Driver Discovery Via Built-In Utilities
+id: b41b436c-3d81-469d-9d01-bc8ca915d4c2
+related:
+    - id: 9fc3072c-dc8f-4bf7-b231-18950000fadd
+      type: similar
+    - id: a20def93-0709-4eae-9bd2-31206e21e6b2
+      type: similar
+status: experimental
+description: |
+    Detects enumeration of installed or loaded device drivers via built-in Windows utilities such as "sc.exe", "pnputil.exe", "fltMC.exe" and the "Get-WindowsDriver" PowerShell cmdlet.
+    Adversaries perform device driver discovery to identify installed drivers and security products, often as a precursor to bringing a vulnerable driver (BYOVD) or unloading a filter driver.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1652/T1652.md
+    - https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/pnputil-command-syntax
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.discovery
+    - attack.t1652
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_sc_img:
+        - Image|endswith: '\sc.exe'
+        - OriginalFileName: 'sc.exe'
+    selection_sc_cli:
+        CommandLine|contains|all:
+            - 'query'
+            - 'type='
+            - 'driver'
+    selection_pnputil_img:
+        - Image|endswith: '\pnputil.exe'
+        - OriginalFileName: 'PNPUTIL.EXE'
+    selection_pnputil_cli:
+        CommandLine|contains:
+            - '/enum-drivers'
+            - '-e'
+    selection_fltmc:
+        Image|endswith: '\fltMC.exe'
+        CommandLine|contains:
+            - 'filters'
+            - 'instances'
+            - 'volumes'
+    selection_cmdlet:
+        CommandLine|contains: 'Get-WindowsDriver'
+    condition: (all of selection_sc_*) or (all of selection_pnputil_*) or selection_fltmc or selection_cmdlet
+falsepositives:
+    - Legitimate driver inventory and troubleshooting by administrators or software deployment tooling
+    - Some endpoint management and hardware inventory agents enumerate drivers periodically
+level: low

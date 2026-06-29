@@ -1,0 +1,38 @@
+title: Windows Event Log Enumeration Via Built-In Utilities
+id: 724fd65f-62f5-465c-ba61-4651ee17714d
+related:
+    - id: 9cd55b6c-430a-4fa9-96f4-7cadf5229e9f
+      type: similar
+status: experimental
+description: |
+    Detects enumeration of Windows event logs via built-in utilities such as "wevtutil" (enum-logs / get-log-info) and the "Get-EventLog" PowerShell cmdlet.
+    Adversaries enumerate event logs to discover available log channels and harvest sensitive information (credentials, host/user details, security tooling activity) prior to further actions or log tampering.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1654/T1654.md
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/wevtutil
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.discovery
+    - attack.t1654
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_wevtutil_img:
+        - Image|endswith: '\wevtutil.exe'
+        - OriginalFileName: 'wevtutil.exe'
+    selection_wevtutil_cli:
+        CommandLine|contains:
+            - ' enum-logs'
+            - ' el '
+            - ' get-log-info'
+            - ' gli '
+    selection_cmdlet:
+        CommandLine|contains:
+            - 'Get-EventLog '
+    condition: (all of selection_wevtutil_*) or selection_cmdlet
+falsepositives:
+    - Legitimate log review and troubleshooting by administrators or monitoring tooling
+    - Backup and log-collection software may enumerate event logs
+level: low
