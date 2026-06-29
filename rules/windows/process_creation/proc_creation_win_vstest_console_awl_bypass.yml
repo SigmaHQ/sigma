@@ -1,0 +1,34 @@
+title: Potential AWL Bypass Via Vstest.Console.EXE
+id: 853fb94c-277f-416b-a567-32168fc97156
+status: experimental
+description: |
+    Detects vstest.console.exe loading a DLL test container from outside a Visual Studio/dotnet context. The signed VS test runner can be
+    abused to execute arbitrary code via a malicious test DLL, bypassing application allow-listing.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/vstest.console/
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.stealth
+    - attack.t1127
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\vstest.console.exe'
+        - OriginalFileName: 'vstest.console.exe'
+    selection_dll:
+        CommandLine|contains: '.dll'
+    filter_main_legit_parent:
+        ParentImage|endswith:
+            - '\devenv.exe'
+            - '\dotnet.exe'
+            - '\msbuild.exe'
+            - '\vstest.console.exe'
+            - '\testhost.exe'
+            - '\vstest.executionengine.exe'
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Software testing and CI/CD pipelines running unit tests (filter by parent process or installation path)
+level: medium
