@@ -1,0 +1,27 @@
+title: Alternate Data Stream Manipulation Via Streams.EXE
+id: 03d5e4aa-7040-464f-80bf-0744c3c20f19
+status: experimental
+description: |
+    Detects execution of the Sysinternals Streams utility, used to enumerate or delete NTFS Alternate Data Streams. Adversaries abuse it to
+    inspect, strip Mark-of-the-Web, or remove ADS-hidden payloads as an anti-forensic / defense-evasion action.
+references:
+    - https://learn.microsoft.com/en-us/sysinternals/downloads/streams
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.stealth
+    - attack.t1564.004
+    - attack.t1070
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith:
+              - '\streams.exe'
+              - '\streams64.exe'
+        - OriginalFileName: 'streams.exe'
+    condition: selection
+falsepositives:
+    - Administrators inspecting alternate data streams
+level: medium
