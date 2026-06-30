@@ -1,0 +1,33 @@
+title: Suspicious Driver or Device Removal via PnPUtil
+id: decca722-d099-46df-b6c0-288634960122
+status: experimental
+description: Detects when a driver is deleted/uninstalled or a device is disabled/removed using the built-in Plug and Play Utility (pnputil.exe). This behavior is often observed when threat actors attempt to disable security product drivers (defense evasion) or uninstall drivers after exploiting them (BYOVD clean-up).
+references:
+    - https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/pnputil-command-syntax
+    - https://redcanary.com/blog/threat-hunting-driver-tampering/
+    - https://www.microsoft.com/en-us/security/blog/2022/12/12/investigating-impairment-of-defenses/
+author: Keerthivasan
+date: 2026-06-29
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+    - attack.t1562
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\pnputil.exe'
+        - OriginalFileName: 'pnputil.exe'
+    selection_cmd:
+        CommandLine|contains:
+            - 'delete-driver'
+            - 'disable-device'
+            - 'remove-device'
+    condition: all of selection_*
+falsepositives:
+    - System administrators or deployment scripts updating drivers by removing old versions.
+    - Antivirus or hardware OEM software updates (e.g. Dell, Lenovo, HP update managers).
+    - VMware Tools, VirtualBox Guest Additions, or other VM guest integration agent updates.
+    - Device drivers uninstallation during legitimate system maintenance.
+level: medium
