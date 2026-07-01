@@ -1,0 +1,50 @@
+title: Remote Management Tool - Ninite Execution From Suspicious Context
+id: 61593e56-df93-4299-86be-3c4bc7bd93a5
+status: experimental
+description: |
+    Detects execution of the Ninite / Ninite Pro software deployment tool from a suspicious
+    parent (browser, mail client, msiexec or script host) or from a user-writable path.
+    Ninite is a legitimate patch and software deployment utility that adversaries abuse to
+    silently install software, including as a foothold delivered through phishing or OAuth
+    consent abuse.
+references:
+    - https://ninite.com/help/features/switches.html
+    - https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-025a
+    - https://github.com/magicsword-io/LOLRMM
+author: Lorena Goldoni
+date: 2026-06-23
+tags:
+    - attack.command-and-control
+    - attack.t1219
+    - attack.execution
+    - attack.t1072
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_image:
+        Image|endswith:
+            - '\NiniteOne.exe'
+            - '\NinitePro.exe'
+            - '\NiniteAgent.exe'
+            - '\Ninite.exe'
+    selection_susp_parent:
+        ParentImage|endswith:
+            - '\chrome.exe'
+            - '\msedge.exe'
+            - '\firefox.exe'
+            - '\outlook.exe'
+            - '\msiexec.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\powershell.exe'
+    selection_susp_path:
+        Image|contains:
+            - '\Users\'
+            - '\AppData\'
+            - '\Downloads\'
+            - '\Temp\'
+    condition: selection_image and (selection_susp_parent or selection_susp_path)
+falsepositives:
+    - Authorized use of Ninite for patch management, especially when launched by an RMM agent or a scheduled task. Baseline its normal parents and paths before deploying broadly.
+level: medium
