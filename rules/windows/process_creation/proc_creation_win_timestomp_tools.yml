@@ -1,0 +1,31 @@
+title: Timestomping Via Known Utilities
+id: db6d1f1c-5996-4cd8-89f2-e18506649fbc
+status: experimental
+description: |
+    Detects execution of known timestomping utilities and command-line patterns used to modify NTFS file timestamps ($STANDARD_INFORMATION).
+    Adversaries timestomp files to blend malicious artifacts into legitimate directories and evade timeline-based forensic analysis.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.006/T1070.006.md
+    - https://attack.mitre.org/techniques/T1070/006/
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.stealth
+    - attack.t1070.006
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_tools:
+        - Image|endswith:
+              - '\setmace.exe'
+              - '\timestomp.exe'
+        - OriginalFileName:
+              - 'setmace.exe'
+              - 'timestomp.exe'
+    selection_nircmd:
+        CommandLine|contains: 'setfiletime'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high

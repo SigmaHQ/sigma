@@ -1,0 +1,42 @@
+title: Kernel Driver Service Registered From Suspicious Path
+id: e63c949e-af9c-435e-af67-fd840d5af84a
+status: experimental
+description: |
+    Detects creation/modification of a service ImagePath pointing to a .sys driver located in a user-writable or non-standard directory.
+    This is a strong indicator of Bring-Your-Own-Vulnerable-Driver (BYOVD): legitimate drivers load from System32\drivers, whereas attackers
+    drop and register vulnerable/malicious drivers from temp, download or profile paths. Complements the static known-bad name/hash
+    driver_load rules by catching the install step regardless of driver name.
+references:
+    - https://www.loldrivers.io/
+    - https://attack.mitre.org/techniques/T1543/003/
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1543.003
+    - attack.t1068
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\Services\'
+        TargetObject|endswith: '\ImagePath'
+        Details|endswith: '.sys'
+    selection_paths:
+        Details|contains:
+            - '\Users\'
+            - '\Temp\'
+            - '\Tmp\'
+            - '\AppData\'
+            - '\ProgramData\'
+            - '\Windows\Temp\'
+            - '\PerfLogs\'
+            - '\Downloads\'
+            - '\Public\'
+            - '\Windows\Tasks\'
+    condition: all of selection*
+falsepositives:
+    - Some legitimate software installs drivers from ProgramData or vendor temp paths; baseline and filter known-good driver paths
+level: high
