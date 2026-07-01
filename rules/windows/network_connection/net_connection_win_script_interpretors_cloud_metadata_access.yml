@@ -1,0 +1,40 @@
+title: Cloud Metadata Endpoint Access By Script Interpreters
+id: 4e7b2c9f-1a3d-4f8e-b5c0-8d6a3f2e9b4c
+related:
+    - id: 6c1f4d8a-2e5b-4c9f-a7d3-0b5e8f1c4a6d
+      type: similar
+status: experimental
+description: |
+    Detects Node.js, Bun, or Python processes making outbound connections to the cloud instance metadata service (IMDS) endpoints 169.254.169.254 or 169.254.170.2 (AWS ECS).
+    Malicious packages published to npm, JSR, or PyPI have been observed querying IMDS during install/postinstall hooks to harvest cloud credentials, IAM roles, and environment-specific secrets.
+references:
+    - https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-metadata-security-credentials.html
+    - https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v2.html
+    - https://unit42.paloaltonetworks.com/monitoring-npm-supply-chain-attacks/
+    - https://www.microsoft.com/en-us/security/blog/2026/06/02/preinstall-persistence-inside-red-hat-npm-miasma-credential-stealing-campaign/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-06-08
+tags:
+    - attack.credential-access
+    - attack.t1552.005
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\bun.exe'
+              - '\node.exe'
+              - '\py.exe'
+              - '\pyw.exe'
+        - Image|contains: '\python'
+    selection_dst:
+        Initiated: true
+        DestinationIp:
+            - '169.254.169.254'
+            - '169.254.170.2'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate cloud-aware tooling running on EC2/GCP/Azure that intentionally queries instance metadata
+level: low
+regression_tests_path: regression_data/rules/windows/network_connection/net_connection_win_script_interpretors_cloud_metadata_access/info.yml
