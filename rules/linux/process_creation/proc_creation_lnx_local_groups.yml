@@ -1,12 +1,15 @@
 title: Local Groups Discovery - Linux
 id: 676381a6-15ca-4d73-a9c8-6a22e970b90d
 status: test
-description: Detects enumeration of local system groups. Adversaries may attempt to find local system groups and permission settings
+description: |
+    Detects enumeration of local system groups.
+    Adversaries may attempt to find local system groups and permission settings to determine which groups exist on a system and which users are members of those groups to aid in follow-on behavior.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1069.001/T1069.001.md
+    - https://man7.org/linux/man-pages/man1/getent.1.html
 author: Ömer Günal, Alejandro Ortuno, oscd.community
 date: 2020-10-11
-modified: 2025-06-04
+modified: 2026-06-19
 tags:
     - attack.discovery
     - attack.t1069.001
@@ -14,20 +17,35 @@ logsource:
     category: process_creation
     product: linux
 detection:
-    selection_1:
+    selection_groups:
         Image|endswith: '/groups'
-    selection_2:
+    selection_read_group:
         Image|endswith:
             - '/cat'
             - '/ed'
+            - '/emacs'
             - '/head'
             - '/less'
+            - '/makemap'
             - '/more'
             - '/nano'
+            - '/sqlite3'
             - '/tail'
             - '/vi'
             - '/vim'
-        CommandLine|contains: '/etc/group'
+        CommandLine|contains:
+            - '/etc/group'
+            - '/etc/gshadow'
+            - ' group'
+            - ' gshadow'
+    selection_getent:
+        Image|endswith: '/getent'
+        CommandLine|contains:
+            - 'group'
+            - 'gshadow'
+    selection_ypcat:
+        Image|endswith: '/ypcat'
+        CommandLine|contains: 'group'
     condition: 1 of selection_*
 falsepositives:
     - Legitimate administration activities
