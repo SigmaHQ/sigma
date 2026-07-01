@@ -1,0 +1,30 @@
+title: AWS Bedrock Model Invocation Logging Configuration Deleted
+id: 8c3a9f45-7e12-4a8b-9d2c-3b1e5f8a6c47
+status: experimental
+description: |
+    Detects a successful API call to delete the model invocation logging configuration in Amazon Bedrock.
+    Adversaries may disable logging to evade detection while interacting with foundation models,
+    potentially masking prompt injection, data exfiltration, or unauthorized use of AI compute
+    resources (LLMjacking).
+references:
+    - https://docs.aws.amazon.com/bedrock/latest/userguide/model-invocation-logging.html
+    - https://www.abstract.security/blog/detecting-aws-bedrock-abuse-from-llmjacking-to-the-hidden-attack-vectors
+    - https://attack.mitre.org/techniques/T1562/008/
+author: Ahmed Raza Niyaz Shaikh
+date: 2026-06-25
+tags:
+    - attack.defense-impairment
+    - attack.stealth
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: bedrock.amazonaws.com
+        eventName: DeleteModelInvocationLoggingConfiguration
+    filter_error:
+        errorCode|exists: true
+    condition: selection and not filter_error
+falsepositives:
+    - Legitimate administrative actions to reconfigure AI logging infrastructure or update S3/CloudWatch delivery destinations
+level: high
