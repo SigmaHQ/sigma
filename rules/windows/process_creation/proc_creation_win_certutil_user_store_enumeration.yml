@@ -1,0 +1,38 @@
+title: Certificate Store Enumeration Via CertUtil
+id: 3b7e1f2a-84cd-4e91-b3d6-c57a902f8e34
+status: experimental
+description: |
+    Detects enumeration of Windows user certificate stores using certutil utility.
+    Certutil is a built-in Windows utility for managing certificates and certificate stores.
+    Attackers may enumerate personal, intermediate CA, or root certificate stores to identify certificates for theft or to forge authentication certificates.
+references:
+    - https://blog.talosintelligence.com/uat-8302/
+    - https://lolbas-project.github.io/lolbas/Binaries/Certutil/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-06-02
+tags:
+    - attack.discovery
+    - attack.credential-access
+    - attack.t1649
+    - attack.t1552.004
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\certutil.exe'
+        - OriginalFileName: 'CertUtil.exe'
+    selection_cli_user:
+        CommandLine|contains|windash: ' -user '
+    selection_cli_store:
+        CommandLine|contains|windash: ' -store '
+    selection_cli_store_name:
+        CommandLine|contains:
+            - ' My'
+            - ' CA'
+            - ' Root'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: low
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_certutil_user_store_enumeration/info.yml
