@@ -1,0 +1,32 @@
+title: Anonymous Access To S3 Object Data
+id: e7fc473f-992e-44ce-bab4-6b38c3725f78
+status: experimental
+description: |
+    Detects unauthenticated/anonymous retrieval of objects from S3 buckets in CloudTrail (GetObject with an anonymous or AWS-account-only identity).
+    Adversaries abuse misconfigured (publicly readable) S3 buckets to collect sensitive data from cloud storage without valid credentials.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1530/T1530.md
+    - https://docs.aws.amazon.com/AmazonS3/latest/userguide/cloudtrail-logging.html
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.collection
+    - attack.t1530
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: 's3.amazonaws.com'
+        eventName:
+            - 'GetObject'
+            - 'SelectObjectContent'
+    selection_anonymous:
+        - userIdentity.accountId: 'anonymous'
+        - userIdentity.type: 'AWSAccount'
+        - userIdentity.principalId: 'anonymous'
+    condition: all of selection*
+falsepositives:
+    - Intentionally public buckets serving static website content or public datasets
+    - Legitimate cross-account anonymous access patterns for published data
+level: medium

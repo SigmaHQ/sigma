@@ -1,0 +1,37 @@
+title: Plist File Modification Via Defaults Or Plutil
+id: 80f7cef2-6eee-4b6d-ba6c-ca0861848c56
+status: experimental
+description: |
+    Detects modification of property list (.plist) files in the Preferences directories via the "defaults write" command or "plutil".
+    Adversaries modify plist files to alter application/system behavior, store configuration for persistence payloads, or hide settings from the user.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1647/T1647.md
+    - https://www.manpagez.com/man/1/defaults/
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.stealth
+    - attack.t1647
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection_defaults:
+        Image|endswith: '/defaults'
+        CommandLine|contains: ' write '
+        CommandLine|contains:
+            - '/Library/Preferences'
+            - '.plist'
+    selection_plutil:
+        Image|endswith: '/plutil'
+        CommandLine|contains:
+            - '-replace'
+            - '-insert'
+            - '-remove'
+            - '-convert'
+        CommandLine|contains: '.plist'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate application and system preference changes by users or administrators
+    - Software installers and configuration management tooling commonly write to plist files
+level: low

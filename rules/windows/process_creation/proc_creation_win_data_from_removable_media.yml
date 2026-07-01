@@ -1,0 +1,37 @@
+title: Data Collection From Removable Media Via PowerShell
+id: 22f05339-11ff-475c-9289-b349fd1660da
+status: experimental
+description: |
+    Detects PowerShell commands that enumerate removable/USB drives and recursively search them for documents (e.g. .doc, .xls, .txt, .pdf).
+    Adversaries scan removable media to locate and stage sensitive documents for collection and exfiltration.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1025/T1025.md
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.collection
+    - attack.t1025
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_removable:
+        CommandLine|contains:
+            - "DriveType -eq 'Removable'"
+            - 'DriveType -eq "Removable"'
+            - 'Get-Volume'
+    selection_search:
+        CommandLine|contains:
+            - 'Get-ChildItem'
+            - 'gci '
+            - 'ls '
+    selection_filetypes:
+        CommandLine|contains:
+            - '.doc'
+            - '.xls'
+            - '.pdf'
+            - '.txt'
+    condition: all of selection_*
+falsepositives:
+    - Backup or data-management scripts that index documents on removable media
+level: medium

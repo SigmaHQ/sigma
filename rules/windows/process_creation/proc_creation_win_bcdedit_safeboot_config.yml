@@ -1,0 +1,34 @@
+title: Safe Mode Boot Configuration Via Bcdedit.EXE
+id: 7ca598c6-3c96-4ff6-b9f6-e25352787664
+related:
+    - id: 1444443e-6757-43e4-9ea4-c8fc705f79a2
+      type: similar
+    - id: d7662ff6-9e97-4596-a61d-9839e32dee8d
+      type: similar
+status: experimental
+description: |
+    Detects the use of "bcdedit.exe" to configure the system to boot into Safe Mode via the "safeboot" option.
+    Adversaries (notably ransomware operators) reboot endpoints into Safe Mode to disable endpoint security products that do not load with the limited Safe Mode driver set, allowing encryption or other actions to proceed unhindered.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1688/T1688.md
+    - https://news.sophos.com/en-us/2020/05/01/ragnar-locker-ransomware-deploys-virtual-machine-to-dodge-security/
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.stealth
+    - attack.t1688
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\bcdedit.exe'
+        - OriginalFileName: 'bcdedit.exe'
+    selection_cli:
+        CommandLine|contains|all:
+            - 'set'
+            - 'safeboot'
+    condition: all of selection_*
+falsepositives:
+    - Administrators or troubleshooting scripts legitimately configuring Safe Mode boot
+level: high

@@ -1,0 +1,33 @@
+title: Linux Kernel Module And Driver Discovery
+id: 9115eaca-44de-4b8d-9bac-922d3ceaed78
+related:
+    - id: b41b436c-3d81-469d-9d01-bc8ca915d4c2
+      type: similar
+status: experimental
+description: |
+    Detects enumeration of loaded kernel modules and on-disk driver files on Linux via utilities such as "lsmod", "modinfo" and searches under "/lib/modules" for ".ko" files.
+    Adversaries enumerate kernel modules/drivers to fingerprint the host, identify security modules, or locate candidates for malicious module loading.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1652/T1652.md
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.discovery
+    - attack.t1652
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_lsmod:
+        Image|endswith:
+            - '/lsmod'
+            - '/modinfo'
+    selection_find_modules:
+        Image|endswith: '/find'
+        CommandLine|contains|all:
+            - '/lib/modules/'
+            - '.ko'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate administration, troubleshooting, and configuration-management tooling enumerating kernel modules
+level: low
