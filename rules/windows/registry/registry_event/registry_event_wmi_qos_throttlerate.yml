@@ -1,0 +1,34 @@
+title: QoS ThrottleRate Set by WMI
+id: e4b2d9a1-8f3a-4c9b-9e2a-1d7f6b5a3c21
+status: experimental
+description: Detects when a QoS with ThrottleRate policy is created by Windows Management Instrumentation provider service. This behavior is an indication of EDR suppression where an attacker severs the communication between the agent and the management server for telemetry and alerting.
+author: Tamseel Ahmad
+references:
+    - https://www.zerosalarium.com/2026/06/edrchoker-choking-telemetry-stream-block-edr.html
+date: 2026-06-12
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    category: registry_event
+detection:
+    selection_reistry:
+        Image|endswith: '\wmiprvse.exe'
+        TargetObject|contains|all:
+            - '\Software\Policies\Microsoft\Windows\QoS\'
+            - 'ThrottleRate'
+    selection_low_rate:
+        # Sysmon formats REG_QWORD as two 32-bit halves: QWORD (0x<high>-0x<low>)
+        # High half 0x00000000 + low half prefixes 0x000000-0x000003 catch values 0-1023 (below 1KB/s).
+        # Observed EDRChoker value: QWORD (0x00000000-0x00000001)
+        - Details|startswith:
+              - 'QWORD (0x00000000-0x000000'  # 0-255
+              - 'QWORD (0x00000000-0x000001'  # 256-511
+              - 'QWORD (0x00000000-0x000002'  # 512-767
+              - 'QWORD (0x00000000-0x000003'  # 768-1023
+        - Details: 'QWORD (0x00000000-0x00000400)'  # 1024 (1KB/s)
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
