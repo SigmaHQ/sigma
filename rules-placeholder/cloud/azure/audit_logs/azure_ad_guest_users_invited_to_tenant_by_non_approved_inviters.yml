@@ -4,8 +4,10 @@ status: test
 description: Detects guest users being invited to tenant by non-approved inviters
 references:
     - https://learn.microsoft.com/en-gb/entra/architecture/security-operations-user-accounts#monitoring-external-user-sign-ins
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities#invited-users
 author: MikeDuddington, '@dudders1'
 date: 2022-07-28
+modified: 2026-05-09
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -17,10 +19,10 @@ logsource:
     service: auditlogs
 detection:
     selection:
-        Category: 'UserManagement'
-        OperationName: 'Invite external user'
+        category: 'UserManagement'
+        operationName: 'Invite external user'
     filter:
-        InitiatedBy|contains: '<approved guest inviter use OR for multiple>'
+        properties.initiatedBy|contains|expand: '%USER%'
     condition: selection and not filter
 falsepositives:
     - If this was approved by System Administrator.
