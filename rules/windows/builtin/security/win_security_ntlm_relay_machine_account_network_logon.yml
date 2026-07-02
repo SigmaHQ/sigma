@@ -1,0 +1,41 @@
+title: NTLM Network Logon by Machine Account - Potential Coerced Relay
+id: 821f2f37-d0d8-402b-8a07-a4363ad465e5
+status: experimental
+description: |
+    Detects a successful network logon (Event 4624, LogonType 3) authenticated with NTLM where the target account is a machine account (ends with '$').
+    Computer accounts normally authenticate to other hosts using Kerberos. A machine account, and in particular a domain controller machine account, authenticating to another host over NTLM is highly unusual and is a hallmark of a coercion + NTLM relay attack (PetitPotam / PrinterBug / DFSCoerce relayed via ntlmrelayx to SMB, LDAP or AD CS).
+    In a relay, Event 4624 on the relay target shows the coerced machine account's name while the source IP belongs to the attacker relay host.
+references:
+    - https://en.hackndo.com/ntlm-relay/
+    - https://github.com/fortra/impacket
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4624
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.credential-access
+    - attack.lateral-movement
+    - attack.collection
+    - attack.t1557.001
+    - attack.t1187
+logsource:
+    product: windows
+    service: security
+    definition: 'The advanced audit policy setting "Logon/Logoff > Logon" must be configured for Success'
+detection:
+    selection:
+        EventID: 4624
+        LogonType: 3
+        AuthenticationPackageName: 'NTLM'
+        TargetUserName|endswith: '$'
+    filter_main_anonymous:
+        TargetUserName: 'ANONYMOUS LOGON'
+    filter_main_local:
+        IpAddress:
+            - '-'
+            - '::1'
+            - '127.0.0.1'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Legacy applications, backup agents or clustering software that still negotiate NTLM using the computer account
+    - Workgroup or non-Kerberos scenarios where machine accounts fall back to NTLM
+level: high
