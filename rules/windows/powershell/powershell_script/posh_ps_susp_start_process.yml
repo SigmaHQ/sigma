@@ -4,9 +4,10 @@ status: test
 description: Powershell use PassThru option to start in background
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1036.003/T1036.003.md
-    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/Start-Process?view=powershell-5.1&viewFallbackFrom=powershell-7
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process?view=powershell-7.6
 author: frack113
 date: 2022-01-15
+modified: 2026-05-18
 tags:
     - attack.stealth
     - attack.t1036.003
@@ -15,12 +16,15 @@ logsource:
     category: ps_script
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-    selection:
+    selection_cmdlet:
+        ScriptBlockText|contains:
+            - 'Start-Process '
+            - 'saps '
+    selection_param:
         ScriptBlockText|contains|all:
-            - Start-Process
             - '-PassThru '
             - '-FilePath '
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - Legitimate PowerShell scripts
 level: medium
