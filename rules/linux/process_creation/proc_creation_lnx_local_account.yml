@@ -2,22 +2,15 @@ title: Local System Accounts Discovery - Linux
 id: b45e3d6f-42c6-47d8-a478-df6bd6cf534c
 status: test
 description: |
-    Detects enumeration of local system accounts.
+    Detects enumeration of local system accounts. 
     This information can help adversaries determine which local accounts exist on a system to aid in follow-on behavior.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1087.001/T1087.001.md
-    - https://linux.die.net/man/1/finger
-    - https://linux.die.net/man/1/lastb
-    - https://man.freebsd.org/cgi/man.cgi?pwd_mkdb
-    - https://man7.org/linux//man-pages/man1/lastb.1.html
     - https://man7.org/linux/man-pages/man1/getent.1.html
-    - https://man7.org/linux/man-pages/man1/w.1.html
-    - https://man7.org/linux/man-pages/man1/who.1.html
-    - https://medium.com/@linuxrootroom/what-is-the-getent-passwd-command-in-linux-90abb27ab723
-    - https://my.f5.com/manage/s/article/K589
-author: Alejandro Ortuno, oscd.community, CheraghiMilad
+    - https://linux.die.net/man/1/finger
+author: Alejandro Ortuno, nasbench, oscd.community, CheraghiMilad
 date: 2020-10-08
-modified: 2026-06-19
+modified: 2026-07-03
 tags:
     - attack.discovery
     - attack.t1087.001
@@ -30,9 +23,9 @@ detection:
             - '/lastlog'
             - '/last'
             - '/lastb'
-    selection_root:
-        CommandLine|contains: '''x:0:'''
-    selection_read_passwd:
+    selection_root_string:
+        CommandLine|contains: 'x:0:'
+    selection_read_utilities:
         Image|endswith:
             - '/cat'
             - '/ed'
@@ -46,24 +39,24 @@ detection:
             - '/tail'
             - '/vi'
             - '/vim'
-            - '/ypcat'
+    selection_read_files:
         CommandLine|contains:
-            - '/etc/passwd'
-            - '/etc/shadow'
-            - '/etc/sudoers'
-            - '/etc/spwd.db'
-            - '/etc/pwd.db'
-            - '/etc/master.passwd'
+            - 'passwd'
+            - 'shadow'
+            - 'sudoers'
+            - 'spwd.db'
+            - 'pwd.db'
+            - 'master.passwd'
     selection_id:
         Image|endswith: '/id'
     selection_lsof:
         Image|endswith: '/lsof'
         CommandLine|contains: '-u'
     selection_getent:
-    Image|endswith: '/getent'
-        CommandLine|endswith:
-            - ' passwd'
-            - ' shadow'
+        Image|endswith: '/getent'
+        CommandLine|contains:
+            - 'passwd'
+            - 'shadow'
     selection_who:
         Image|endswith:
             - '/finger'
@@ -73,7 +66,7 @@ detection:
     selection_ypcat:
         Image|endswith: '/ypcat'
         CommandLine|contains: 'passwd'
-    condition: 1 of selection_*
+    condition: selection_lastlog or selection_root_string or (selection_read_utilities and selection_read_files) or selection_id or selection_lsof or selection_getent or selection_who or selection_ypcat
 falsepositives:
     - Legitimate administration activities
 level: low
