@@ -1,0 +1,41 @@
+title: Suspicious WSL Execution for Evasion and Payload Delivery
+id: a67ef34b-c532-482b-b3c4-2c340820c179
+status: experimental
+description: >
+    Detects suspicious use of wsl.exe to execute Linux binaries or scripts
+    from temporary or public directories. Threat actors use WSL to bypass
+    Windows-based EDR/AV hooks and execute Linux-native C2 agents.
+references:
+    - https://attack.mitre.org/techniques/T1202/
+    - https://www.elastic.co/security-labs/wsl-living-off-the-land
+author: Karthik G
+date: 2026/07/05
+tags:
+    - attack.t1202
+    - attack.t1059.004
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\wsl.exe'
+        OriginalFileName: 'wsl.exe'
+    selection_cli_exec:
+        CommandLine|contains:
+            - '-e '
+            - '--exec '
+            - '--system '
+            - 'bash -c'
+            - 'sh -c'
+    selection_cli_paths:
+        CommandLine|contains:
+            - '\AppData\Local\Temp\'
+            - '\Users\Public\'
+            - '\Windows\Temp\'
+            - '/tmp/'
+            - '/dev/shm/'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of WSL by software developers executing scripts from temp directories.
+    - Automated CI/CD pipelines utilizing WSL.
+level: medium
