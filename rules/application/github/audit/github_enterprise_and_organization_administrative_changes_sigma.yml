@@ -1,0 +1,59 @@
+title: GitHub - Enterprise and Organization Administrative Changes
+id: 765a5980-4cd2-4562-8515-e1e438016533
+status: experimental
+description: |
+    Detects high impact administrative changes within GitHub Enterprise and Organization environments.
+references:
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/audit-log-events-for-your-enterprise
+author: Stamatis Chatzimangou (@_st0pp3r_)
+date: 2026/07/06
+modified:
+tags:
+    - attack.persistence
+    - attack.t1098
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection_business:
+        action:
+            - 'business.invite_admin'
+            - 'business.add_admin'
+            - 'business.invite_billing_manager'
+            - 'business.add_billing_manager'
+            - 'business.add_organization'
+            - 'business.add_support_entitlee'
+            - 'business.create'
+            - 'business.delete'
+            - 'business.remove_admin'
+            - 'business.remove_billing_manager'
+            - 'business.remove_organization'
+            - 'business.remove_support_entitlee'
+            - 'business.revoke_external_identity'
+    selection_org:
+        action:
+            - 'org.add_billing_manager'
+            - 'org.create'
+            - 'org.delete'
+            - 'org.remove_billing_manager'
+            - 'org.rename'
+    selection_payment:
+        action:
+            - 'payment_method.create'
+            - 'payment_method.remove'
+            - 'payment_method.update'
+    selection_successor:
+        action:
+            - 'successor_invitation.accept'
+            - 'successor_invitation.revoke'
+    selection_enterprise_domain:
+        action:
+            - 'enterprise_domain.approve'
+            - 'enterprise_domain.create'
+            - 'enterprise_domain.destroy'
+            - 'enterprise_domain.verify'
+    condition: 1 of selection_*
+falsepositives:
+    - Authorised administrators performing planned enterprise or organisation configuration changes.
+level: medium
