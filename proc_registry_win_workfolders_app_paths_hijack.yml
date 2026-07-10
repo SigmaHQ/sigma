@@ -1,0 +1,24 @@
+title: App Paths Registry Hijack Via WorkFolders Persistence
+id: 5b6c8a31-b8ef-4df1-be71-cfd506de7d49
+status: experimental
+description: Detects the creation or modification of the App Paths registry key for control.exe within the current user hive (HKCU), which can be abused by adversaries to achieve code execution or persistence via the native WorkFolders.exe binary.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/WorkFolders/
+author: Christian Murphy-Sykes (@ShadowSkillZ)
+date: 2026/07/10
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1218
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: 'SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\control.exe'
+    filter_legitimate:
+        TargetObject|startswith: 'HKLM\'
+    condition: selection and not filter_legitimate
+falsepositives:
+    - Highly unusual administrative software deployment customizations mapping custom Control Panel applets via HKCU.
+level: high
