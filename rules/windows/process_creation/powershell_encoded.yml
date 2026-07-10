@@ -1,0 +1,24 @@
+title: Suspicious PowerShell Encoded Command Execution
+id: c3b91a82-1234-abcd-9876-fa09a259c999
+status: test
+description: Detects the use of encoded command execution flags in PowerShell, a common tactic for obfuscating malicious scripts.
+author: Security Operations
+date: 2026/07/04
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+    selection_flags:
+        CommandLine|contains:
+            - ' -e '
+            - ' -enc '
+            - ' -encodedcommand '
+            - ' -ec '
+    condition: selection_img and selection_flags
+falsepositives:
+    - Legitimate management scripts or software deployment tools (e.g., SCCM, Chocolatey).
+level: medium
