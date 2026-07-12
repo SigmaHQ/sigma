@@ -1,0 +1,68 @@
+title: Node.js Package Manager Spawning Download Or Reverse Shell - macOS
+id: c210982b-6001-4f1f-96ad-70fef301e066
+status: experimental
+description: |
+    Detects a Node.js runtime or JavaScript package manager (node / bun, the executors behind npm, pnpm and yarn) spawning a shell that downloads-and-executes payloads or opens a reverse shell, or invoking a scripting interpreter with a network download cradle.
+    This behaviour is characteristic of install-time "lifecycle hook" (preinstall/postinstall) abuse used in modern npm supply-chain compromises (e.g. Shai-Hulud, the @tanstack "Mini Shai-Hulud" and the axios "plain-crypto-js" campaigns), which also target macOS developer workstations.
+    Unlike campaign-specific indicator rules, this is a generic behavioural hunt intended to surface the next compromise before its IOCs are published.
+references:
+    - https://socket.dev/blog/tanstack-npm-packages-compromised-mini-shai-hulud-supply-chain-attack
+    - https://www.huntress.com/blog/supply-chain-compromise-axios-npm-package
+    - https://docs.npmjs.com/cli/v10/using-npm/scripts
+author: Nicolò Thei, NikoCosmico01
+date: 2026-07-12
+tags:
+    - attack.execution
+    - attack.t1059.004
+    - attack.t1059.006
+    - attack.t1059.007
+    - attack.t1195.002
+    - detection.threat-hunting
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection_shell:
+        ParentImage|endswith:
+            - '/node'
+            - '/bun'
+        Image|endswith:
+            - '/bash'
+            - '/dash'
+            - '/ksh'
+            - '/sh'
+            - '/zsh'
+        CommandLine|contains:
+            - 'base64 -D'
+            - 'base64 -d'
+            - 'chmod +x'
+            - 'curl '
+            - '/dev/tcp/'
+            - 'nohup '
+            - '| bash'
+            - '|bash'
+            - '| sh'
+            - '|sh'
+            - 'osascript'
+            - 'wget '
+    selection_interpreter:
+        ParentImage|endswith:
+            - '/node'
+            - '/bun'
+        Image|endswith:
+            - '/perl'
+            - '/php'
+            - '/python'
+            - '/python3'
+            - '/ruby'
+        CommandLine|contains:
+            - 'b64decode'
+            - 'base64'
+            - '/dev/tcp/'
+            - 'socket'
+            - 'urllib'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate "preinstall"/"postinstall" scripts that fetch prebuilt native binaries via curl/wget. Baseline per project and allowlist known-good packages.
+    - Build tooling that invokes Python/Perl/Ruby for setup tasks.
+level: medium
