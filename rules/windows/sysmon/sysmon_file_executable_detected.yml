@@ -7,6 +7,7 @@ references:
     - https://medium.com/@olafhartong/sysmon-15-0-file-executable-detected-40fd64349f36
 author: frack113
 date: 2023-07-20
+modified: 2026-07-14 # We update the modified date to today
 tags:
     - attack.defense-impairment
 logsource:
@@ -15,7 +16,10 @@ logsource:
 detection:
     selection:
         EventID: 29  # this is fine, we want to match any FileExecutableDetected event
-    condition: selection
+    filter_simple_help:
+        TargetFilename|contains: '\AppData\Roaming\JWrapper-Remote Support\'
+    condition: selection and not filter_simple_help
 falsepositives:
-    - Unlikely
+    - Highly dependent on your local Sysmon configuration schema and what you choose to explicitly monitor.
+    - Legitimate remote control or support utilities that drop temporary wrappers or helper applications during execution (e.g. JWrapper / Simple-Help remote support client packages).
 level: medium
