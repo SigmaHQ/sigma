@@ -1,0 +1,30 @@
+title: Network Capture Via Nmcap.EXE
+id: 792eefce-61b7-491f-b86c-1f4e7e6af9dd
+status: experimental
+description: |
+    Detects execution of Network Monitor's command line capture tool nmcap.exe to sniff network traffic to a capture file.
+    Adversaries abuse this signed utility for network sniffing and credential harvesting without dropping third-party tooling.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Nmcap/
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.credential-access
+    - attack.discovery
+    - attack.t1040
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\nmcap.exe'
+        - OriginalFileName: 'NMCap.exe'
+    selection_cli:
+        CommandLine|contains:
+            - '/capture'
+            - '/network'
+            - '/file'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate network troubleshooting by administrators using Microsoft Network Monitor
+level: medium
