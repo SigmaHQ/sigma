@@ -1,0 +1,36 @@
+title: Proxy Execution Via Mscopilot.EXE GPU-Launcher
+id: 6acb22bc-6287-4afd-9b57-9c4d6bc2e215
+status: experimental
+description: |
+    Detects abuse of the signed Microsoft Copilot Electron binary via the "--gpu-launcher" argument to proxy-execute an arbitrary command.
+    The legitimate value points to the GPU process; attackers set it to a shell command for signed-binary proxy execution.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Mscopilot/
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.stealth
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith:
+            - '\mscopilot.exe'
+            - '\mscopilot_proxy.exe'
+    selection_launcher:
+        CommandLine|contains: '--gpu-launcher='
+    selection_susp:
+        CommandLine|contains:
+            - 'cmd'
+            - 'powershell'
+            - 'pwsh'
+            - '&&'
+            - 'rundll32'
+            - 'regsvr32'
+            - 'mshta'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high
