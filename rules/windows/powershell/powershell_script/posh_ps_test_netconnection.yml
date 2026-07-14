@@ -1,17 +1,16 @@
-title: Testing Usage of Uncommonly Used Port
+title: PowerShell Port Probing Via Test-NetConnection
 id: adf876b3-f1f8-4aa9-a4e4-a64106feec06
 status: test
-description: |
-    Adversaries may communicate using a protocol and port paring that are typically not associated.
-    For example, HTTPS over port 8088(Citation: Symantec Elfin Mar 2019) or port 587(Citation: Fortinet Agent Tesla April 2018) as opposed to the traditional port 443.
+description: Detects the use of the PowerShell cmdlet 'Test-NetConnection' to probe remote network ports, which is often used by adversaries for host discovery or network service scanning.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1571/T1571.md#atomic-test-1---testing-usage-of-uncommonly-used-port-with-powershell
     - https://learn.microsoft.com/en-us/powershell/module/nettcpip/test-netconnection?view=windowsserver2022-ps
 author: frack113
 date: 2022-01-23
+modified: 2026-07-14 # Updated to reflect today's alignment changes
 tags:
-    - attack.command-and-control
-    - attack.t1571
+    - attack.discovery
+    - attack.t1046 # Realigned to Network Service Scanning
 logsource:
     product: windows
     category: ps_script
@@ -28,5 +27,5 @@ detection:
             - ' 80 '
     condition: selection and not filter
 falsepositives:
-    - Legitimate administrative script
+    - Legitimate administrative scripts or network diagnostics run by systems administrators.
 level: medium
