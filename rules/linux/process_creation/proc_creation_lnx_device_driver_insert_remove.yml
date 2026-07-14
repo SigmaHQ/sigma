@@ -1,0 +1,30 @@
+title: Adding and Removing Kernel Modules - Linux
+id: 85b78882-a58d-405f-bbb3-201d41812e8c
+status: experimental
+description: Adversaries may attempt to insert/remove rootkits (device driver) onto a victim host. This rule detects the use of commands such as 'insmod', 'modprobe', and 'rmmod' which are commonly used to load or remove kernel modules.
+references:
+    - https://reveng007.github.io/blog/2022/03/08/reveng_rkit_detailed.html
+    - https://xcellerator.github.io/posts/linux_rootkits_02/
+    - https://0x00sec.org/t/kernel-rootkits-getting-your-hands-dirty/1485
+    - https://thomas-byrne.co.uk/projects/makingarootkit/
+author: CheraghiMilad
+date: 2024-12-10
+tags:
+    - attack.defense-evasion
+    - attack.t1014
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith:
+            - '/kmod'
+            - '/sudo'
+        CommandLine|contains:
+            - 'insmod'
+            - 'rmmod'
+            - 'modprobe'
+    condition: selection
+falsepositives:
+    - Administrative tasks such as legitimate system administration involving device driver modules.
+level: medium
