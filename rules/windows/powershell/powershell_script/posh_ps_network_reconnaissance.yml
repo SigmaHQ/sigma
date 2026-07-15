@@ -1,0 +1,29 @@
+title: PowerShell Network Reconnaissance and Port Probing Activity
+id: 5b4e7a31-628d-4b47-b3c9-f19b1836a992 # A fresh, unique rule ID
+status: experimental
+description: Detects the use of PowerShell script blocks containing network connectivity verification tools or raw .NET socket probing to discover active internal services and host mappings.
+references:
+    - https://learn.microsoft.com/en-us/powershell/module/nettcpip/test-netconnection?view=windowsserver2022-ps
+    - https://attack.mitre.org/techniques/T1046/
+author: Keshon Karishan (KKarishan)
+date: 2026-07-15 
+tags:
+    - attack.discovery
+    - attack.t1046
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_cmdlet:
+        ScriptBlockText|contains:
+            - 'Test-NetConnection'
+            - 'tnc '
+    selection_socket:
+        ScriptBlockText|contains|all:
+            - 'System.Net.Sockets.TcpClient'
+            - '.Connect('
+    condition: selection_cmdlet or selection_socket
+falsepositives:
+    - Internal diagnostic scripts executed by network administrators.
+level: medium
