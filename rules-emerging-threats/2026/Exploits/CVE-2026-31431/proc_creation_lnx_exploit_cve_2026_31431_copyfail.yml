@@ -1,0 +1,44 @@
+title: Authencesn Crypto Module Load via Modprobe - Copy-Fail Indicator
+id: 474b415a-d917-4f3b-8c62-9e1a0d5f7b48
+status: experimental
+description: |
+    Detects kernel auto-loading of the authencesn crypto module via modprobe
+    This occurs when user-space code creates an AF_ALG socket and binds the authencesn AEAD cipher
+    (e.g., authencesn(hmac(sha256),cbc(aes))). The kernel invokes modprobe to load the
+    crypto module. This is a key indicator of CVE-2026-31431 (Copy Fail) exploitation,
+    where the authencesn cipher is used to trigger a buffer overflow in the AF_ALG AEAD splice path,
+    corrupting the page cache of SUID binaries for local privilege escalation.
+
+    On Linux systems, modprobe is typically a symlink to kmod, so the process image will be /usr/bin/kmod (or /bin/kmod)
+    with 'modprobe' appearing in the command line.
+references:
+    - https://www.linkedin.com/posts/stamatis-chatzimangou_copyfail-kql-activity-7455582422215114752-S4RW/
+    - https://www.splunk.com/en_us/blog/security/detecting-copy-fail-cve-2026-31431-phenomenal-power-itty-bitty-script.html
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-31431
+    - https://man7.org/linux/man-pages/man8/modprobe.8.html
+    - https://www.kernel.org/doc/html/latest/crypto/userspace-if.html
+author: Gene Kazimiarovich
+date: 2026-05-09
+tags:
+    - attack.privilege-escalation
+    - attack.t1068
+    - attack.persistence
+    - attack.t1547.006
+    - detection.emerging-threats
+    - cve.2026-31431
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_kmod:
+        Image|endswith: '/kmod'
+        CommandLine|contains|all:
+            - 'modprobe'
+            - 'crypto-authencesn('
+    selection_modprobe:
+        Image|endswith: '/modprobe'
+        CommandLine|contains: 'crypto-authencesn('
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate manual loading of the authencesn module by administrators for kernel crypto benchmarking or IPsec configuration (near-zero in production)
+level: high
