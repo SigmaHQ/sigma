@@ -89,7 +89,7 @@ If you find a false positive or would like to propose a new detection rule idea 
 
 ## 💬 Community
 
-Join the Sigma community on [Discord](https://discord.gg/UcDN25s8) to discuss detection engineering, ask questions, share ideas, and collaborate with other practitioners. We also use Discord for announcements such as new releases and other project updates.
+Join the Sigma community on [Discord](https://discord.gg/CZhaX3ygdt) to discuss detection engineering, ask questions, share ideas, and collaborate with other practitioners. We also use Discord for announcements such as new releases and other project updates.
 
 ## 🌐 Official Resources
 
