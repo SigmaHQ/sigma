@@ -1,0 +1,41 @@
+title: DNS Query Using NULL Record Type
+id: 77461855-8eb5-4e8b-b82e-26bec23277ca
+status: experimental
+description: |
+    Detects a DNS query using the NULL record type. NULL records are rarely
+    used in legitimate DNS traffic but are commonly used by DNS tunneling
+    tools, such as iodine, because they can carry more payload per query
+    than standard A/AAAA lookups. Existing public DNS tunneling detections
+    are largely based on overall query volume or lists of known tunneling
+    domains and tools, this rule targets NULL-type query behavior
+    specifically, filling a gap not covered by those approaches, and can
+    catch novel or custom tunneling tools that aren't on any known-domain
+    list.
+
+    Validated against real traffic, 100% detection rate against captured
+    iodine tunneling traffic, 2782 out of 2782 queries, 0 false positives
+    against captured benign DNS traffic, 242 queries. Analysts should treat
+    a single NULL query as low-signal on its own, and prioritize
+    investigation when NULL queries repeat many times to the same domain in
+    a short window, which is a stronger indicator of tunneling activity.
+    See referenced project for full methodology.
+references:
+    - https://github.com/Shelaz303/dns-tunneling-detector
+    - https://patrick-bareiss.com/detect-c2-traffic-over-dns-using-sigma/
+    - https://code.kryo.se/iodine/
+author: Shelaz303
+date: 2026-07-21
+logsource:
+    category: dns
+detection:
+    selection:
+        qtype_name: 'NULL'
+    condition: selection
+falsepositives:
+    - Legitimate software that intentionally uses NULL DNS records, uncommon
+level: medium
+tags:
+    - attack.command-and-control
+    - attack.t1071.004
+    - attack.exfiltration
+    - attack.t1048
