@@ -1,0 +1,30 @@
+title: Windows Sandbox Server Spawned (Enrichment Trigger for Headless Sandbox Detection)
+id: 5267fa06-a48c-41c1-beb0-d6990a2415a2
+status: experimental
+description: |
+    Detects WindowsSandboxServer.exe spawning on the host.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Wsb/
+    - https://learn.microsoft.com/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-cli
+author: Konrad 'unrooted' Klawikowski
+date: 2026-05-30
+tags:
+    - attack.execution
+    - attack.defense-evasion
+    - attack.t1564.006
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\WindowsSandboxServer.exe'
+    condition: selection
+fields:
+    - User
+    - ProcessId
+    - Image
+    - ParentImage
+    - ParentCommandLine
+falsepositives:
+    - Every legitimate Sandbox launch (this rule is a low-precision enrichment trigger)
+level: low

@@ -1,0 +1,62 @@
+title: Correlated Windows Sandbox CLI Abuse Chain (start + exec / share)
+id: ea1e01d2-f1b9-4d17-9c02-60945943f381
+status: experimental
+description: |
+    Correlation rule that fires when the same User runs wsb.exe with `start` and then with `exec`, `share`, or `connect` within 10 minutes. 
+references:
+    - https://learn.microsoft.com/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-cli
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Wsb/
+author: Konrad 'unrooted' Klawikowski
+date: 2026-07-22
+tags:
+    - attack.execution
+    - attack.defense-evasion
+    - attack.t1218
+    - attack.t1564.006
+correlation:
+    type: temporal
+    rules:
+        - wsb_start_event
+        - wsb_followup_event
+    group-by:
+        - User
+    timespan: 10m
+---
+title: Windows Sandbox CLI Start Event (Correlation Base Rule)
+name: wsb_start_event
+id: 3556b3d4-2e33-4f52-a6bb-eeaa960f6833
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_image:
+        - Image|endswith: '\wsb.exe'
+        - OriginalFileName: 'wsb.exe'
+    keyword:
+        CommandLine|contains: ' start'
+    condition: all of selection_* and keyword
+---
+title: Windows Sandbox CLI Follow-Up Event (Correlation Base Rule)
+name: wsb_followup_event
+id: 27157649-a411-4d70-8704-48712de67bc0
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_image:
+        - Image|endswith: '\wsb.exe'
+        - OriginalFileName: 'wsb.exe'
+    keyword:
+        CommandLine|contains:
+            - ' exec '
+            - ' share '
+            - ' connect '
+    condition: all of selection_* and keyword
+fields:
+    - CommandLine
+    - User
+    - ParentImage
+falsepositives:
+    - Interactive Sandbox sessions where a user starts a sandbox via CLI and then issues follow-up commands (legitimate scripted workflow)
+    - Sandbox-based CI/QA pipelines that chain start + exec
+level: medium
