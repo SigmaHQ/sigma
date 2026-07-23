@@ -1,0 +1,40 @@
+title: Registry Hive File Staged Outside Standard User Profile Path
+id: a7f3c891-2e4d-4b6a-9f8c-d5e2a1b04c73
+status: experimental
+description: |
+    Detects the creation of a registry hive file (UsrClass.dat or NTUSER.DAT) outside of the standard user profile path.
+    These files generally contain various user-specific registry settings and are typically located in the user's profile directory.
+    Staging these files outside of the standard path can be indicative of an attacker attempting to manipulate user registry settings
+    for persistence, privilege escalation, or dump user registry hives for credential harvesting.
+references:
+    - https://github.com/MSNightmare/LegacyHive
+    - https://git.projectnightcrawler.dev/NightmareEclipse/LegacyHive
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-07-23
+tags:
+    - attack.privilege-escalation
+    - attack.t1548
+    - attack.credential-access
+    - attack.t1003
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '\UsrClass.dat'
+            - '\NTUSER.DAT'
+    filter_main_usrclass:
+        TargetFilename|endswith: '\AppData\Local\Microsoft\Windows\UsrClass.dat'
+    filter_main_ntuser:
+        TargetFilename|re|i: '^C:\\Users\\[^\\]+\\NTUSER\.DAT$'
+    filter_main_system:
+        TargetFilename|startswith:
+            - 'C:\Windows\System32\config\'
+            - 'C:\Windows\SYSVOL\'
+            - 'C:\Windows\ServiceProfiles\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Backup or profile migration software
+    - Forensic acquisition tools
+level: high
