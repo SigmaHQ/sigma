@@ -1,0 +1,26 @@
+title: Suspicious Renamed LuaJIT Runtime Executing Text Payload
+id: 1279f13a-3936-4d54-adbd-c537738f2942
+status: experimental
+description: Detects the observed launcher pattern in which compiler.exe executes an obfuscated Lua payload stored as dl.txt.
+references:
+  - https://www.netskope.com/blog/openclaw-trap-ai-assisted-lure-factory-targets-developers-gamers
+  - https://discourse.ifin.network/t/luajit-malware-analysis/679
+author: Josh Nickels
+date: 2026-07-23
+tags:
+  - attack.execution
+  - attack.t1059
+  - attack.t1204.002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\\compiler.exe'
+    CommandLine|contains|all:
+      - 'compiler.exe'
+      - 'dl.txt'
+  condition: selection
+falsepositives:
+  - Legitimate internal software using the same generic filenames
+level: high
