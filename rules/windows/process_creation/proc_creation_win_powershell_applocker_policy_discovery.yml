@@ -1,0 +1,33 @@
+title: PowerShell AppLocker Policy Discovery Via Get-AppLockerPolicy
+id: f14b1e99-5e53-4598-98dc-6f20ad7b35e0
+status: test
+description: Detects AppLocker policy enumeration attempts via PowerShell using the Get-AppLockerPolicy cmdlet and an effective policy scope
+references:
+    - https://learn.microsoft.com/en-us/powershell/module/applocker/get-applockerpolicy
+    - https://attack.mitre.org/techniques/T1518/001/
+author: Tom3306
+date: 2026-02-28
+tags:
+    - attack.discovery
+    - attack.t1518.001
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\\powershell.exe'
+              - '\\pwsh.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_cmdlet:
+        CommandLine|contains: 'Get-AppLockerPolicy'
+    selection_effective:
+        CommandLine|contains|windash:
+            - ' -Effective'
+            - ' /Effective'
+    condition: all of selection_*
+falsepositives:
+    - PowerShell-based AppLocker auditing and policy troubleshooting by administrators
+level: medium
