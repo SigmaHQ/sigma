@@ -2,30 +2,30 @@ title: Docker Socket Access Via Curl Or Wget
 id: 85f46916-09a8-4b99-86e1-4ce209b0f772
 status: experimental
 description: |
-  Detects curl or wget communicating with the Docker daemon's Unix socket
-  (/var/run/docker.sock). Access to the Docker socket from an unexpected
-  process is a well-known container-to-host escape and privilege-escalation
-  vector, as it grants full control of the Docker daemon.
+    Detects curl or wget communicating with the Docker daemon's Unix socket
+    (/var/run/docker.sock). Access to the Docker socket from an unexpected
+    process is a well-known container-to-host escape and privilege-escalation
+    vector, as it grants full control of the Docker daemon.
 references:
-  - https://docs.docker.com/engine/security/
+    - https://docs.docker.com/engine/security/
 author: Garrett Allen (@Gerrrt)
 date: 2026-07-22
 tags:
-  - attack.privilege-escalation
-  - attack.t1611
+    - attack.privilege-escalation
+    - attack.t1611
 logsource:
-  category: process_creation
-  product: linux
+    category: process_creation
+    product: linux
 detection:
-  selection_tool:
-    Image|endswith:
-      - "/curl"
-      - "/wget"
-  selection_socket:
-    CommandLine|contains:
-      - "/var/run/docker.sock"
-      - "/run/docker.sock"
-  condition: all of selection_*
+    selection_tool:
+        Image|endswith:
+            - '/curl'
+            - '/wget'
+    selection_socket:
+        CommandLine|contains:
+            - '/var/run/docker.sock'
+            - '/run/docker.sock'
+    condition: all of selection_*
 falsepositives:
-  - Administrative or monitoring scripts that legitimately query the Docker API over the socket
+    - Administrative or monitoring scripts that legitimately query the Docker API over the socket
 level: high
