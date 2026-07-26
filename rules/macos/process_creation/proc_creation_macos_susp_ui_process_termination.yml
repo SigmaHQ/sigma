@@ -1,0 +1,35 @@
+title: Suspicious MacOS User Interface Process Termination
+id: d9e40b8b-f403-45b6-95ba-bd8dbd14c16b
+status: experimental
+description: |
+    Detects the use of the native macOS utilities "pkill" or "killall" to terminate
+    Terminal or core macOS user interface processes. Malware may use this behavior
+    to conceal malicious activity, close visible windows, suppress notifications,
+    or interfere with normal user interaction.
+references:
+    - https://www.esentire.com/blog/fake-deepseek-site-infects-mac-users-with-atomic-stealer
+    - https://www.group-ib.com/blog/clicklock-stealer-macos-malware/
+    - https://www.levelblue.com/blogs/spiderlabs-blog/say-my-name-how-miolab-is-building-macos-stealer-empire
+author: JasonPhang98
+date: 2026-07-26
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection_img:
+        Image|endswith:
+            - '/pkill'
+            - '/killall'
+    selection_target:
+        CommandLine|contains:
+            - 'Terminal'
+            - 'Finder'
+            - 'Dock'
+            - 'SystemUIServer'
+            - 'NotificationCenter'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate troubleshooting of unresponsive macOS applications or user interface components
+    - Administrator scripts that restart Finder, Dock, SystemUIServer, or NotificationCenter
+    - Software installation or configuration scripts that restart macOS user interface processes
+level: low
