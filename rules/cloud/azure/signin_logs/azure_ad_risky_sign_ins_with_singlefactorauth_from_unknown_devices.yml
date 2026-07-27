@@ -6,7 +6,7 @@ references:
     - https://learn.microsoft.com/en-us/entra/architecture/security-operations-devices#non-compliant-device-sign-in
 author: Harjot Singh, '@cyb3rjy0t'
 date: 2023-01-10
-modified: 2025-07-02
+modified: 2026-05-08
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -18,13 +18,13 @@ logsource:
     service: signinlogs
 detection:
     selection_main:
-        Status: 'Success'
-        AuthenticationRequirement: 'singleFactorAuthentication'
-        RiskState: 'atRisk'
+        resultType: 0
+        properties.authenticationRequirement: 'singleFactorAuthentication'
+        properties.riskState: 'atRisk'
     selection_empty1:
-        DeviceDetail.trusttype: ''
+        properties.deviceDetail.trusttype: ''
     selection_empty2:
-        DeviceDetail.trusttype: null
+        properties.deviceDetail.trusttype: null
     condition: selection_main and 1 of selection_empty*
 falsepositives:
     - Unknown
