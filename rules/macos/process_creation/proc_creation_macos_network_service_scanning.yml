@@ -22,11 +22,9 @@ detection:
         Image|endswith:
             - '/nmap'
             - '/telnet'
-    filter:
-        CommandLine|contains:
-            - ' --listen '
-            - ' -l '
-    condition: (selection_1 and not filter) or selection_2
+    filter_main_nc_listen:
+        CommandLine|re: '\s--?(?:[a-z46]{0,5}l[a-z46]{0,4})'
+    condition: (selection_1 and not 1 of filter_main_*) or selection_2
 falsepositives:
     - Legitimate administration activities
 level: low
