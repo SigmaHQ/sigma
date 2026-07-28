@@ -1,0 +1,26 @@
+title: SSH Authorized Keys Modification
+id: e7806bcc-7464-4ecd-9dd5-22bf0e3cb0f3
+status: experimental
+description: |
+    Detects the creation or modification of the 'authorized_keys' file on Linux systems.
+    Attackers often modify this file to maintain persistence by adding their own public key to a user's authorized_keys file.
+references:
+    - https://attack.mitre.org/techniques/T1098/004/
+author: Sri Charan
+date: 2026-07-28
+tags:
+    - attack.persistence
+    - attack.t1098.004
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection:
+        TargetFilename|endswith: '/.ssh/authorized_keys'
+    filter_main_sshd:
+        Image|endswith: '/sshd'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Legitimate administration activities (e.g. ssh-copy-id)
+    - Configuration management tools (Ansible, Chef, Puppet) managing SSH keys
+level: medium
