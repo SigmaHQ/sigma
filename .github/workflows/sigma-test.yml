@@ -26,9 +26,11 @@ jobs:
       uses: actions/setup-python@v6
       with:
         python-version: 3.11
+        cache: pip
+        cache-dependency-path: tests/requirements*.txt
     - name: Test Sigma logsource
       run: |
-        pip install PyYAML colorama
+        pip install -r tests/requirements.txt
         python tests/test_logsource.py
 
   test-sigma-legacy:
@@ -42,9 +44,11 @@ jobs:
       uses: actions/setup-python@v6
       with:
         python-version: 3.11
+        cache: pip
+        cache-dependency-path: tests/requirements*.txt
     - name: Test Sigma Rules
       run: |
-        pip install PyYAML colorama
+        pip install -r tests/requirements.txt
         python tests/test_rules.py
 
   sigma-check:
@@ -58,11 +62,11 @@ jobs:
       uses: actions/setup-python@v6
       with:
         python-version: 3.11
+        cache: pip
+        cache-dependency-path: tests/requirements*.txt
     - name: Install dependencies
       run: |
-        pip install pysigma
-        pip install sigma-cli
-        pip install pySigma-validators-sigmahq==0.20.*
+        pip install -r tests/requirements-validation.txt
     - name: Test Sigma Rule Syntax
       run: |
         sigma check --fail-on-error --fail-on-issues --validation-config tests/sigma_cli_conf.yml rules*
