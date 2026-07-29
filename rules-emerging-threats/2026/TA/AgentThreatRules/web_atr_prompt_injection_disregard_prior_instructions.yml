@@ -1,0 +1,39 @@
+title: AI Agent Prompt Injection - Disregard Prior Instructions
+id: fb90b945-7f16-483a-b5a8-d9fca14c4101
+status: experimental
+description: |
+    Detects prompt injection attempts using the "disregard prior instructions" lexical family. Variants of this phrasing are commonly used to bypass safety alignment and override the system prompt of an LLM agent.
+    This rule is a sister to the "ignore previous instructions" detection and covers paraphrased forms that attackers use to evade simple keyword filters.
+    Derived from Agent Threat Rules (ATR) ATR-2026-00022.
+references:
+    - https://github.com/Agent-Threat-Rule/agent-threat-rules
+    - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+    - https://arxiv.org/abs/2302.12173
+author: Adam Lin (panguard.ai)
+date: 2026-05-09
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_method:
+        cs-method:
+            - 'POST'
+            - 'GET'
+    keywords:
+        - 'disregard prior instructions'
+        - 'disregard all prior instructions'
+        - 'disregard the previous instructions'
+        - 'disregard the above instructions'
+        - 'disregard%20prior%20instructions'
+        - 'disregard%20all%20prior%20instructions'
+        - 'forget all previous instructions'
+        - 'forget the previous instructions'
+        - 'forget%20all%20previous%20instructions'
+    condition: selection_method and keywords
+falsepositives:
+    - Authorized red team or AI safety evaluation traffic
+    - Educational content about prompt injection submitted to user-content endpoints
+level: medium

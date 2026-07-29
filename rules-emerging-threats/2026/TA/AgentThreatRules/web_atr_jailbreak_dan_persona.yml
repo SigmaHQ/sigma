@@ -1,0 +1,38 @@
+title: AI Agent Jailbreak - DAN Do-Anything-Now Persona
+id: 0549b6eb-e321-4530-97f2-b1d8190d6c61
+status: experimental
+description: |
+    Detects role-play jailbreak attempts that invoke the "DAN" (Do Anything Now) persona to bypass an LLM's safety alignment. The DAN family is one of the longest-running and most replicated jailbreak templates and continues to circulate in many mutated forms.
+    The pattern asks the model to adopt an unrestricted alter-ego that will answer prompts the aligned model would refuse.
+    Derived from Agent Threat Rules (ATR) ATR-2026-00031.
+references:
+    - https://github.com/Agent-Threat-Rule/agent-threat-rules
+    - https://learnprompting.org/docs/prompt_hacking/jailbreaking
+author: Adam Lin (panguard.ai)
+date: 2026-05-09
+tags:
+    - attack.stealth
+    - attack.t1027
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_method:
+        cs-method:
+            - 'POST'
+            - 'GET'
+    keywords:
+        - 'do anything now'
+        - 'do%20anything%20now'
+        - 'you are DAN'
+        - 'you are now DAN'
+        - 'act as DAN'
+        - 'pretend to be DAN'
+        - 'DAN mode enabled'
+        - 'DAN%20mode%20enabled'
+        - 'jailbroken DAN'
+    condition: selection_method and keywords
+falsepositives:
+    - Discussion of LLM jailbreaks in security research forums
+    - Legitimate references to people or characters named DAN (rare in agent input contexts)
+level: high

@@ -1,0 +1,47 @@
+title: AI Agent Instructed SSRF - Localhost and Cloud Metadata Endpoints
+id: a7765336-9d50-41e1-9b2c-db6b5a4fe062
+status: experimental
+description: |
+    Detects user input or retrieved content instructing an LLM agent to fetch internal localhost endpoints or cloud-provider instance metadata services. These are high-value SSRF targets that frequently expose IAM credentials or service tokens.
+    The pattern combines a fetch verb with a loopback or metadata host. Cloud metadata addresses include the AWS, GCP, Azure, and Alibaba IMDS endpoints.
+    Derived from Agent Threat Rules (ATR) ATR-2026-00082.
+references:
+    - https://github.com/Agent-Threat-Rule/agent-threat-rules
+    - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+    - https://hackingthe.cloud/aws/exploitation/ec2-metadata-ssrf/
+author: Adam Lin (panguard.ai)
+date: 2026-05-09
+tags:
+    - attack.credential-access
+    - attack.t1552.005
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_method:
+        cs-method:
+            - 'POST'
+            - 'GET'
+    keywords:
+        - 'http://127.0.0.1'
+        - 'http://localhost'
+        - 'http://0.0.0.0'
+        - 'http://[::1]'
+        - 'http://169.254.169.254'
+        - 'http%3A%2F%2F127.0.0.1'
+        - 'http%3A%2F%2Flocalhost'
+        - 'http%3A%2F%2F169.254.169.254'
+        - 'metadata.google.internal'
+        - '/latest/meta-data/'
+    fetch_verbs:
+        cs-uri-query|contains:
+            - 'fetch'
+            - 'browse'
+            - 'open url'
+            - 'visit'
+            - 'curl'
+    condition: selection_method and keywords and fetch_verbs
+falsepositives:
+    - Local development tooling that legitimately routes agent traffic through 127.0.0.1
+    - Administrative or health-check endpoints that intentionally consume cloud metadata
+level: high
