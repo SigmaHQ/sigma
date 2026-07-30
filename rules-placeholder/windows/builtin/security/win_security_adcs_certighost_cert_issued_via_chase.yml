@@ -1,0 +1,46 @@
+title: ADCS - Certificate Issued via CDC Chase Mechanism
+id: 8b7e2c54-1f93-4a6d-b8e0-3c9d7f25a168
+status: experimental
+description: |
+    Detects successful issuance of an ADCS certificate where the request attributes include
+    'cdc' (Client DC) or 'rmd' (Remote Domain) pointing to a non-DC host, confirming the
+    CA's chase fallback path was taken against an attacker-controlled target.
+
+    'cdc' directs the CA to an address for identity lookup; 'rmd' specifies the principal to
+    look up there. In an attack, cdc points to a rogue host that returns a forged DC identity.
+    A successfully issued certificate at this stage means the attacker has obtained a cert
+    carrying a Domain Controller's SID and DNS identity, enabling PKINIT authentication as
+    that DC followed by DCSync replication.
+references:
+    - https://github.com/aniqfakhrul/CVE-2026-54121
+    - https://gist.github.com/H0j3n/a5ef2609b5f2944ac2390a191a534c26
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-07-27
+tags:
+    - attack.privilege-escalation
+    - attack.credential-access
+    - attack.t1649
+logsource:
+    product: windows
+    service: security
+    definition: |
+        This requires two independent controls on the CA server.
+            (1) CA\AuditFilter must have bit 0x04 (AUDIT_CERTSRV_REQUESTFLAGS) set
+                this instructs certsrv.exe to emit request/issuance events.
+                Without this bit the CA never calls ReportEvent() for certificate operations, regardless of OS policy.
+                    - Set via: certutil -setreg CA\AuditFilter 127 then net stop CertSvc; net start CertSvc.
+            (2) The OS audit subcategory must be enabled to write those events into the Security log:
+                auditpol /set /subcategory:"Certification Services" /success:enable.
+        Note: GPO alone (without AuditFilter) is not sufficient.
+detection:
+    selection:
+        EventID: 4887
+        Attributes|contains:
+            - 'cdc:'
+            - 'rmd:'
+    filter_main_known_cdc_ips:
+        Attributes|contains|expand: '%dc_ips%'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high

@@ -1,0 +1,59 @@
+title: DC Machine Account TGS Request from Non-DC Source IP
+id: e3f7c841-2a9d-4b5e-c018-d94b3e67f012
+status: experimental
+description: |
+    Detects a Kerberos service ticket request (Event 4769) targeting a Domain Controller
+    machine account's service (e.g. DRSUAPI) originating from an IP address that is not a
+    known Domain Controller. Service tickets for DC machine accounts should only be requested
+    by other DCs during legitimate replication operations.
+
+    An attacker with a valid TGT (obtained via PKINIT, overpass-the-hash, or stolen TGT)
+    targeting a DC machine account's service from a workstation IP indicates preparation for
+    DCSync or impersonation of a DC. Unlike Silver Ticket attacks (which forge the TGS and
+    bypass this event), this rule catches attacks that go through the KDC legitimately.
+
+    This rule requires %dc_machine_accounts% and %dc_ip_addresses% to be populated with
+    all known DC machine account names and DC IP addresses respectively.
+
+    Companion rules:
+        - win_security_susp_computer_account_creation_by_domain_user (EventID 4741)
+        - win_security_adcs_certighost_cdc_chase_request (EventID 4886)
+        - win_security_adcs_certighost_cert_issued_via_chase (EventID 4887)
+        - win_security_dc_machine_account_tgt_non_dc_ip (EventID 4768)
+        - win_security_dc_machine_account_logon_non_dc_ip (EventID 4624)
+        - win_security_dcsync_machine_account (EventID 4662)
+references:
+    - https://github.com/aniqfakhrul/CVE-2026-54121
+    - https://gist.github.com/H0j3n/a5ef2609b5f2944ac2390a191a534c26
+    - https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-54121
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4769
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-07-29
+tags:
+    - attack.credential-access
+    - attack.lateral-movement
+    - attack.t1550.003
+    - attack.t1558.003
+    - cve.2026-54121
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4769
+        Status: '0x0'
+        TargetUserName|endswith: '$'
+        ServiceName|expand: '%dc_machine_accounts%'
+    filter_main_dc_source:
+        IpAddress|expand: '%dc_ip_addresses%'
+    filter_main_loopback:
+        - IpAddress:
+              - '127.0.0.1'
+              - '::1'
+              - '::ffff:127.0.0.1'
+              - '-'
+        - IpAddress|startswith: 'fe80:'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unlikely
+level: high

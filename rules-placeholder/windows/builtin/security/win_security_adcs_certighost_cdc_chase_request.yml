@@ -1,0 +1,59 @@
+title: ADCS - Certificate Request With CDC Chase Attribute
+id: c4a1f389-2e6b-4d9a-8f0c-b73e5a12d947
+related:
+    - id: 2a9e4f17-6c3b-4d8a-e1f0-b57c2d94a631
+      type: similar
+status: experimental
+description: |
+    Detects Active Directory Certificate Services (ADCS) certificate requests that include the
+    'cdc' (Client DC) request attribute pointing to an IP that is not a known Domain Controller.
+
+    'cdc' is an optional MS-WCCE enrollment attribute designed for cross-domain/cross-forest
+    scenarios where a client in a child domain tells the CA which DC to contact for identity
+    lookups when the CA cannot reach that domain directly. Legitimate values are DC hostnames
+    or IPs that resolve to a real Domain Controller computer object in AD with the
+    SERVER_TRUST_ACCOUNT (0x2000) userAccountControl bit set.
+
+    In an attack, the attacker sets cdc to an IP they control so the CA connects to their
+    rogue SMB and LDAP services instead of a real DC. The rogue server returns a forged DC
+    identity which the pre-patch CA accepts without validation. A malicious event looks like:
+
+        Requester: DOMAIN\GHOST<random>$
+        Attributes: cdc:<attacker_ip>
+                    rmd:<target_dc_fqdn>
+        SubjectAlternativeName: DNS Name=<target_dc_fqdn>
+
+    CVE-2026-54121 (Certighost) is the known exploit for this path. The July 2026 patch added
+    _ValidateChaseTargetIsDC which rejects cdc values that do not resolve to a legitimate
+    DC object in Active Directory before following the chase.
+references:
+    - https://github.com/aniqfakhrul/CVE-2026-54121
+    - https://gist.github.com/H0j3n/a5ef2609b5f2944ac2390a191a534c26
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-07-27
+tags:
+    - attack.privilege-escalation
+    - attack.credential-access
+    - attack.t1649
+logsource:
+    product: windows
+    service: security
+    definition: |
+        This requires two independent controls on the CA server.
+            (1) CA\AuditFilter must have bit 0x04 (AUDIT_CERTSRV_REQUESTFLAGS) set
+                this instructs certsrv.exe to emit request/issuance events.
+                Without this bit the CA never calls ReportEvent() for certificate operations, regardless of OS policy.
+                    - Set via: certutil -setreg CA\AuditFilter 127 then net stop CertSvc; net start CertSvc.
+            (2) The OS audit subcategory must be enabled to write those events into the Security log:
+                auditpol /set /subcategory:"Certification Services" /success:enable.
+        Note: GPO alone (without AuditFilter) is not sufficient.
+detection:
+    selection:
+        EventID: 4886
+        Attributes|contains: 'cdc:'
+    filter_main_known_cdc_ips:
+        Attributes|contains|expand: '%dc_ips%'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high
