@@ -1,0 +1,32 @@
+title: Commvault QOperation Path Traversal Webshell Drop (CVE-2025-57790)
+id: bd3b3fff-a018-4994-9876-68af5809160f
+status: experimental
+description: |
+    Detects the use of qoperation.exe with the -file argument to write a JSP file to the webroot, indicating a webshell drop.
+    This is a post-authentication step corresponding to CVE-2025-57790.
+references:
+    - https://labs.watchtowr.com/guess-who-would-be-stupid-enough-to-rob-the-same-vault-twice-pre-auth-rce-chains-in-commvault/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-10-20
+tags:
+    - attack.persistence
+    - attack.t1505.003
+    - detection.emerging-threats
+    - cve.2025-57790
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        # qoperation execute -af F:\Program Files\Commvault\ContentStore\Reports\MetricsUpload\Upload\ABC1234\rekt.xml -file F:\Program Files\Commvault\ContentStore\Apache\webapps\ROOT\wT-poc.jsp
+        CommandLine|contains|all:
+            - 'qoperation'
+            - 'exec'
+            - ' -af '
+            - '.xml '
+            - '\Apache\webapps\ROOT\'
+            - '.jsp'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
