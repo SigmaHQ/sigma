@@ -1,5 +1,8 @@
-title: Active Directory Replication from Non Machine Account
+title: Active Directory Replication from Non Machine Account - DcSync Indicator
 id: 17d619c1-e020-4347-957e-1d1207455c93
+related:
+    - id: 611eab06-a145-4dfa-a295-3ccc5c20f59a # Suspicious Machine Account Replication - DcSync Indicator
+      type: similar
 status: test
 description: Detects potential abuse of Active Directory Replication Service (ADRS) from a non machine account to request credentials.
 references:
@@ -15,6 +18,13 @@ tags:
 logsource:
     product: windows
     service: security
+    definition: |
+        Requirements: A SACL must be configured on the domain NC root object (e.g. DC=domain,DC=com)
+        to generate Event 4662. Add via ADSI Edit: navigate to the domain NC root → Properties →
+        Security → Advanced → Auditing → add an ACE for Everyone, Type: Success, Applies to:
+        This object only, rights: DS-Replication-Get-Changes and DS-Replication-Get-Changes-All.
+        The OS audit subcategory must also be enabled:
+        auditpol /set /subcategory:"Directory Service Access" /success:enable
 detection:
     selection:
         EventID: 4662

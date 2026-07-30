@@ -1,0 +1,57 @@
+title: Suspicious Machine Account Replication - DcSync Indicator
+id: 611eab06-a145-4dfa-a295-3ccc5c20f59a
+related:
+    - id: 17d619c1-e020-4347-957e-1d1207455c93 # Active Directory Replication from Non Machine Account
+      type: similar
+status: test
+description: |
+    Detects suspicious Active Directory Replication Service (ADRS) requests originating from
+    a machine account (SubjectUserName ending in '$') rather than a legitimate Domain Controller.
+
+    Under normal operation, only Domain Controllers initiate replication requests carrying the
+    DS-Replication-Get-Changes-All right. If a threat actor obtains valid machine account
+    credentials — for example by abusing certificate-based authentication (PKINIT) to
+    impersonate a DC after exploiting a CA vulnerability such as CVE-2026-54121 (Certighost),
+    where a temporary machine account is created to request a DC certificate and then used to
+    perform DCSync — they can dump all domain credential material including the krbtgt hash.
+references:
+    - https://twitter.com/gentilkiwi/status/1003236624925413376
+    - https://gist.github.com/gentilkiwi/dcc132457408cf11ad2061340dcb53c2
+    - https://blog.blacklanternsecurity.com/p/detecting-dcsync?s=r
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4662
+    - https://github.com/aniqfakhrul/CVE-2026-54121
+author: Benjamin Delpy, Florian Roth (Nextron Systems), Scott Dermett, Sorina Ionescu
+date: 2018-06-03
+modified: 2026-07-30
+tags:
+    - attack.credential-access
+    - attack.s0002
+    - attack.t1003.006
+    - cve.2026-54121
+logsource:
+    product: windows
+    service: security
+    definition: |
+        Requirements: A SACL must be configured on the domain NC root object (e.g. DC=domain,DC=com)
+        to generate Event 4662. Add via ADSI Edit: navigate to the domain NC root → Properties →
+        Security → Advanced → Auditing → add an ACE for Everyone, Type: Success, Applies to:
+        This object only, rights: DS-Replication-Get-Changes and DS-Replication-Get-Changes-All.
+        The OS audit subcategory must also be enabled:
+        auditpol /set /subcategory:"Directory Service Access" /success:enable
+detection:
+    selection:
+        EventID: 4662
+        Properties|contains:
+            - 'Replicating Directory Changes All'
+            - '1131f6ad-9c07-11d1-f79f-00c04fc2dcd2'
+            - '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2'
+            - '9923a32a-3607-11d2-b9be-0000f87a36b2'
+            - '89e95b76-444d-4c62-991a-0facbeda640c'
+        AccessMask: '0x100'
+        SubjectUserName|endswith: '$'
+    filter_main_subject_usersid:
+        SubjectUserSid|startswith: 'S-1-5-18'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Valid DC Sync that is not covered by the filters; please report
+level: high
