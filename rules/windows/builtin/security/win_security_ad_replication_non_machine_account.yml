@@ -11,7 +11,7 @@ references:
     - https://threathunterplaybook.com/hunts/windows/190101-ADModDirectoryReplication/notebook.html
 author: Roberto Rodriguez @Cyb3rWard0g
 date: 2019-07-26
-modified: 2021-11-27
+modified: 2026-07-30
 tags:
     - attack.credential-access
     - attack.t1003.006
@@ -30,13 +30,20 @@ detection:
         EventID: 4662
         AccessMask: '0x100'
         Properties|contains:
-            - '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2'
+            - 'Replicating Directory Changes All'
             - '1131f6ad-9c07-11d1-f79f-00c04fc2dcd2'
+            - '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2'
+            - '9923a32a-3607-11d2-b9be-0000f87a36b2'
             - '89e95b76-444d-4c62-991a-0facbeda640c'
-    filter:
-        - SubjectUserName|endswith: '$'
-        - SubjectUserName|startswith: 'MSOL_' # https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/reference-connect-accounts-permissions#ad-ds-connector-account
-    condition: selection and not filter
+    filter_main_machine_accounts:
+        SubjectUserName|endswith: '$'
+    filter_optional_subject_domain:
+        SubjectDomainName: 'Window Manager'
+    filter_optional_subject_usersid:
+        SubjectUserName|startswith:
+            - 'NT AUT'
+            - 'MSOL_' # https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/reference-connect-accounts-permissions#ad-ds-connector-account
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: critical
