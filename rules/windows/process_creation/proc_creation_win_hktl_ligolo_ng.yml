@@ -1,0 +1,44 @@
+title: HackTool - Ligolo-NG Agent Execution
+id: 7a7bf6b6-dc32-4d96-9d2c-9c14be658502
+related:
+    - id: c0946792-2e41-4ef4-9784-badec993458f
+      type: similar
+status: experimental
+description: |
+    Detects execution of the ligolo-ng agent, a tunneling tool that creates a full network
+    pivot between a compromised host and an attacker-controlled proxy server. The agent
+    supports bind mode (agent listens, proxy connects in) and reverse mode (agent dials out).
+
+    Detection uses two independent branches:
+    - Image path containing "ligolo": catches default release filenames. Note: OriginalFileName
+      is not set in ligolo-ng release builds (Go toolchain does not embed it), making Image
+      the only reliable PE-level anchor. Evadable by renaming the binary.
+    - CLI flags --ignore-cert with --connect or --bind: catches execution regardless of
+      binary name. Evadable by patching the binary to remove flag names.
+
+    Correlate with the companion ligolo-ng default port network connection rule for
+    higher confidence.
+references:
+    - https://github.com/nicocha30/ligolo-ng
+author: sebafvs
+date: 2026-07-30
+tags:
+    - attack.command-and-control
+    - attack.t1572
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|contains: 'ligolo'
+    selection_cli_cert:
+        CommandLine|contains: '--ignore-cert'
+    selection_cli_mode:
+        CommandLine|contains:
+            - '--connect'
+            - '--bind'
+    condition: selection_img or (selection_cli_cert and selection_cli_mode)
+falsepositives:
+    - Any binary with "ligolo" in its path, since the Image branch is evadable by renaming
+    - Legitimate tunneling or VPN tools that coincidentally use --ignore-cert with --connect or --bind flags
+level: high

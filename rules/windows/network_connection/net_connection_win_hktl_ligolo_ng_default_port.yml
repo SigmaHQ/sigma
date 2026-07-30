@@ -1,0 +1,32 @@
+title: HackTool - Ligolo-NG Default Port Network Connection
+id: c0946792-2e41-4ef4-9784-badec993458f
+related:
+    - id: 7a7bf6b6-dc32-4d96-9d2c-9c14be658502
+      type: similar
+status: experimental
+description: |
+    Detects network connections on TCP port 11601, the default listening port of the
+    ligolo-ng proxy server. In reverse mode the agent dials out to the attacker's proxy
+    on this port, so the agent host sees an outbound connection. In bind mode the agent
+    listens on this port and the proxy connects in, so the agent host sees an inbound
+    connection. The rule matches the port in either direction to cover both modes.
+    Port-only detection is trivially evadable by changing the port at runtime (--srvport
+    flag on the proxy). Correlate with the companion ligolo-ng agent execution rule for
+    higher confidence.
+references:
+    - https://github.com/nicocha30/ligolo-ng
+author: sebafvs
+date: 2026-07-30
+tags:
+    - attack.command-and-control
+    - attack.t1572
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        DestinationPort: 11601
+    condition: selection
+falsepositives:
+    - Any legitimate service that happens to use TCP port 11601. Verify with process context.
+level: low
