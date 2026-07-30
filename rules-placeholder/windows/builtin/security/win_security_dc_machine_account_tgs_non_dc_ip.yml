@@ -14,14 +14,6 @@ description: |
 
     This rule requires %dc_machine_accounts% and %dc_ip_addresses% to be populated with
     all known DC machine account names and DC IP addresses respectively.
-
-    Companion rules:
-        - win_security_susp_computer_account_creation_by_domain_user (EventID 4741)
-        - win_security_adcs_certighost_cdc_chase_request (EventID 4886)
-        - win_security_adcs_certighost_cert_issued_via_chase (EventID 4887)
-        - win_security_dc_machine_account_tgt_non_dc_ip (EventID 4768)
-        - win_security_dc_machine_account_logon_non_dc_ip (EventID 4624)
-        - win_security_dcsync_machine_account (EventID 4662)
 references:
     - https://github.com/aniqfakhrul/CVE-2026-54121
     - https://gist.github.com/H0j3n/a5ef2609b5f2944ac2390a191a534c26
@@ -43,7 +35,7 @@ detection:
         EventID: 4769
         Status: '0x0'
         TargetUserName|endswith: '$'
-        ServiceName|expand: '%dc_machine_accounts%'
+        ServiceName|expand: '%dc_machine_accounts%' # should be populated with all known DC machine account names
     filter_main_dc_source:
         IpAddress|expand: '%dc_ip_addresses%'
     filter_main_loopback:
