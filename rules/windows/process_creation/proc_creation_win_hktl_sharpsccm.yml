@@ -1,0 +1,44 @@
+title: HackTool - SharpSCCM Execution
+id: 97e45307-42b0-449d-bd9a-28bd6826c25c
+status: experimental
+description: |
+    Detects the execution of SharpSCCM, a post-exploitation tool that abuses Microsoft Endpoint Configuration Manager (SCCM/ConfigMgr) for credential gathering and lateral movement without requiring access to the SCCM administration console.
+    The tool extracts DPAPI-protected policy secrets such as Network Access Account (NAA) credentials, task sequence variables and collection variables from the local WMI repository or CIM store, and can coerce NTLM authentication from SCCM servers in sites where automatic site-wide client push installation is enabled, which may lead to site takeover.
+    Because SCCM service accounts are frequently overprivileged, successful use of this tool often results in the disclosure of highly privileged domain credentials.
+references:
+    - https://github.com/Mayyhem/SharpSCCM
+    - https://github.com/Mayyhem/SharpSCCM/wiki/local
+    - https://docs.specterops.io/sharpsccm-docs/resources/Command-Line-Usage
+    - https://blog.xpnsec.com/unobfuscating-network-access-accounts/
+author: Ashish Pulivarthy (ashish-cybersec)
+date: 2026-07-10
+tags:
+    - attack.credential-access
+    - attack.t1555
+    - attack.lateral-movement
+    - attack.t1187
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\SharpSCCM.exe'
+        - OriginalFileName: 'SharpSCCM.exe'
+    selection_cli_credential_access:
+        CommandLine|contains:
+            - 'local secrets'
+            - 'local naa'
+            - 'get secrets '
+    selection_cli_coercion:
+        CommandLine|contains:
+            - 'invoke client-push'
+            - 'get site-push-settings'
+    selection_cli_recon:
+        CommandLine|contains:
+            - 'local site-info'
+            - 'local triage'
+            - 'local user-sid'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely. SharpSCCM is an offensive security tool with no legitimate administrative use, as all of its functionality is available through supported SCCM administration interfaces.
+level: high
