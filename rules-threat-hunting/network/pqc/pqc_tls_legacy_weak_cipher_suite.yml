@@ -1,0 +1,32 @@
+title: Legacy or Weak TLS Cipher Suite Negotiated
+id: 9fbcf61f-332a-432e-a0f6-4fdcfbaa3a34
+status: experimental
+description: A TLS session negotiated a legacy/weak cipher suite (3DES, RC4, NULL,
+  EXPORT, or an anonymous suite). These are classically broken or brittle and further
+  weakened by Grover's algorithm; none support a post-quantum migration path.
+references:
+- https://csrc.nist.gov/pubs/ir/8547/ipd
+author: TAI Creative LLC
+date: '2026-07-16'
+tags:
+- attack.credential-access
+- attack.t1040
+- attack.t1557
+logsource:
+  product: zeek
+  service: ssl
+detection:
+  selection:
+    cipher|contains:
+    - 3DES
+    - DES_
+    - RC4
+    - _NULL_
+    - EXPORT
+    - _anon_
+    - MD5
+  condition: selection
+falsepositives:
+- Legacy appliances that cannot be upgraded (should be isolated).
+level: high
+license: DRL-1.1

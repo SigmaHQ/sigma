@@ -1,0 +1,39 @@
+title: Classical-Only TLS Key Exchange (Harvest-Now-Decrypt-Later Exposure)
+id: a7c369d8-c1e9-4282-a672-af0e62966ddd
+status: experimental
+description: 'A TLS session negotiated a classical-only key-exchange group (X25519,
+  secp256r1, ffdhe*) with no post-quantum hybrid. Traffic protected this way is exposed
+  to harvest-now-decrypt-later: an adversary can record it today and decrypt it once
+  a CRQC exists. Inventory rule to surface endpoints that have not adopted a PQC hybrid
+  group such as X25519MLKEM768.'
+references:
+- https://csrc.nist.gov/pubs/ir/8547/ipd
+- https://www.cisa.gov/quantum
+author: TAI Creative LLC
+date: '2026-07-16'
+tags:
+- attack.collection
+- attack.t1040
+- attack.credential-access
+- attack.t1557
+logsource:
+  product: zeek
+  service: ssl
+detection:
+  selection:
+    curve:
+    - x25519
+    - secp256r1
+    - secp384r1
+    - ffdhe2048
+    - ffdhe3072
+  filter_pqc:
+    curve|contains:
+    - mlkem
+    - kyber
+  condition: selection and not filter_pqc
+falsepositives:
+- Environments that have not yet begun PQC migration (expected); this is an inventory/coverage
+  finding, not an attack alert.
+level: low
+license: DRL-1.1
