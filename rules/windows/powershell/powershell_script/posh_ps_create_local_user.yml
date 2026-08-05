@@ -4,9 +4,10 @@ status: test
 description: Detects creation of a local user via PowerShell
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1136.001/T1136.001.md
+    - https://github.com/SigmaHQ/sigma/issues/6057
 author: '@ROxPinTeddy'
 date: 2020-04-11
-modified: 2022-12-25
+modified: 2026-06-13
 tags:
     - attack.execution
     - attack.t1059.001
@@ -17,9 +18,16 @@ logsource:
     category: ps_script
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-    selection:
+    selection_cmdlet:
         ScriptBlockText|contains: 'New-LocalUser'
-    condition: selection
+    selection_adsi_winnt:
+        - ScriptBlockText|contains|all:
+              - 'WinNT://'
+              - '.Create("User"'
+        - ScriptBlockText|contains|all:
+              - 'WinNT://'
+              - ".Create('User'"
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate user creation
 level: medium
