@@ -6,7 +6,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1016/T1016.md
 author: Ömer Günal and remotephone, oscd.community
 date: 2020-10-06
-modified: 2022-09-15
+modified: 2025-02-13
 tags:
     - attack.discovery
     - attack.t1016
@@ -27,7 +27,10 @@ detection:
             - '/route'
     selection_cli:
         CommandLine|contains: '/etc/resolv.conf'
-    condition: 1 of selection_*
+    filter_common:
+        - ParentCommandLine: 'openclaw-gateway'
+        - CommandLine: 'ip neigh show'
+    condition: 1 of selection_* and not filter_common
 falsepositives:
     - Legitimate administration activities
 level: informational
