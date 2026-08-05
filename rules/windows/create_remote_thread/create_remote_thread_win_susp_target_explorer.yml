@@ -1,0 +1,29 @@
+title: Remote Thread Creation Targeting Explorer
+id: dd2ec761-39ef-445c-af50-ddb081072736
+status: experimental
+description: |
+    Detects remote thread creation targeting explorer.exe. Explorer is a long-lived,
+    trusted process that is commonly targeted for process injection in order to
+    evade defenses or establish persistence.
+author: mugheeskhan5
+date: 2026-07-29
+tags:
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1055
+
+logsource:
+    product: windows
+    category: create_remote_thread
+
+detection:
+    selection:
+        TargetImage|endswith: '\explorer.exe'
+    condition: selection
+
+falsepositives:
+    - Legitimate software performing DLL injection into explorer.exe
+    - Security software
+    - Remote administration or accessibility software
+
+level: medium
