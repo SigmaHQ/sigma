@@ -11,7 +11,7 @@ references:
     - https://learn.microsoft.com/en-us/windows/win32/wmisdk/mofcomp
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-07-12
-modified: 2023-04-11
+modified: 2026-08-06
 tags:
     - attack.stealth
     - attack.t1218
@@ -32,19 +32,29 @@ detection:
               - '\cscript.exe'
         - CommandLine|contains:
               - '\AppData\Local\Temp'
+              - '\Contacts\'
+              - '\Favorites\'
+              - '\Favourites\'
+              - '\Music\'
+              - '\Pictures\'
               - '\Users\Public\'
+              - '\Videos\'
               - '\WINDOWS\Temp\'
+              - '%appdata%'
               - '%temp%'
               - '%tmp%'
-              - '%appdata%'
     filter_main_wmiprvse:
         ParentImage: 'C:\Windows\System32\wbem\WmiPrvSE.exe'
         CommandLine|contains: 'C:\Windows\TEMP\'
         CommandLine|endswith: '.mof'
+    filter_main_installutil:
+        ParentCommandLine|endswith: '\InstallUtil.exe /Uninstall C:\Windows\CCM\Microsoft.ConfigurationManager.SVProvider.dll'
+        ParentImage|endswith: '\InstallUtil.exe'
+        CommandLine|contains|all:
+            - 'C:\Windows\TEMP'
+            - '.tmp'
     filter_optional_null_parent:
-        # Sometimes the parent information isn't available from the Microsoft-Windows-Security-Auditing provider.
-        CommandLine|contains: 'C:\Windows\TEMP\'
-        CommandLine|endswith: '.mof'
+        ParentCommandLine: null
     condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
