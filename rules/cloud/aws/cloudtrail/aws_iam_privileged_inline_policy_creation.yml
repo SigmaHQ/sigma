@@ -1,0 +1,33 @@
+title: AWS IAM Privileged Inline Policy Creation
+id: d4a3c2b1-1e2f-4a5b-8c9d-0e1f2a3b4c5d
+status: experimental
+description: |
+    Detects the creation or update of an inline IAM policy that grants full administrative permissions ("*") on all resources.
+    Adversaries use Put*Policy APIs to embed wildcard permissions directly into a compromised identity or modify an existing inline policy to escalate privileges seamlessly.
+references:
+    - https://rhinosecuritylabs.com/aws/aws-privilege-escalation-methods-mitigation/
+    - https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html
+    - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html
+author: Vladimir Novikov
+date: 2026-05-16
+tags:
+    - attack.privilege-escalation
+    - attack.t1098.003
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: iam.amazonaws.com
+        eventName:
+            - PutUserPolicy
+            - PutRolePolicy
+            - PutGroupPolicy
+        requestParameters.policyDocument|contains|all:
+            - '"Effect": "Allow"'
+            - '"Action": "*"'
+            - '"Resource": "*"'
+    condition: selection
+falsepositives:
+    - High-level automation roles or infrastructure-as-code deployments (Terraform/CloudFormation).
+level: high
