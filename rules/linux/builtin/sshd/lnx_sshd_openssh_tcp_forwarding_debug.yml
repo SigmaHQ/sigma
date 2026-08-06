@@ -1,0 +1,35 @@
+title: OpenSSH TCP Forwarding Channel Activity
+id: b2e0be00-72b7-474a-87fe-ae2d1cebc8ea
+status: test
+description: Detects OpenSSH debug log messages that show SSH TCP forwarding channel activity, including local or dynamic forwarding via direct-tcpip and remote forwarding via tcpip-forward or forwarded-tcpip channels.
+references:
+    - https://attack.mitre.org/techniques/T1572/
+    - https://github.com/openssh/openssh-portable
+    - https://github.com/SigmaHQ/sigma/issues/6117
+author: Mark C
+date: 2026-07-15
+tags:
+    - attack.command-and-control
+    - attack.lateral-movement
+    - attack.t1572
+    - attack.t1021.004
+logsource:
+    product: linux
+    service: sshd
+detection:
+    keywords_direct_tcpip:
+        - 'server_request_direct_tcpip'
+        - 'ctype direct-tcpip'
+        - 'new direct-tcpip'
+    keywords_remote_forward:
+        - 'server_input_global_request: rtype tcpip-forward'
+        - 'tcpip-forward listen'
+        - 'new forwarded-tcpip'
+    condition: 1 of keywords_*
+falsepositives:
+    - Administrators using SSH local port forwarding with -L
+    - Administrators using SSH dynamic SOCKS forwarding with -D
+    - Administrators using SSH remote port forwarding with -R
+    - Bastion hosts, jump boxes, or developer workflows where SSH forwarding is expected
+    - Environments that intentionally enable OpenSSH LogLevel DEBUG for troubleshooting or monitoring
+level: medium
