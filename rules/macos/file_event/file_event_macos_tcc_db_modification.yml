@@ -1,0 +1,32 @@
+title: TCC Database File Modification - MacOS
+id: 06190d9c-3cee-45b2-a6ea-2bc80f197eee
+status: experimental
+description: |
+    Detects direct modification of the TCC (Transparency, Consent, and Control)
+    database file, either system-wide or per-user. TCC.db stores which apps have
+    been granted access to sensitive resources like the camera, microphone, screen
+    recording, and full disk access. Malware may directly modify this file to
+    silently grant itself privacy permissions, bypassing the normal user consent
+    prompt.
+references:
+    - https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive
+    - https://objective-see.org/blog/blog_0x2A.html
+author: Aymane Boualam
+date: 2026-08-07
+tags:
+    - attack.privilege-escalation
+    - attack.defense-impairment
+    - attack.t1548.001
+logsource:
+    category: file_event
+    product: macos
+detection:
+    selection:
+        TargetFilename|contains:
+            - '/Library/Application Support/com.apple.TCC/TCC.db'
+    condition: selection
+falsepositives:
+    - Legitimate use of tccutil or System Preferences/System Settings to grant
+      or revoke app permissions may trigger writes to this file through Apple's
+      own TCC daemon (tccd) — filter on process context if available.
+level: high
