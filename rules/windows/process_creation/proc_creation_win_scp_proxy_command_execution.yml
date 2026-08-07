@@ -1,0 +1,34 @@
+title: Indirect Command Execution Via Scp.EXE
+id: 2a79d41a-b9c8-4a60-a467-87f934f6b4e1
+related:
+    - id: 762bb580-79b4-40f4-8b9e-9349ce1710f4
+      type: similar
+    - id: 7d6d30b8-5b91-4b90-a891-46cccaf29598
+      type: similar
+status: experimental
+description: |
+    Detects the use of the OpenSSH "scp.exe" client to execute commands indirectly, either via the "-S" option (which specifies the program to use for the encrypted connection) or via a "ProxyCommand".
+    Both mechanisms allow a threat actor to abuse the trusted "scp.exe" binary as a proxy to launch arbitrary programs while evading detection. This completes coverage of the OpenSSH client LOLBin family alongside the existing "sftp.exe" and "ssh.exe" rules.
+references:
+    - https://redsiege.com/blog/2024/04/sshishing-abusing-shortcut-files-and-the-windows-ssh-client-for-initial-access/
+    - https://gtfobins.github.io/gtfobins/scp/
+author: Ashish Pulivarthy (ashish-cybersec)
+date: 2026-07-02
+tags:
+    - attack.stealth
+    - attack.t1202
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\scp.exe'
+        - OriginalFileName: 'scp.exe'
+    selection_flags:
+        CommandLine|contains:
+            - ' -S '
+            - 'ProxyCommand='
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of scp with a custom transport program or proxy command. This is rare and mostly seen in constrained network or administration scenarios.
+level: medium
