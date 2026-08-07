@@ -1,3 +1,4 @@
+
 title: Sysmon File Executable Creation Detected
 id: 693a44e9-7f26-4cb6-b787-214867672d3a
 status: test
@@ -15,7 +16,10 @@ logsource:
 detection:
     selection:
         EventID: 29  # this is fine, we want to match any FileExecutableDetected event
-    condition: selection
+    filter_optional_simplehelp:
+        TargetFilename|contains: '\JWrapper-Remote Support Bundle-'
+    condition: selection and not filter_optional_simplehelp
 falsepositives:
     - Unlikely
+    - Legitimate SimpleHelp remote support software installation (JWrapper bundle)
 level: medium
