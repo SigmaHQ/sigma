@@ -1,0 +1,55 @@
+title: MFA attack - bombarding a user with SMS for MFA
+id: 0406c2b7-2eb2-4435-b747-f5a2092645ce
+status: experimental
+description: |
+    Detects when a threat actor tries to bombard a user with SMS messages for MFA in order to deplete the customer's SMS quota leading to Denial of Service.
+    Monitors for excessive SMS messages sent to individual users within a short time period.
+references:
+    - https://auth0.com/docs/secure/multi-factor-authentication/configure-sms-voice-notifications
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.impact
+    - attack.t1499.002
+logsource:
+    product: auth0
+    service: mfa
+detection:
+    selection:
+        data.type: gd_send_sms
+        data.description: "Guardian - Second factor sms sent"
+    condition: selection
+fields:
+    - data.type
+    - data.description
+    - data.user_id
+    - data.ip
+    - data.client_id
+falsepositives:
+    - Legitimate users requesting multiple SMS messages in a short period of time due to lost or delayed messages
+    - Network issues causing SMS delivery failures and retries
+    - Users experiencing authentication problems requiring multiple attempts
+level: medium
+explanation: |
+    The query collects events issued when a sms is sent.
+    The splunk detection is based on the number of SMS sent to a single user in a given period of time.
+    If a number of SMS sent to a user exceeds a threshold, it is likely that the user is bombarded with SMS messages.
+    The threshold can be adjusted based on the customer's environment and the expected number of SMS messages sent to a user.
+    The query prints the affected users.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.description="Guardian - Second factor sms sent"
+    | bin _time span=1h
+    | stats count as sms_per_user by data.user_id
+    | where sms_per_user > {threshold_for_max_sms}
+
+    Tenant Logs Query:
+    type: "gd_send_sms" AND description: "Guardian - Second factor sms sent"
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant_name, threshold, e.g. 10, and the span of the considered time period, e.g. set to 1 hour by default.
+    - Prevention - Limit the number of SMS messages sent to a user in a given period of time.
+    - Prevention - Consider using alternative MFA methods, such as push notifications or authenticator apps, to reduce the reliance on SMS for MFA.
+    - Prevention - Deploy a send-phone-message action implementing a throttling logic to prevent excessive sms notifications, e.g. exceeding 10 SMS sent per hour.

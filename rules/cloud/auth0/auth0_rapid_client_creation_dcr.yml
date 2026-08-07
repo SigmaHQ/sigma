@@ -1,0 +1,61 @@
+title: Rapid creation of clients with the dynamic client registration endpoint
+id: ccd7e1e4-9c37-4314-852b-fa557e98c8da
+status: experimental
+description: |
+    Detects when a large number of clients are created in a short period of time using dynamic client registration.
+    This can indicate an attempt to create multiple clients for malicious purposes, such as denial of service, resource exhaustion, phishing (consent phishing) by creating look-alike applications, and causing admin fatigue by overwhelming the admin with clients.
+references:
+    - https://auth0.com/docs/get-started/applications/dynamic-client-registration
+    - https://datatracker.ietf.org/doc/html/rfc7591
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.impact
+    - attack.credential-access
+    - attack.t1499
+    - attack.t1566
+logsource:
+    product: auth0
+    service: oidc_oauth2
+detection:
+    selection:
+        data.type: sapi
+        data.description: "Dynamic client registration"
+    condition: selection
+fields:
+    - data.type
+    - data.description
+    - data.ip
+    - data.details.response.body.client_id
+    - data.details.response.body.client_name
+falsepositives:
+    - Legitimate bulk client creation during system migrations or setup
+    - Automated deployment processes creating multiple applications
+    - Development or testing environments with rapid client provisioning
+level: medium
+explanation: |
+    The query collects log entries captured when a client is created using dynamic client registration.
+    The splunk detection below observes the number of clients created within a specified time window.
+    It alerts if an excessive number of clients, denoted by threshold_for_max_clients_created) have been created within a specified time window.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type=sapi data.description="Dynamic client registration"
+    | eval original_time = _time
+    | bin _time span=1h
+    | stats count as count_clients, max(original_time) as max_time,
+    min(original_time) as min_time, values(data.details.response.body.client_id) as created_clients by _time
+    | eval created_within_mininutes = (max_time - min_time)/60
+    | where created_within_mininutes < {threshold_for_observed_time_window_in_minutes}
+    | where count_clients > {threshold_for_max_clients_created}
+    | table created_clients, created_within_mininutes, count_clients
+
+    Tenant Logs Query:
+    type:sapi AND description:"Dynamic client registration"
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant name, the threshold for the maximum number of clients created within a specified time window, i.e. {threshold_for_max_clients_created}, and the time window to observe, i.e. {threshold_for_observed_time_window_in_minutes}.
+    - The time window can be adjusted based on the customer's environment and the expected number of clients.
+    - Prevention - Harden access to the dynamic client registration (DCR) endpoint with Auth0 Tenant ACL or by placing a specialised WAF in front of your tenant.
+    - Prevention - Disable temporary the DCR end point.

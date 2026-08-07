@@ -1,0 +1,62 @@
+title: MFA downgrade - disable strong factors
+id: 2ccf5131-6bc7-4a98-85c5-f86d28dfd172
+status: experimental
+description: |
+    Detects when an adversary tries to downgrade authentication requirements by disabling strong authenticators (Webauthn) for users.
+    Monitors for changes that weaken multi-factor authentication security posture.
+references:
+    - https://auth0.com/docs/secure/multi-factor-authentication
+    - https://auth0.com/docs/secure/multi-factor-authentication/configure-webauthn-security-keys
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.defense-evasion
+    - attack.t1562
+    - attack.t1562.007
+logsource:
+    product: auth0
+    service: mfa
+detection:
+    selection:
+        data.type: sapi
+        data.description: "Update multi-factor authentication type"
+        data.details.request.body.enabled: false
+    condition: selection
+fields:
+    - data.type
+    - data.description
+    - data.user_id
+    - data.details.request.ip
+    - data.details.request.path
+    - data.details.request.body.enabled
+falsepositives:
+    - Legitimate MFA configuration changes by administrators
+    - Temporary disabling of factors for maintenance or troubleshooting
+    - Policy changes during security reviews
+level: medium
+explanation: |
+    The query filters for log entries recording changes in availability of MFA factors for the whole tenant.
+    The splunk query below also parses the path where the last part shows the type of the disabled factor.
+    The alert is triggered when a monitored type, e.g. phishing-resistant, of a factor is observed.
+    The splunk query summarizes the user created modification and its IP and lists disabled factors.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type="sapi" data.description="Update multi-factor authentication type"
+    data.details.request.body.enabled=false
+    | rex field=data.details.request.path "/(?<factor>[^/]+)$"
+    | search factor IN (webauthn-roaming, webauthn-biometrics)
+    |table data.user_id, data.details.request.ip, factor
+
+    Tenant Logs Query:
+    type: "sapi" AND description: "Update multi-factor authentication type"
+comments:
+    - The splunk query above, shall be tuned to reflect a valid tenant name.
+    - Additionally, you can expand the detection to other factors, e.g. SMS.
+    - Limit the detection to actions conducted from untrusted IPs and/or particular users.
+    - Prevention - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
+    - Prevention - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.
+    - Prevention - Control Management API scopes that allow modification of attack protection features - update:attack_protection.
+    - Prevention - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
