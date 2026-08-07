@@ -1,0 +1,38 @@
+title: Sudo Spawning a Shell With No Arguments
+id: 590585fd-ea0b-4baa-b391-7d9a2d45d5ba
+status: experimental
+description: |
+    Detects sudo spawning a shell where the parent CommandLine ends with just "sudo" and carries no
+    subcommand or flags. Bare sudo has no legitimate code path that opens a shell — it only prints
+    usage. A shell child under these conditions indicates the process was hijacked, e.g. via
+    shellcode calling execve("/bin/sh", NULL) inside a poisoned SUID binary.
+references:
+    - https://gtfobins.github.io/
+    - https://xint.io/blog/copy-fail-linux-distributions
+    - https://github.com/theori-io/copy-fail-CVE-2026-31431
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-30
+tags:
+    - attack.privilege-escalation
+    - attack.t1068
+    - attack.t1548.001
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        ParentImage|endswith: '/sudo'
+        ParentCommandLine|endswith: 'sudo'
+        Image|endswith:
+            - '/sh'
+            - '/dash'
+            - '/bash'
+            - '/ksh'
+            - '/zsh'
+            - '/ash'
+            - '/tcsh'
+            - '/csh'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
