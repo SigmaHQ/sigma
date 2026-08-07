@@ -1,0 +1,36 @@
+title: Python WebServer Execution - Linux
+id: 3f0f5957-04f8-4792-ad89-192b0303bde6
+status: experimental
+description: |
+    Detects the execution of Python web servers via command line interface (CLI).
+    After gaining access to target systems, adversaries may use Python's built-in HTTP server modules to quickly establish a web server without requiring additional software.
+    This technique is commonly used in post-exploitation scenarios as it provides a simple method for transferring files between the compromised host and attacker-controlled systems.
+references:
+    - https://www.atomicredteam.io/atomic-red-team/atomics/T1048.003#atomic-test-8---python3-httpserver
+    - https://docs.python.org/3/library/http.server.html
+    - https://docs.python.org/2/library/simplehttpserver.html
+author: Mohamed LAKRI
+date: 2025-10-17
+tags:
+    - attack.exfiltration
+    - attack.t1048.003
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_img:
+        - Image|endswith:
+              - '/python'
+              - '/python2'
+              - '/python3'
+        - Image|contains:
+              - '/python2.'  # python image is always of the form ../python3.10; ../python is just a symlink
+              - '/python3.'
+    selection_module:
+        CommandLine|contains:
+            - 'http.server'
+            - 'SimpleHTTPServer'
+    condition: all of selection_*
+falsepositives:
+    - Testing or development activity
+level: medium

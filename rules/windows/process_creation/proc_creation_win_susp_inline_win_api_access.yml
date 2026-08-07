@@ -9,7 +9,7 @@ references:
     - https://twitter.com/m417z/status/1566674631788007425
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-09-06
-modified: 2023-01-09
+modified: 2025-03-06
 tags:
     - attack.execution
     - attack.t1106
@@ -69,7 +69,14 @@ detection:
     filter_optional_mpcmdrun:
         Image|endswith: '\MpCmdRun.exe'
         CommandLine|contains: 'GetLoadLibraryWAddress32'
+    filter_optional_compatTelRunner:
+        ParentImage|endswith: '\CompatTelRunner.exe'
+        CommandLine|contains:
+            - 'FreeHGlobal'
+            - 'PtrToString'
+            - 'kernel32'
+            - 'CloseHandle'
     condition: selection and not 1 of filter_optional_*
 falsepositives:
-    - Unknown
+    - Some legitimate action or applications may use these functions. Investigate further to determine the legitimacy of the activity.
 level: high

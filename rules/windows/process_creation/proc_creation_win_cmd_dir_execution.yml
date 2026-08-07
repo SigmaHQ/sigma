@@ -2,12 +2,12 @@ title: File And SubFolder Enumeration Via Dir Command
 id: 7c9340a9-e2ee-4e43-94c5-c54ebbea1006
 status: test
 description: |
-    Detects usage of the "dir" command part of Widows CMD with the "/S" command line flag in order to enumerate files in a specified directory and all subdirectories.
+    Detects usage of the "dir" command part of Windows CMD with the "/S" command line flag in order to enumerate files in a specified directory and all subdirectories.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1217/T1217.md
 author: frack113
 date: 2021-12-13
-modified: 2024-04-14
+modified: 2026-05-18
 tags:
     - attack.discovery
     - attack.t1217
@@ -19,8 +19,17 @@ detection:
         - Image|endswith: '\cmd.exe'
         - OriginalFileName: Cmd.Exe
     selection_cli:
-        CommandLine|contains|windash: 'dir*-s'
-    condition: all of selection_*
+        CommandLine|contains|windash: '-s'
+        CommandLine|contains: 'dir '
+    filter_main_rmdir:
+        CommandLine|contains: 'rmdir'
+    condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
     - Likely
 level: low
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_cmd_dir_execution/info.yml
+simulation:
+    - type: atomic-red-team
+      name: List Internet Explorer Bookmarks using the command prompt
+      technique: T1217
+      atomic_guid: 727dbcdb-e495-4ab1-a6c4-80c7f77aef85

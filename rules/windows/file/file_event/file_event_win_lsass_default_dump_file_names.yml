@@ -14,9 +14,11 @@ references:
     - https://www.whiteoaksecurity.com/blog/attacks-defenses-dumping-lsass-no-mimikatz/
     - https://github.com/helpsystems/nanodump
     - https://github.com/CCob/MirrorDump
+    - https://github.com/safedv/RustiveDump/blob/1a9b026b477587becfb62df9677cede619d42030/src/main.rs#L35
+    - https://github.com/ricardojoserf/NativeDump/blob/01d8cd17f31f51f5955a38e85cd3c83a17596175/NativeDump/Program.cs#L258
 author: Florian Roth (Nextron Systems)
 date: 2021-11-15
-modified: 2023-09-05
+modified: 2024-10-08
 tags:
     - attack.credential-access
     - attack.t1003.001
@@ -26,18 +28,19 @@ logsource:
 detection:
     selection_1:
         TargetFilename|endswith:
-            - '\lsass.dmp'
-            - '\lsass.zip'
-            - '\lsass.rar'
             - '\Andrew.dmp'
             - '\Coredump.dmp'
+            - '\lsass.dmp'
+            - '\lsass.rar'
+            - '\lsass.zip'
             - '\NotLSASS.zip'  # https://github.com/CCob/MirrorDump
             - '\PPLBlade.dmp'  # https://github.com/tastypepperoni/PPLBlade
+            - '\rustive.dmp' # https://github.com/safedv/RustiveDump/blob/main/src/main.rs#L35
     selection_2:
         TargetFilename|contains:
             - '\lsass_2'  # default format of procdump v9.0 is lsass_YYMMDD_HHmmss.dmp
-            - '\lsassdump'
             - '\lsassdmp'
+            - '\lsassdump'
     selection_3:
         TargetFilename|contains|all:
             - '\lsass'
@@ -46,7 +49,9 @@ detection:
         TargetFilename|contains: 'SQLDmpr'
         TargetFilename|endswith: '.mdmp'
     selection_5:
-        TargetFilename|startswith: 'nanodump'
+        TargetFilename|contains:
+            - '\nanodump'
+            - '\proc_' # NativeDump pattern https://github.com/ricardojoserf/NativeDump/blob/01d8cd17f31f51f5955a38e85cd3c83a17596175/NativeDump/Program.cs#L258
         TargetFilename|endswith: '.dmp'
     condition: 1 of selection_*
 falsepositives:

@@ -1,5 +1,8 @@
-title: Active Directory Replication from Non Machine Account
+title: Active Directory Replication from Non Machine Account - DcSync Indicator
 id: 17d619c1-e020-4347-957e-1d1207455c93
+related:
+    - id: 611eab06-a145-4dfa-a295-3ccc5c20f59a # Suspicious Machine Account Replication - DcSync Indicator
+      type: similar
 status: test
 description: Detects potential abuse of Active Directory Replication Service (ADRS) from a non machine account to request credentials.
 references:
@@ -8,29 +11,37 @@ references:
     - https://threathunterplaybook.com/hunts/windows/190101-ADModDirectoryReplication/notebook.html
 author: Roberto Rodriguez @Cyb3rWard0g
 date: 2019-07-26
-modified: 2021-11-27
+modified: 2026-07-30
 tags:
     - attack.credential-access
     - attack.t1003.006
 logsource:
     product: windows
     service: security
+    definition: |
+        Requirements: A SACL must be configured on the domain NC root object (e.g. DC=domain,DC=com)
+        to generate Event 4662. Add via ADSI Edit: navigate to the domain NC root → Properties →
+        Security → Advanced → Auditing → add an ACE for Everyone, Type: Success, Applies to:
+        This object only, rights: DS-Replication-Get-Changes and DS-Replication-Get-Changes-All.
+        The OS audit subcategory must also be enabled:
+        auditpol /set /subcategory:"Directory Service Access" /success:enable
 detection:
     selection:
         EventID: 4662
-        AccessMask: '0x100'
         Properties|contains:
-            - '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2'
-            - '1131f6ad-9c07-11d1-f79f-00c04fc2dcd2'
-            - '89e95b76-444d-4c62-991a-0facbeda640c'
-    filter:
-        - SubjectUserName|endswith: '$'
-        - SubjectUserName|startswith: 'MSOL_' # https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/reference-connect-accounts-permissions#ad-ds-connector-account
-    condition: selection and not filter
-fields:
-    - ComputerName
-    - SubjectDomainName
-    - SubjectUserName
+            - '1131f6ad-9c07-11d1-f79f-00c04fc2dcd2' # DS-Replication-Get-Changes-All
+            - '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2' # DS-Replication-Get-Changes
+            - '9923a32a-3607-11d2-b9be-0000f87a36b2' # DS-Replication-Synchronize
+            - '89e95b76-444d-4c62-991a-0facbeda640c' # DS-Replication-Get-Changes-In-Filtered-Set
+    filter_main_machine_accounts:
+        SubjectUserName|endswith: '$'
+    filter_optional_subject_domain:
+        SubjectDomainName: 'Window Manager'
+    filter_optional_subject_usersid:
+        SubjectUserName|startswith:
+            - 'NT AUT'
+            - 'MSOL_' # https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/reference-connect-accounts-permissions#ad-ds-connector-account
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
-level: critical
+level: medium

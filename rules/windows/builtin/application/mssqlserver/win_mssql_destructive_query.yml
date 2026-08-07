@@ -1,0 +1,31 @@
+title: MSSQL Destructive Query
+id: 00321fee-ca72-4cce-b011-5415af3b9960
+status: experimental
+description: |
+    Detects the invocation of MS SQL transactions that are destructive towards table or database data, such as "DROP TABLE" or "DROP DATABASE".
+references:
+    - https://learn.microsoft.com/en-us/sql/t-sql/statements/drop-table-transact-sql?view=sql-server-ver16
+    - https://learn.microsoft.com/en-us/sql/t-sql/statements/drop-database-transact-sql?view=sql-server-ver16
+    - https://learn.microsoft.com/en-us/sql/t-sql/statements/truncate-table-transact-sql?view=sql-server-ver16
+author: Daniel Degasperi '@d4ns4n_'
+date: 2025-06-04
+tags:
+    - attack.exfiltration
+    - attack.impact
+    - attack.t1485
+logsource:
+    product: windows
+    service: application
+    definition: 'Requirements: MSSQL audit policy must be enabled in order to receive this event (event id 33205)'
+detection:
+    selection:
+        Provider_Name: 'MSSQLSERVER$AUDIT'
+        EventID: 33205
+        Data|contains:
+            - 'statement:TRUNCATE TABLE'
+            - 'statement:DROP TABLE'
+            - 'statement:DROP DATABASE'
+    condition: selection
+falsepositives:
+    - Legitimate transaction from a sysadmin.
+level: medium

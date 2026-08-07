@@ -25,6 +25,14 @@ logsources:
         fieldmappings:
             Image: NewProcessName
             ParentImage: ParentProcessName
+    file_change:
+        category: file_change
+        product: windows
+        conditions:
+            EventID: 2
+        rewrite:
+            product: windows
+            service: sysmon
     network_connection:
         category: network_connection
         product: windows
@@ -134,14 +142,25 @@ logsources:
         product: windows
         conditions:
             EventID: 12
+            EventType: CreateKey
         rewrite:
             product: windows
             service: sysmon
-    registry_delete:
+    registry_delete_key:
         category: registry_delete
         product: windows
         conditions:
             EventID: 12
+            EventType: DeleteKey
+        rewrite:
+            product: windows
+            service: sysmon
+    registry_delete_value:
+        category: registry_delete
+        product: windows
+        conditions:
+            EventID: 12
+            EventType: DeleteValue
         rewrite:
             product: windows
             service: sysmon
@@ -390,6 +409,11 @@ logsources:
         service: smbclient-connectivity
         sources:
             - "WinEventLog:Microsoft-Windows-SmbClient/Connectivity"
+    windows-smbserver-connectivity:
+        product: windows
+        service: smbserver-connectivity
+        sources:
+            - "WinEventLog:Microsoft-Windows-SMBServer/Connectivity"
     windows-printservice-operational:
         product: windows
         service: printservice-operational
@@ -564,6 +588,11 @@ logsources:
         sources:
             - 'WinEventLog:Microsoft-ServiceBus-Client/Admin'
             - 'WinEventLog:Microsoft-ServiceBus-Client/Operational'
+    windows-iis-configuration:
+        product: windows
+        service: iis-configuration
+        sources:
+            - 'WinEventLog:Microsoft-IIS-Configuration/Operational'
     apache:
         category: webserver
         sources:

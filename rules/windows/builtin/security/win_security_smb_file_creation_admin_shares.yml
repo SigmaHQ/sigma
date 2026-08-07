@@ -7,7 +7,7 @@ references:
     - https://securitydatasets.com/notebooks/atomic/windows/lateral_movement/SDWIN-200806015757.html?highlight=create%20file
 author: Jose Rodriguez (@Cyb3rPandaH), OTR (Open Threat Research)
 date: 2020-08-06
-modified: 2021-11-27
+modified: 2025-10-17
 tags:
     - attack.lateral-movement
     - attack.t1021.002
@@ -19,9 +19,11 @@ detection:
         EventID: 5145
         ShareName|endswith: 'C$'
         AccessMask: '0x2'
-    filter:
+    filter_main_subjectusername:
         SubjectUserName|endswith: '$'
-    condition: selection and not filter
+    filter_optional_local_ip:
+        IpAddress: '::1'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high

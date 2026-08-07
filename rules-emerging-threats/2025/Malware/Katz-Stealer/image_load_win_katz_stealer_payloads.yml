@@ -1,0 +1,27 @@
+title: Katz Stealer DLL Loaded
+id: e6c7ab7c-c79d-4b84-b913-b2ec3f8e8a98
+status: experimental
+description: |
+    Detects loading of DLLs associated with Katz Stealer malware 2025 variants.
+    Katz Stealer is a malware variant that is known to be used for stealing sensitive information from compromised systems.
+    The process that loads these DLLs are very likely to be malicious.
+references:
+    - Internal Research
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-05-22
+tags:
+    - attack.execution
+    - attack.t1129
+    - detection.emerging-threats
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith:
+            - '\katz_ontop.dll'
+            - '\AppData\Local\Temp\received_dll.dll'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
