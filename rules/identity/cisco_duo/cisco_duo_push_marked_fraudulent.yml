@@ -1,0 +1,32 @@
+title: Cisco Duo Push Notification Marked As Fraudulent By User
+id: cd0739f5-6bb9-4c17-b5aa-301913628d12
+status: experimental
+description: |
+    Detects when a user marks a Duo Push authentication request as fraudulent.
+    This is a high-confidence indicator of an active MFA push-fatigue or
+    push-bombing attack, where an attacker with valid but stolen credentials
+    repeatedly triggers push prompts hoping the legitimate user accidentally
+    approves one. A user actively reporting fraud means they received a push
+    they did not request.
+references:
+    - https://duo.com/docs/adminapi#authentication-logs
+    - https://duo.com/docs/administration-settings
+author: Aymane Boualam
+date: 2026-08-06
+tags:
+    - attack.credential-access
+    - attack.initial-access
+    - attack.t1621
+logsource:
+    product: cisco
+    service: duo
+detection:
+    selection:
+        event_type: authentication
+        reason: user_marked_fraud
+    condition: selection
+falsepositives:
+    - Unknown. A user should only mark a push as fraudulent if they genuinely
+      did not initiate the authentication request, so false positives are
+      expected to be extremely rare.
+level: high
