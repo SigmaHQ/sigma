@@ -1,0 +1,36 @@
+title: HackTool - Kerbrute Execution - Linux
+id: e839522a-d2dc-4e8d-89e1-0d7b1a3c6b50
+related:
+    - id: 5b17f52d-25bd-4d09-b5c9-4c8e3b3a5f7c
+      type: similar
+status: experimental
+description: |
+    Detects execution of Kerbrute, a tool for brute-forcing and enumerating valid Active Directory
+    accounts through Kerberos pre-authentication. Commonly used for domain user enumeration,
+    password spraying, and AS-REP roasting target discovery.
+references:
+    - https://github.com/ropnop/kerbrute
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-21
+tags:
+    - attack.reconnaissance
+    - attack.credential-access
+    - attack.discovery
+    - attack.t1087.002
+    - attack.t1110.003
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_img:
+        Image|contains: '/kerbrute'
+    selection_cli:
+        CommandLine|contains:
+            - ' userenum '
+            - ' bruteuser '
+            - ' passwordspray '
+            - ' bruteforce '
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high
