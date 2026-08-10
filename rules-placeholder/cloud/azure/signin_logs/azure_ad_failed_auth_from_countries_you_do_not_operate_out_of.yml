@@ -18,11 +18,10 @@ logsource:
     product: azure
     service: signinlogs
 detection:
-    selection:
-        Status: 'Success'
-    selection1:
-        Location|contains: '<Countries you DO operate out of e,g GB, use OR for multiple>'
-    condition: not selection and not selection1
+    filter:
+        resultType: 0
+        location|contains|expand: '%KNOWN_LOCATION%'
+    condition: not filter
 falsepositives:
-    - If this was approved by System Administrator.
+    - Sometime connection to/from VPN, tunneling or cloud services can generate fps.
 level: low
