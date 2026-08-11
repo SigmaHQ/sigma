@@ -1,0 +1,54 @@
+title: Shell Command in Git Configuration Value - MacOS
+id: b6c7f0a4-8cdb-45c3-aec9-7e1b12940be7
+related:
+    - id: f1a78b88-269b-408f-b2b4-bfb7a8750107
+      type: similar
+    - id: b179883a-72e1-4807-a157-811e26dfa6ae
+      type: similar
+status: experimental
+description: |
+    Detects a Git configuration key set on the command line to a value that invokes a shell or a scripting interpreter.
+    Git runs the values of keys such as core.pager, core.fsmonitor, core.editor, diff.external and sequence.editor as commands during ordinary operations, and treats a credential.helper or alias value beginning with an exclamation mark as a shell snippet, so one "-c key=value" pair turns a routine Git command into command execution.
+    Attacker-supplied Git configuration is a documented remote code execution path, reached either through a crafted command line or through configuration written into a repository that a later Git command reads.
+references:
+    - https://git-scm.com/docs/git-config
+    - https://www.vulncheck.com/advisories/hermes-webui-rce-via-git-configuration-injection
+author: David Burkett (@signalblur)
+date: 2026-08-11
+tags:
+    - attack.execution
+    - attack.t1059.004
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection_img:
+        Image|endswith: '/git'
+    selection_config_key:
+        CommandLine|contains:
+            - 'alias.'
+            - 'core.alternateRefsCommand'
+            - 'core.editor'
+            - 'core.fsmonitor'
+            - 'core.pager'
+            - 'core.sshCommand'
+            - 'credential.helper'
+            - 'diff.external'
+            - 'filter.'
+            - 'pager.'
+            - 'sequence.editor'
+    selection_shell_value:
+        CommandLine|contains:
+            - '/dev/tcp/'
+            - '=!'
+            - 'nc -e'
+            - 'perl -e'
+            - 'python -c'
+            - 'python3 -c'
+            - 'ruby -e'
+            - 'sh -c'
+    condition: all of selection_*
+falsepositives:
+    - A shell based credential helper set inline, such as the AWS CodeCommit helper, whose value legitimately begins with an exclamation mark.
+    - A Git command whose arguments quote both a configuration key and a shell invocation, such as a commit message that describes this behaviour.
+level: high
