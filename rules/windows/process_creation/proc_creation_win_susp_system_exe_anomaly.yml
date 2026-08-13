@@ -12,9 +12,9 @@ references:
     - https://www.splunk.com/en_us/blog/security/inno-setup-malware-redline-stealer-campaign.html
 author: Florian Roth (Nextron Systems), Patrick Bareiss, Anton Kutepov, oscd.community, Nasreddine Bencherchali (Nextron Systems)
 date: 2017-11-27
-modified: 2025-10-13
+modified: 2026-07-28
 tags:
-    - attack.defense-evasion
+    - attack.stealth
     - attack.t1036
 logsource:
     category: process_creation
@@ -41,6 +41,8 @@ detection:
             - '\dllhst3g.exe'
             - '\dwm.exe'
             - '\eventvwr.exe'
+            - '\fsquirt.exe' # was seen used by sidewinder APT - https://securelist.com/sidewinder-apt/114089/
+            - '\finger.exe'
             - '\logonui.exe'
             - '\LsaIso.exe'
             - '\lsass.exe'
@@ -65,10 +67,13 @@ detection:
             - '\taskhostw.exe'
             - '\Taskmgr.exe'
             - '\userinit.exe'
+            - '\werfault.exe'
+            - '\werfaultsecure.exe'
             - '\wininit.exe'
             - '\winlogon.exe'
             - '\winver.exe'
             - '\wlanext.exe'
+            - '\wmic.exe'
             - '\wscript.exe'
             - '\wsl.exe'
             - '\wsmprovhost.exe' # Was seen used by Lazarus Group - https://asec.ahnlab.com/en/39828/
@@ -97,10 +102,11 @@ detection:
             - 'C:\Program Files\WSL\'
         Image|endswith: '\wsl.exe'
     filter_main_wsl_appdata:
-        Image|startswith: C:\Users\'
+        Image|startswith: 'C:\Users\'
         Image|contains: '\AppData\Local\Microsoft\WindowsApps\'
         Image|endswith: '\wsl.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_susp_system_exe_anomaly/info.yml

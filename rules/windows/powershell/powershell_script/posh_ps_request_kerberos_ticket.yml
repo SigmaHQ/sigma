@@ -1,14 +1,18 @@
-title: Request A Single Ticket via PowerShell
+title: Suspicious Kerberos Ticket Request via PowerShell Script - ScriptBlock
 id: a861d835-af37-4930-bcd6-5b178bfb54df
+related:
+    - id: caa9a802-8bd8-4b9e-a5cd-4d6221670219
+      type: similar
 status: test
 description: |
-    utilize native PowerShell Identity modules to query the domain to extract the Service Principal Names for a single computer.
-    This behavior is typically used during a kerberos or silver ticket attack.
-    A successful execution will output the SPNs for the endpoint in question.
+    Detects PowerShell scripts that utilize native PowerShell Identity modules to request Kerberos tickets.
+    This behavior is typically seen during a Kerberos or silver ticket attack. A successful execution will output the SPNs for the endpoint in question.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1558.003/T1558.003.md#atomic-test-4---request-a-single-ticket-via-powershell
+    - https://learn.microsoft.com/en-us/dotnet/api/system.identitymodel.tokens.kerberosrequestorsecuritytoken?view=netframework-4.8.1
 author: frack113
 date: 2021-12-28
+modified: 2025-11-18
 tags:
     - attack.credential-access
     - attack.t1558.003
@@ -18,7 +22,9 @@ logsource:
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
     selection:
-        ScriptBlockText|contains: System.IdentityModel.Tokens.KerberosRequestorSecurityToken
+        ScriptBlockText|contains|all:
+            - 'System.IdentityModel.Tokens.KerberosRequestorSecurityToken'
+            - '.GetRequest()'
     condition: selection
 falsepositives:
     - Unknown
