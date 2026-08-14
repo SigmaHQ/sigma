@@ -1,0 +1,43 @@
+title: New User Account Creation Attempt Via ADSI
+id: e50d5d26-0cf6-4045-b82b-13c0a4e316be
+related:
+    - id: 7c9fed65-039a-4055-8c23-fa763d94aff6
+      type: similar
+status: experimental
+description: |
+    Detects an attempt to create a new user account via ADSI (Active Directory Service Interfaces)
+    using either the WinNT or LDAP provider. This is an uncommon method to create user accounts
+    and may indicate an attempt to evade detection by avoiding more commonly monitored commands
+    such as "net user", "New-LocalUser" or "New-ADUser".
+references:
+    - https://learn.microsoft.com/en-us/windows/win32/adsi/user-creation-with-the-adsi-ldap-provider
+    - https://learn.microsoft.com/en-us/windows/win32/adsi/adsi-winnt-provider
+author: William Gokah (idea), Raylee Hawkins, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-13
+tags:
+    - attack.persistence
+    - attack.t1136.001
+    - attack.t1136.002
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_adsi:
+        ScriptBlockText|contains: '[ADSI]'
+    selection_create_user:
+        # Example (WinNT - local user):
+        #   $computer = [ADSI]"WinNT://localhost"; $user = $computer.Create("User", "NewUser"); $user.SetPassword("P@ssw0rd!"); $user.SetInfo()
+        # Example (LDAP - domain user):
+        #   $ou = [ADSI]"LDAP://CN=Users,DC=domain,DC=com"; $user = $ou.Create("user", "CN=NewUser"); $user.Put("sAMAccountName","NewUser"); $user.SetInfo()
+        ScriptBlockText|contains:
+            - '.create("user'
+            - ".create('user"
+    selection_adsi_provider:
+        ScriptBlockText|contains:
+            - 'WinNT://' # Local user creation via WinNT provider
+            - 'LDAP://' # Domain user creation via LDAP provider
+    condition: all of selection_*
+falsepositives:
+    - Legitimate administrative scripts that use ADSI to provision user accounts but should be rare in most environments
+level: medium
