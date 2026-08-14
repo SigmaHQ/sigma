@@ -2,7 +2,14 @@
 title: Sysmon File Executable Creation Detected
 id: 693a44e9-7f26-4cb6-b787-214867672d3a
 status: test
-description: Triggers on any Sysmon "FileExecutableDetected" event, which triggers every time a PE that is monitored by the config is created.
+description: |
+    Detects Portable Executable (PE) files creation events logged by Sysmon in paths monitored
+    by the used Sysmon configuration. This is a high-value detection for catching unauthorized
+    or suspicious executable drops. Alert volume and scope depend entirely on which paths or
+    files are monitored in the Sysmon config — a high noise level or hits from known-legitimate
+    software are a strong signal that the Sysmon configuration is too permissive, not that the
+    detection itself is wrong and probably needs to be tuned to a more restrictive set of paths
+    or files.
 references:
     - https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon
     - https://medium.com/@olafhartong/sysmon-15-0-file-executable-detected-40fd64349f36
@@ -18,6 +25,5 @@ detection:
         EventID: 29  # this is fine, we want to match any FileExecutableDetected event
     condition: selection
 falsepositives:
-    - Unlikely
-    - Legitimate SimpleHelp remote support software installation (JWrapper bundle)
+    - Legitimate software writing executables to monitored paths - if this occurs, narrow the Sysmon configuration to more sensitive paths rather than suppressing this rule
 level: medium
