@@ -1,0 +1,34 @@
+title: Windows Update Disabled Via Registry
+id: 1bff5de9-819d-41f3-90cd-b4dae2443bef
+status: experimental
+description: |
+    Detects registry modifications that disable Windows Update automatic updates or block access
+    to the Windows Update service entirely. Malware and ransomware commonly disable Windows Update
+    to prevent security patches from being applied and to stop update-triggered reboots that could
+    interfere with their operation.
+references:
+    - https://github.com/jebofponderworthy/windows-tools/blob/d43204b11e47163f842b5a4ffd76163f27ef69e2/incoming/Enable-Windows-Update-Using-Registry.ps1
+    - https://github.com/jebofponderworthy/windows-tools/blob/7039ad4326793ff3e6935e1ee8bdd3694cb71793/tools/update-windows-with-reboot.ps1
+    - https://github.com/Siradankullanici/OpenSourceViruses/blob/3267564a35f6e13559a3119eb68d0da8d2e91a0a/suspiciousregchangesandtaskkils
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-14
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains:
+            - '\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'
+            - '\Microsoft\Windows\CurrentVersion\Policies\Explorer'
+            - '\SYSTEM\Internet Communication Management\Internet Communication'
+        TargetObject|endswith:
+            - '\AU\NoAutoUpdate'
+            - '\DisableWindowsUpdateAccess'
+        Details: 'DWORD (0x00000001)'
+    condition: selection
+falsepositives:
+    - Legitimate disabling of Windows Update via Group Policy or other administrative tools
+level: medium
