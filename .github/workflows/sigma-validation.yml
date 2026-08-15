@@ -9,19 +9,14 @@ jobs:
   sigma-rules-validator:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.11'
-      - name: Install dependencies
-        run: pip install requests check-jsonschema
-      - name: Download validate.py
-        run: wget -O validate.py https://raw.githubusercontent.com/SigmaHQ/sigma/master/tests/validate-sigma-schema/validate.py
       - name: Validate Sigma rules
-        run: |
-          check-jsonschema --schemafile $(python validate.py schema) $(sudo -E python validate.py rules ./rules ./rules-compliance ./rules-dfir ./rules-emerging-threats ./rules-placeholder ./rules-threat-hunting)
-        env:
-          SIGMA_SCHEMA_URL: https://raw.githubusercontent.com/SigmaHQ/sigma-specification/refs/tags/${{ env.SIGMA_RULE_SCHEMA_VERSION }}/json-schema/sigma-detection-rule-schema.json
+        uses: SigmaHQ/sigma-rules-validator@v1
+        with:
+          paths: |-
+            ./rules
+            ./rules-compliance
+            ./rules-dfir
+            ./rules-emerging-threats
+            ./rules-placeholder
+            ./rules-threat-hunting
+          schemaURL: https://raw.githubusercontent.com/SigmaHQ/sigma-specification/refs/tags/${{ env.SIGMA_RULE_SCHEMA_VERSION }}/json-schema/sigma-detection-rule-schema.json
