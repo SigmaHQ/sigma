@@ -1,15 +1,15 @@
-title: Persistence Via Sudoers.d Files
+title: Modification of Sudoers Files
 id: ddb26b76-4447-4807-871f-1b035b2bfa5d
 status: test
 description: |
-    Detects the creation or modification of files within the "sudoers.d" directory on Linux systems.
-    Such activity may indicate an attempt to establish or maintain privilege escalation by granting specific users elevated permissions.
-    Unauthorized changes to sudoers files are a common technique used by attackers to persist administrative access.
+    Detects the creation or modification of the main "/etc/sudoers" file or files within the "/etc/sudoers.d/" directory on Linux systems.
+    Adversaries may alter sudoers configuration to execute commands with elevated privileges without supplying a password.
 references:
+    - https://www.sudo.ws/docs/man/sudoers.man/
     - https://github.com/h3xduck/TripleCross/blob/1f1c3e0958af8ad9f6ebe10ab442e75de33e91de/apps/deployer.sh
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-07-05
-modified: 2026-03-18
+modified: 2026-08-15
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -18,12 +18,14 @@ logsource:
     product: linux
     category: file_event
 detection:
-    selection:
+    selection_main:
+        TargetFilename: '/etc/sudoers'
+    selection_dropin:
         TargetFilename|startswith: '/etc/sudoers.d/'
     filter_main_dpkg:
         Image|endswith: '/usr/bin/dpkg'
         TargetFilename: '/etc/sudoers.d/README.dpkg-new'
-    condition: selection and not 1 of filter_main_*
+    condition: 1 of selection_* and not 1 of filter_main_*
 falsepositives:
-    - Creation of legitimate files in sudoers.d folder as part of administrator work
+    - Legitimate sudoers changes by administrators or configuration-management tools
 level: medium
