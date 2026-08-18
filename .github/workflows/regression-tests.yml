@@ -3,7 +3,8 @@ name: Regression Tests
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  EVTX_BASELINE_VERSION: v0.8.3
+  EVTX_BASELINE_VERSION: v0.8.4
+  JSON_MATCHER_VERSION: v0.0.2
 
 jobs:
   true-positive-tests:
@@ -19,13 +20,18 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyyaml
+        pip install pyyaml sigma-cli pySigma-backend-golangexpr
 
     - name: Download evtx-sigma-checker
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
         chmod +x evtx-sigma-checker
+    
+    - name: Download json-checker
+      run: |
+        wget --no-verbose https://github.com/SigmaHQ/json_matcher/releases/download/$JSON_MATCHER_VERSION/json_matcher_$JSON_MATCHER_VERSION -O json_checker
+        chmod +x json_checker
 
     - name: Run regression tests
       run: |
-        python tests/regression_tests_runner.py --rules-paths rules rules-emerging-threats rules-threat-hunting --evtx-checker ./evtx-sigma-checker --thor-config tests/thor.yml --ignore-validation
+        python tests/regression_tests_runner.py --rules-paths rules rules-emerging-threats rules-threat-hunting --evtx-checker ./evtx-sigma-checker --thor-config tests/thor.yml --ignore-validation --json-checker ./json_checker

@@ -17,9 +17,9 @@ references:
     - https://vipre.com/blog/svg-phishing-attacks-the-new-trick-in-the-cybercriminals-playbook/
 author: Nasreddine Bencherchali (Nextron Systems), frack113
 date: 2022-06-19
-modified: 2025-07-22
+modified: 2026-03-31
 tags:
-    - attack.defense-evasion
+    - attack.stealth
     - attack.t1036.007
 logsource:
     category: file_event
@@ -59,7 +59,9 @@ detection:
     #     TargetFilename|contains:
     #         - '\AppData\Roaming\Microsoft\Office\Recent\'
     #         - '\AppData\Roaming\Microsoft\Windows\Recent\'
-    condition: 1 of selection_*
+    filter_icons_linux:
+        TargetFilename|startswith: '/usr/share/icons/'
+    condition: 1 of selection_* and not 1 of filter_*
 falsepositives:
     - Unlikely
 level: high
