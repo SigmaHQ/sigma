@@ -6,10 +6,10 @@ references:
     - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
 author: frack113
 date: 2022-02-19
-modified: 2025-10-08
+modified: 2026-08-06
 tags:
-    - attack.defense-evasion
-    - attack.t1562.004
+    - attack.defense-impairment
+    - attack.t1686.003
 logsource:
     product: windows
     service: firewall-as
@@ -61,5 +61,8 @@ detection:
               - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
               - 'C:\Program Files\Windows Defender\'
           ApplicationPath|endswith: '\MsMpEng.exe'
+    filter_optional_systemApps:
+        ApplicationPath|startswith: 'C:\Windows\SystemApps\'
+        ModifyingApplication: 'C:\Windows\System32\svchost.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 level: medium
