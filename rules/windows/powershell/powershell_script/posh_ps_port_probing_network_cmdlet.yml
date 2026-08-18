@@ -1,0 +1,55 @@
+title: Port Probing Via PowerShell Network Cmdlets Or .NET Sockets
+id: 0f0a89f7-0fae-48f6-bb47-26c7b9e3c5bd
+related:
+    - id: adf876b3-f1f8-4aa9-a4e4-a64106feec06
+      type: obsolete
+status: experimental
+description: |
+    Detects the use of built-in PowerShell network diagnostic cmdlets or .NET socket classes to probe a specific TCP port on a local or remote host.
+    Adversaries may use "Test-NetConnection" or "Test-Connection" with an explicit port, or directly instantiate .NET "Net.Sockets.Socket"/"Net.Sockets.TcpClient" objects and call their connect methods, to enumerate reachable network services as a precursor to lateral movement.
+references:
+    - https://learn.microsoft.com/en-us/powershell/module/nettcpip/test-netconnection?view=windowsserver2022-ps
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/test-connection?view=powershell-7.4
+    - https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.tcpclient.connect
+    - https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.connect
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1571/T1571.md#atomic-test-1---testing-usage-of-uncommonly-used-port-with-powershell
+author: Norbert Jaśniewicz (AlphaSOC)
+date: 2026-08-10
+tags:
+    - attack.discovery
+    - attack.t1046
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_tnc:
+        # Match Test-NetConnection or tnc with port flag. Flags in PowerShell may be abbreviated to the shortest unambiguous prefix.
+        ScriptBlockText|re|i: '(Test-NetConnection|tnc)[^\r\n]*[ \t]-(((Remote)?(P|Po|Por|Port))|Comm|Commo|Common|CommonT|CommonTC|CommonTCP|CommonTCPP|CommonTCPPo|CommonTCPPor|CommonTCPPort)[: \t]'
+    selection_tc:
+        ScriptBlockText|re|i: '(Test-Connection)[^\r\n]*[ \t]-(Tc|Tcp|TcpP|TcpPo|TcpPor|TcpPort)[: \t]'
+    selection_dotnet_class:
+        ScriptBlockText|contains:
+            - 'Net.Sockets.Socket'
+            - 'Net.Sockets.TcpClient'
+    selection_dotnet_method:
+        ScriptBlockText|contains:
+            - '.Connect('
+            - '.ConnectAsync('
+            - '.BeginConnect('
+    selection_tcpclient_ctor:
+        # The "TcpClient(host, port)" constructor connects immediately, so no separate connect call is made.
+        # An argument separator is required before the closing parenthesis, so the non-connecting default constructor is not matched.
+        # Line breaks are allowed inside the argument list, since PowerShell does not require a continuation character within parentheses.
+        #
+        # Note: System.Net.Sockets.Socket does not have analogous constructor.
+        ScriptBlockText|re|i:
+            # New-Object Net.Sockets.TcpClient("host", port)
+            - 'Net\.Sockets\.TcpClient\([^)]*,'
+            # [Net.Sockets.TcpClient]::new("host", port)
+            - 'Net\.Sockets\.TcpClient\]::new\([^)]*,'
+    condition: selection_tnc or selection_tc or all of selection_dotnet_* or selection_tcpclient_ctor
+falsepositives:
+    - Infrastructure monitoring and health-check scripts
+    - Administrators troubleshooting network connectivity or firewall rules
+level: low
