@@ -1,0 +1,29 @@
+title: File Truncated to Zero Size via Truncate Utility
+id: 21cd4da6-8f06-4ca8-9506-7f769cc678f5
+related:
+    - id: 1b25519f-6e80-417c-a761-b903405b9c38
+      type: derived
+status: test
+description: |
+    Detects the use of the 'truncate' utility to set a file's size to zero, effectively wiping its contents.
+    While truncate has legitimate uses, adversaries use it to destroy log, history, or configuration files
+    as part of anti-forensics or defense evasion activity.
+references:
+    - https://man7.org/linux/man-pages/man1/truncate.1.html
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.003/T1070.003.md
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-19
+tags:
+    - attack.stealth
+    - attack.t1070
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '/truncate'
+        CommandLine|re: '(-s|--size[=\s])\s{0,8}0'  # e.g. -s0 / -s  0 / --size=0 / --size  0
+    condition: selection
+falsepositives:
+    - Log rotation scripts or maintenance tasks that legitimately zero out files
+level: low

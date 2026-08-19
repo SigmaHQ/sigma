@@ -1,0 +1,80 @@
+title: Shell Command History Tampering via CommandLine
+id: 1b25519f-6e80-417c-a761-b903405b9c38
+related:
+    - id: fdc88d25-96fb-4b7c-9633-c0e417fdbd4e
+      type: derived
+status: test
+description: |
+    Detects commands that try to clear or tamper with the Linux command history via CommandLine.
+    This technique is used by threat actors in order to evade defenses and execute commands
+    without them being recorded in files such as "bash_history" or "zsh_history".
+references:
+    - https://tlpblack.net/blog/20260728-a-deep-dive-into-bytetobreach-s-bytetocrypt-ransomware
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.003/T1070.003.md
+    - https://www.hackers-arise.com/post/2016/06/20/covering-your-bash-shell-tracks-antiforensics
+    - https://www.cadosecurity.com/spinning-yarn-a-new-linux-malware-campaign-targets-docker-apache-hadoop-redis-and-confluence/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-19
+tags:
+    - attack.stealth
+    - attack.t1070.003
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_img_truncate:
+        # e.g. truncate -s0 ~/.bash_history
+        # e.g. truncate --size=0 ~/.zsh_history
+        Image|endswith: '/truncate'
+        CommandLine|re: '(-s|--size[=\s])\s*0'  # handles -s0, -s  0, --size=0, --size  0, etc.
+    selection_img_ln:
+        # e.g. ln -sf /dev/null ~/.bash_history
+        # e.g. ln -sf /dev/zero ~/.zsh_history
+        Image|endswith: '/ln'
+        CommandLine|contains:
+            - ' /dev/null '
+            - ' /dev/zero'
+    selection_img_chattr:
+        # e.g. chattr +i ~/.bash_history
+        Image|endswith: '/chattr'
+        CommandLine|contains: ' +i'
+    selection_img_rm_shred:
+        # e.g. rm ~/.bash_history
+        # e.g. shred ~/.zsh_history
+        Image|endswith:
+            - '/rm'
+            - '/shred'
+    selection_cli_history_file:
+        # Combined with selection_img_* to scope matches to history files only
+        CommandLine|contains:
+            - 'sh_history'
+            - '.history'
+            - 'zhistory'
+    selection_shell:
+        # e.g. bash -c "history -c"
+        # e.g. zsh -c "HISTFILE=/dev/null some_command"
+        # e.g. bash -c "export HISTFILESIZE=0; evil_cmd"
+        # e.g. sh -c "shopt -ou history"
+        Image|endswith:
+            - '/ash'
+            - '/bash'
+            - '/busybox'
+            - '/csh'
+            - '/dash'
+            - '/fish'
+            - '/ksh'
+            - '/sh'
+            - '/tcsh'
+            - '/zsh'
+        CommandLine|contains:
+            - 'history -c'
+            - 'history -w'
+            - 'HISTFILE=/dev/null'
+            - 'HISTFILESIZE=0'
+            - 'HISTSIZE=0'
+            - 'shopt -ou history'
+            - 'shopt -uo history'
+    condition: (1 of selection_img_* and selection_cli_history_file) or selection_shell
+falsepositives:
+    - Legitimate administration scripts that manage shell history retention settings
+level: high
