@@ -1,0 +1,32 @@
+title: Linux Kernel Ring Buffer Cleared via Dmesg
+id: 146e004e-5373-4a63-8088-689eb278ae1d
+related:
+    - id: eca5e022-d368-4043-98e5-9736fb01f72f
+      type: similar
+status: test
+description: |
+    Detects the use of 'dmesg' to clear the kernel ring buffer, which removes kernel log messages
+    that could contain evidence of exploitation, privilege escalation, or hardware errors.
+    Threat actors use this technique to destroy forensic artifacts after gaining access to a system.
+references:
+    - https://tlpblack.net/blog/20260728-a-deep-dive-into-bytetobreach-s-bytetocrypt-ransomware
+    - https://man7.org/linux/man-pages/man1/dmesg.1.html
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.002/T1070.002.md
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-19
+tags:
+    - attack.defense-impairment
+    - attack.t1685.006
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '/dmesg'
+        CommandLine|contains:
+            - ' -C'         # e.g. dmesg -C  (clear ring buffer without printing)
+            - '-clear'    # e.g. covers both `dmesg --clear` and `dmesg --read-clear`
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
