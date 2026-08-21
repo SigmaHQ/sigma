@@ -1,14 +1,21 @@
-title: Hidden Local User Account Creation Via Net.EXE
+title: Hidden Local User Account Creation Attempt Via Net.EXE
 id: 8106cdf0-7503-49a9-806a-c5cee9885369
 related:
     - id: cd219ff3-fa99-45d4-8380-a7d15116c6dc
+      type: derived
+    - id: 460479f3-80b7-42da-9c43-2cc1d54dbccd
       type: similar
 status: test
-description: Detects the creation of a local user account ending with a dollar sign using net.exe or net1.exe, which attackers use to create semi-hidden local backdoor accounts.
+description: |
+    Detects the attempt to create a hidden local user account via the Windows Net.EXE utility
+    by appending a dollar sign ($) to the username. The dollar sign at the end of the username
+    hides the account from the Windows login screen and other user interfaces. Threat actors
+    may use this technique to create hidden accounts for persistence stealthily, allowing them
+    to maintain access to a compromised system without being easily detected.
 references:
-    - https://attack.mitre.org/techniques/T1136/001/
+    - https://medium.com/@toon.commander/hidden-windows-accounts-a-stealth-technique-abused-by-attackers-6f7e0b0f7063
 author: Keshon Karishan (KKarishan)
-date: 2026-07-12
+date: 2026-08-21
 tags:
     - attack.persistence
     - attack.t1136.001
@@ -30,5 +37,5 @@ detection:
             - '$'
     condition: all of selection_*
 falsepositives:
-    - Managed Service Account creation scripts (rare for local users)
+    - Unknown
 level: high
