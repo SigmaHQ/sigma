@@ -7,6 +7,7 @@ Run using the command
 """
 
 import os
+import sys
 import unittest
 import yaml
 import collections.abc
@@ -45,13 +46,16 @@ class TestRules(unittest.TestCase):
         if path_to_rules == self.path_to_rules and hasattr(self, "_rule_file_paths"):
             total = len(self._rule_file_paths)
             last_pct = -1
+            tty = sys.stdout.isatty()
             for i, file_path in enumerate(self._rule_file_paths, 1):
-                pct = i * 100 // total
-                if pct != last_pct:
-                    print(f"\r  {pct:3d}% ({i}/{total})", end="", flush=True)
-                    last_pct = pct
+                if tty:
+                    pct = i * 100 // total
+                    if pct != last_pct:
+                        print(f"\r  {pct:3d}% ({i}/{total})", end="", flush=True)
+                        last_pct = pct
                 yield file_path
-            print()
+            if tty:
+                print()
         else:
             for path_ in path_to_rules:
                 for root, _, files in os.walk(path_):
