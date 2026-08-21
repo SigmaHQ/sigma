@@ -21,12 +21,14 @@ logsource:
     product: linux
     category: process_creation
 detection:
-    selection:
+    selection_img:
         Image|endswith: '/dmesg'
-        CommandLine|contains:
-            - ' -C'         # e.g. dmesg -C  (clear ring buffer without printing)
-            - '-clear'    # e.g. covers both `dmesg --clear` and `dmesg --read-clear`
-    condition: selection
+    selection_cli:
+        - CommandLine|contains:
+              - ' -C '         # e.g. dmesg -C  (clear ring buffer without printing)
+              - '-clear'    # e.g. covers both `dmesg --clear` and `dmesg --read-clear`
+        - CommandLine|endswith: ' -C' # -c --> clear ring buffer after printing and -C --> clear ring buffer without printing
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: medium
