@@ -9,6 +9,8 @@ Run using the command
 import os
 import unittest
 import yaml
+import collections.abc
+import copy
 from colorama import init
 from colorama import Fore
 import json
@@ -28,23 +30,36 @@ class TestRules(unittest.TestCase):
             os.path.join(os.path.dirname(os.path.realpath(__name__)), path_)
         )
 
-    # Helper functions
-    def yield_next_rule_file_path(self, path_to_rules: list) -> str:
-        for path_ in path_to_rules:
+    @classmethod
+    def setUpClass(cls):
+        cls._rule_file_paths = []
+        cls._yaml_cache: dict = {}
+        for path_ in cls.path_to_rules:
             for root, _, files in os.walk(path_):
                 for file in files:
                     if file.endswith(".yml"):
-                        yield os.path.join(root, file)
+                        cls._rule_file_paths.append(os.path.join(root, file))
 
-    def get_rule_yaml(self, file_path: str) -> dict:
-        data = []
+    # Helper functions
+    def yield_next_rule_file_path(self, path_to_rules: list) -> "collections.abc.Iterator[str]":
+        if path_to_rules == self.path_to_rules and hasattr(self, "_rule_file_paths"):
+            total = len(self._rule_file_paths)
+            for i, file_path in enumerate(self._rule_file_paths, 1):
+                print(f"\r  {i * 100 // total:3d}% ({i}/{total})", end="", flush=True)
+                yield file_path
+            print()
+        else:
+            for path_ in path_to_rules:
+                for root, _, files in os.walk(path_):
+                    for file in files:
+                        if file.endswith(".yml"):
+                            yield os.path.join(root, file)
 
-        with open(file_path, encoding="utf-8") as f:
-            yaml_parts = yaml.safe_load_all(f)
-            for part in yaml_parts:
-                data.append(part)
-
-        return data
+    def get_rule_yaml(self, file_path: str) -> list:
+        if file_path not in self._yaml_cache:
+            with open(file_path, encoding="utf-8") as f:
+                self._yaml_cache[file_path] = tuple(yaml.safe_load_all(f))
+        return [copy.deepcopy(part) for part in self._yaml_cache[file_path]]
 
     def get_rule_part(self, file_path: str, part_name: str):
         yaml_dicts = self.get_rule_yaml(file_path)

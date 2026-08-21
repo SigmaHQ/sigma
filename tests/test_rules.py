@@ -12,7 +12,6 @@ import yaml
 import re
 import string
 import copy
-import functools
 
 # from attackcti import attack_client
 from colorama import init
@@ -67,6 +66,7 @@ class TestRules(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls._rule_file_paths = []
+        cls._yaml_cache: dict = {}
         for path_ in cls.path_to_rules:
             for root, _, files in os.walk(path_):
                 for file in files:
@@ -74,10 +74,13 @@ class TestRules(unittest.TestCase):
                         cls._rule_file_paths.append(os.path.join(root, file))
 
     # Helper functions
-    def yield_next_rule_file_path(self, path_to_rules: list) -> str:
+    def yield_next_rule_file_path(self, path_to_rules: list) -> "collections.abc.Iterator[str]":
         if path_to_rules == self.path_to_rules and hasattr(self, "_rule_file_paths"):
-            for file_path in self._rule_file_paths:
+            total = len(self._rule_file_paths)
+            for i, file_path in enumerate(self._rule_file_paths, 1):
+                print(f"\r  {i * 100 // total:3d}% ({i}/{total})", end="", flush=True)
                 yield file_path
+            print()
         else:
             for path_ in path_to_rules:
                 for root, _, files in os.walk(path_):
@@ -93,14 +96,11 @@ class TestRules(unittest.TestCase):
 
         return None
 
-    @staticmethod
-    @functools.lru_cache(maxsize=None)
-    def _read_rule_yaml(file_path: str) -> tuple:
-        with open(file_path, encoding="utf-8") as f:
-            return tuple(yaml.safe_load_all(f))
-
-    def get_rule_yaml(self, file_path: str) -> dict:
-        return [copy.deepcopy(part) for part in self._read_rule_yaml(file_path)]
+    def get_rule_yaml(self, file_path: str) -> list:
+        if file_path not in self._yaml_cache:
+            with open(file_path, encoding="utf-8") as f:
+                self._yaml_cache[file_path] = tuple(yaml.safe_load_all(f))
+        return [copy.deepcopy(part) for part in self._yaml_cache[file_path]]
 
     # Tests
     def test_legal_trademark_violations(self):
