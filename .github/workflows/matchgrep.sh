@@ -27,10 +27,16 @@ validation_errors=0
             title=$(grep "^title:" "${rulefile}" | sed 's/^title: //')
             if [[ "${title}" != "${name}" ]]; then
                 >&2 echo "ERROR: Rule name mismatch in known-FPs.csv for ${id}:"
-                >&2 echo "  CSV name : '${name}'"
-                >&2 echo "  Rule title: '${title}' (${rulefile})"
+                >&2 echo "  Current  : '${name}'"
+                >&2 echo "  Expected : '${title}' (${rulefile})"
                 validation_errors=1
             fi
+        elif grep -irl "^id: ${id}$" deprecated/ 2>/dev/null | head -1 | grep -q .; then
+            >&2 echo "ERROR: Rule ${id} (CSV name: '${name}') is deprecated — remove it from known-FPs.csv"
+            validation_errors=1
+        else
+            >&2 echo "ERROR: Rule ID not found in rules for ${id} (CSV name: '${name}')"
+            validation_errors=1
         fi
     done
 } < "${fps}"
