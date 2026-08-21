@@ -18,7 +18,9 @@ if [[ ! -f ${fps}  || ! -r ${fps} ]]; then
 fi
 
 # Validate that each RuleId in the CSV has a matching primary rule file with the same title
-validation_rows=()
+mismatch_rows=()
+deprecated_rows=()
+notfound_rows=()
 {
     read -r # Skip CSV header
     while IFS=\; read -r id name _fpstring; do
@@ -26,28 +28,40 @@ validation_rows=()
         if [[ -n "${rulefile}" ]]; then
             title=$(grep "^title:" "${rulefile}" | sed 's/^title: //')
             if [[ "${title}" != "${name}" ]]; then
-                validation_rows+=("name_mismatch|${id}|${name}|${title}")
+                mismatch_rows+=("${id}|${name}|${title}")
             fi
         elif grep -irl "^id: ${id}$" deprecated/ 2>/dev/null | head -1 | grep -q .; then
-            validation_rows+=("deprecated|${id}|${name}|<deprecated — remove from CSV>")
+            deprecated_rows+=("${id}|${name}")
         else
-            validation_rows+=("not_found|${id}|${name}|<ID not found in any rule file>")
+            notfound_rows+=("${id}|${name}")
         fi
     done
 } < "${fps}"
 
-if [[ ${#validation_rows[@]} -gt 0 ]]; then
-    >&2 echo "ERROR: known-FPs.csv validation failed:"
+validation_failed=0
+
+if [[ ${#mismatch_rows[@]} -gt 0 ]]; then
+    >&2 echo "Rule name mismatches — update the CSV Name to match the Rule Title:"
+    { echo "RuleId|Name in known-FPs.csv|Title in Rule File"; printf '%s\n' "${mismatch_rows[@]}"; } | column -t -s'|' >&2
     >&2 echo
-    {
-        echo "RuleId|Current|Expected"
-        for row in "${validation_rows[@]}"; do
-            IFS='|' read -r _type id current expected <<< "${row}"
-            echo "${id}|${current}|${expected}"
-        done
-    } | column -t -s'|' >&2
+    validation_failed=1
+fi
+
+if [[ ${#deprecated_rows[@]} -gt 0 ]]; then
+    >&2 echo "Deprecated rules — remove these entries from known-FPs.csv:"
+    { echo "RuleId|Name in known-FPs.csv"; printf '%s\n' "${deprecated_rows[@]}"; } | column -t -s'|' >&2
     >&2 echo
-    >&2 echo "Fix the RuleName column in .github/workflows/known-FPs.csv to match the expected titles above."
+    validation_failed=1
+fi
+
+if [[ ${#notfound_rows[@]} -gt 0 ]]; then
+    >&2 echo "Unknown rule IDs — not found in any rule directory:"
+    { echo "RuleId|Name in known-FPs.csv"; printf '%s\n' "${notfound_rows[@]}"; } | column -t -s'|' >&2
+    >&2 echo
+    validation_failed=1
+fi
+
+if [[ ${validation_failed} -ne 0 ]]; then
     exit 4
 fi
 
