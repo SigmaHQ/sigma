@@ -18,7 +18,7 @@ if [[ ! -f ${fps}  || ! -r ${fps} ]]; then
 fi
 
 # Validate that each RuleId in the CSV has a matching primary rule file with the same title
-validation_errors=0
+validation_rows=()
 {
     read -r # Skip CSV header
     while IFS=\; read -r id name _fpstring; do
@@ -26,24 +26,28 @@ validation_errors=0
         if [[ -n "${rulefile}" ]]; then
             title=$(grep "^title:" "${rulefile}" | sed 's/^title: //')
             if [[ "${title}" != "${name}" ]]; then
-                >&2 echo "ERROR: Rule name mismatch in known-FPs.csv for ${id}:"
-                >&2 echo "  Current  : '${name}'"
-                >&2 echo "  Expected : '${title}' (${rulefile})"
-                validation_errors=1
+                validation_rows+=("name_mismatch|${id}|${name}|${title}")
             fi
         elif grep -irl "^id: ${id}$" deprecated/ 2>/dev/null | head -1 | grep -q .; then
-            >&2 echo "ERROR: Rule ${id} (CSV name: '${name}') is deprecated — remove it from known-FPs.csv"
-            validation_errors=1
+            validation_rows+=("deprecated|${id}|${name}|<deprecated — remove from CSV>")
         else
-            >&2 echo "ERROR: Rule ID not found in rules for ${id} (CSV name: '${name}')"
-            validation_errors=1
+            validation_rows+=("not_found|${id}|${name}|<ID not found in any rule file>")
         fi
     done
 } < "${fps}"
 
-if [[ ${validation_errors} -ne 0 ]]; then
+if [[ ${#validation_rows[@]} -gt 0 ]]; then
+    >&2 echo "ERROR: known-FPs.csv validation failed:"
     >&2 echo
-    >&2 echo "Fix the RuleName column in .github/workflows/known-FPs.csv to match the rule titles above."
+    {
+        echo "RuleId|Current|Expected"
+        for row in "${validation_rows[@]}"; do
+            IFS='|' read -r _type id current expected <<< "${row}"
+            echo "${id}|${current}|${expected}"
+        done
+    } | column -t -s'|' >&2
+    >&2 echo
+    >&2 echo "Fix the RuleName column in .github/workflows/known-FPs.csv to match the expected titles above."
     exit 4
 fi
 
