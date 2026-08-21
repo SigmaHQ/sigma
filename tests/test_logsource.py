@@ -44,8 +44,12 @@ class TestRules(unittest.TestCase):
     def yield_next_rule_file_path(self, path_to_rules: list) -> "collections.abc.Iterator[str]":
         if path_to_rules == self.path_to_rules and hasattr(self, "_rule_file_paths"):
             total = len(self._rule_file_paths)
+            last_pct = -1
             for i, file_path in enumerate(self._rule_file_paths, 1):
-                print(f"\r  {i * 100 // total:3d}% ({i}/{total})", end="", flush=True)
+                pct = i * 100 // total
+                if pct != last_pct:
+                    print(f"\r  {pct:3d}% ({i}/{total})", end="", flush=True)
+                    last_pct = pct
                 yield file_path
             print()
         else:
