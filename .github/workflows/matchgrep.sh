@@ -17,6 +17,10 @@ if [[ ! -f ${fps}  || ! -r ${fps} ]]; then
     exit 2
 fi
 
+# Resolve repo root from the script's own location so the caller's working
+# directory doesn't matter (e.g. running from a temp dir still works).
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
 # Validate that each RuleId in the CSV has a matching primary rule file with the same title
 mismatch_rows=()
 deprecated_rows=()
@@ -24,13 +28,13 @@ notfound_rows=()
 {
     read -r # Skip CSV header
     while IFS=\; read -r id name _fpstring; do
-        rulefile=$(grep -irl "^id: ${id}$" rules/ rules-emerging-threats/ rules-threat-hunting/ 2>/dev/null | head -1)
+        rulefile=$(grep -irl "^id: ${id}$" "${REPO_ROOT}/rules" "${REPO_ROOT}/rules-emerging-threats" "${REPO_ROOT}/rules-threat-hunting" 2>/dev/null | head -1)
         if [[ -n "${rulefile}" ]]; then
             title=$(grep "^title:" "${rulefile}" | sed 's/^title: //')
             if [[ "${title}" != "${name}" ]]; then
                 mismatch_rows+=("${id}|${name}|${title}")
             fi
-        elif grep -irl "^id: ${id}$" deprecated/ 2>/dev/null | head -1 | grep -q .; then
+        elif grep -irl "^id: ${id}$" "${REPO_ROOT}/deprecated" 2>/dev/null | head -1 | grep -q .; then
             deprecated_rows+=("${id}|${name}")
         else
             notfound_rows+=("${id}|${name}")
