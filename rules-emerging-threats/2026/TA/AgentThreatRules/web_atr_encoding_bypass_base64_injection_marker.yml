@@ -1,15 +1,18 @@
-title: AI Agent Prompt Injection - Base64 Encoded Instruction Markers
+title: AI Agent Prompt Injection - Base64 Encoded Instruction Override In URL Query
 id: a814751e-4500-46d7-b5ef-5ac607075b62
 status: experimental
 description: |
-    Detects Base64-encoded prompt injection markers in user input to LLM agents. Attackers Base64-encode injection phrases to evade naive keyword filters, then ask the model to decode and execute the result.
-    The keywords below match Base64 fragments of common injection phrases such as "ignore previous instructions" and "you are now". The fragments are mid-string slices that are stable across leading-whitespace variants.
+    Detects a Base64-encoded instruction-override phrase carried in a URL query string to an LLM agent endpoint. Attackers Base64-encode injection phrases to evade keyword filters, then ask the model to decode and act on the result.
+    Base64 alignment depends on how many bytes precede the phrase, so one encoded phrase has three distinct representations. Each phrase below is listed in all three, taking only the quantums that fall entirely inside the phrase so that surrounding content does not change them. Every fragment is at least 32 characters and decodes to a complete instruction-override phrase.
+    Shorter markers such as an encoded "system prompt" were considered and rejected: at one alignment it reduces to "stem prom", which is a substring of ordinary text like "ecosystem promotion".
+    Scope is deliberately narrow. This matches only where the payload reaches the agent in the query string, which is the part of the request a webserver access log records. Prompts delivered in a POST body are out of scope for this log source.
     Derived from Agent Threat Rules (ATR) ATR-2026-00051.
 references:
     - https://github.com/Agent-Threat-Rule/agent-threat-rules
     - https://kai-greshake.de/posts/inject-my-pdf/
 author: Adam Lin (panguard.ai)
 date: 2026-05-09
+modified: 2026-08-24
 tags:
     - attack.stealth
     - attack.t1027
@@ -17,27 +20,20 @@ tags:
 logsource:
     category: webserver
 detection:
-    selection_method:
-        cs-method:
-            - 'POST'
-            - 'GET'
-    keywords:
-        # mid-string slice of "ignore previous instructions" base64
-        - 'aWdub3JlIHByZXZpb3VzIGluc3RydWN0aW9ucw'
-        # mid-string slice of "Ignore previous instructions"
-        - 'SWdub3JlIHByZXZpb3VzIGluc3RydWN0aW9ucw'
-        # mid-string slice of "you are now"
-        - 'eW91IGFyZSBub3c'
-        # mid-string slice of "system prompt"
-        - 'c3lzdGVtIHByb21wdA'
-        # mid-string slice of "disregard prior instructions"
-        - 'ZGlzcmVnYXJkIHByaW9yIGluc3RydWN0aW9ucw'
-    decode_helper:
+    selection:
         cs-uri-query|contains:
-            - 'base64'
-            - 'decode'
-    condition: selection_method and (keywords or (keywords and decode_helper))
+            # "ignore previous instructions", the three Base64 alignments
+            - 'aWdub3JlIHByZXZpb3VzIGluc3RydWN0aW9u'
+            - 'SWdub3JlIHByZXZpb3VzIGluc3RydWN0aW9u'
+            - 'bm9yZSBwcmV2aW91cyBpbnN0cnVjdGlv'
+            - 'Z25vcmUgcHJldmlvdXMgaW5zdHJ1Y3Rpb25z'
+            # "disregard prior instructions", the three Base64 alignments
+            - 'ZGlzcmVnYXJkIHByaW9yIGluc3RydWN0aW9u'
+            - 'c3JlZ2FyZCBwcmlvciBpbnN0cnVjdGlv'
+            - 'aXNyZWdhcmQgcHJpb3IgaW5zdHJ1Y3Rpb25z'
+    condition: selection
 falsepositives:
-    - Legitimate Base64-encoded payloads that happen to overlap with these mid-string fragments (extremely rare given the slice length)
+    - Security tooling that submits encoded test payloads through a query string
     - Authorized red-team or AI safety evaluation traffic
+    - Documentation or research content about prompt injection that is itself Base64 encoded and passed through a query string
 level: medium

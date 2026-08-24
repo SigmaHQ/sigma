@@ -1,9 +1,12 @@
-title: AI Agent Instructed SSRF - Localhost and Cloud Metadata Endpoints
+title: AI Agent Instructed SSRF To Localhost Or Cloud Metadata In URL Query
 id: a7765336-9d50-41e1-9b2c-db6b5a4fe062
 status: experimental
 description: |
-    Detects user input or retrieved content instructing an LLM agent to fetch internal localhost endpoints or cloud-provider instance metadata services. These are high-value SSRF targets that frequently expose IAM credentials or service tokens.
-    The pattern combines a fetch verb with a loopback or metadata host. Cloud metadata addresses include the AWS, GCP, Azure, and Alibaba IMDS endpoints.
+    Detects a URL query string that instructs an LLM agent to fetch a loopback address or a cloud-provider instance metadata endpoint. These are high-value SSRF targets because they frequently return IAM credentials or service tokens to whatever asked for them.
+    The match requires a fetch verb and a loopback or metadata host in the same query string, so an ordinary query that merely mentions one of these hosts does not fire. Each host is listed both literally and percent-encoded, because a URL passed as a query parameter value is usually encoded by the client.
+    Each verb is anchored on a following separator rather than matched as a bare substring. Without that anchor a benign query is enough to satisfy the verb side by accident: a request carrying the parameter tool=browser matches a bare "browse", so any ordinary question that happens to mention a metadata address would fire.
+    Requiring a verb trades recall for precision. An instruction phrased without one, such as a query that simply appends the metadata URL to a summarisation request, is not detected here.
+    Scope is deliberately narrow. This matches only where the instruction reaches the agent in the query string, which is the part of the request a webserver access log records. Instructions delivered in a POST body or in retrieved content are out of scope for this log source.
     Derived from Agent Threat Rules (ATR) ATR-2026-00082.
 references:
     - https://github.com/Agent-Threat-Rule/agent-threat-rules
@@ -11,6 +14,7 @@ references:
     - https://hackingthe.cloud/aws/exploitation/ec2-metadata-ssrf/
 author: Adam Lin (panguard.ai)
 date: 2026-05-09
+modified: 2026-08-24
 tags:
     - attack.credential-access
     - attack.t1552.005
@@ -18,30 +22,51 @@ tags:
 logsource:
     category: webserver
 detection:
-    selection_method:
-        cs-method:
-            - 'POST'
-            - 'GET'
-    keywords:
-        - 'http://127.0.0.1'
-        - 'http://localhost'
-        - 'http://0.0.0.0'
-        - 'http://[::1]'
-        - 'http://169.254.169.254'
-        - 'http%3A%2F%2F127.0.0.1'
-        - 'http%3A%2F%2Flocalhost'
-        - 'http%3A%2F%2F169.254.169.254'
-        - 'metadata.google.internal'
-        - '/latest/meta-data/'
-    fetch_verbs:
+    selection_target:
         cs-uri-query|contains:
-            - 'fetch'
-            - 'browse'
-            - 'open url'
-            - 'visit'
-            - 'curl'
-    condition: selection_method and keywords and fetch_verbs
+            # loopback, literal and percent-encoded scheme separator
+            - 'http://127.0.0.1'
+            - 'http%3A%2F%2F127.0.0.1'
+            - 'http://localhost'
+            - 'http%3A%2F%2Flocalhost'
+            - 'http://0.0.0.0'
+            - 'http%3A%2F%2F0.0.0.0'
+            - 'http://[::1]'
+            - 'http%3A%2F%2F%5B%3A%3A1%5D'
+            # cloud instance metadata services
+            - '169.254.169.254'
+            - 'metadata.google.internal'
+            - '/latest/meta-data/'
+            - '%2Flatest%2Fmeta-data%2F'
+    selection_verb:
+        cs-uri-query|contains:
+            # fetch, followed by a separator so it cannot be satisfied by a longer word
+            - 'fetch%20'
+            - 'fetch+'
+            - 'fetch '
+            # browse, followed by a separator so it cannot be satisfied by a longer word
+            - 'browse%20'
+            - 'browse+'
+            - 'browse '
+            # visit, followed by a separator so it cannot be satisfied by a longer word
+            - 'visit%20'
+            - 'visit+'
+            - 'visit '
+            # curl, followed by a separator so it cannot be satisfied by a longer word
+            - 'curl%20'
+            - 'curl+'
+            - 'curl '
+            # retrieve, followed by a separator so it cannot be satisfied by a longer word
+            - 'retrieve%20'
+            - 'retrieve+'
+            - 'retrieve '
+            # download, followed by a separator so it cannot be satisfied by a longer word
+            - 'download%20'
+            - 'download+'
+            - 'download '
+    condition: all of selection_*
 falsepositives:
-    - Local development tooling that legitimately routes agent traffic through 127.0.0.1
-    - Administrative or health-check endpoints that intentionally consume cloud metadata
+    - Developer tooling that proxies local endpoints through an agent during testing
+    - Authorized red-team or SSRF assessment traffic
+    - A verb term appearing at the end of a longer word followed by a separator, such as prefetch, alongside a genuine mention of a metadata host
 level: high
