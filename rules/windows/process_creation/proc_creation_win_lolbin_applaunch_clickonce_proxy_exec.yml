@@ -1,5 +1,8 @@
 title: Applaunch ClickOnce Activation
 id: 34465f76-30d9-4e6f-acca-8c449f2213b1
+related:
+    - id: e593cf51-88db-4ee1-b920-37e89012a3c9
+      type: similar
 status: experimental
 description: Detects the execution of the LOLBIN Applaunch outside of the ClickOnce service dfsvc.exe, which can be used to activate arbitrary ClickOnce applications
 references:
@@ -20,7 +23,9 @@ detection:
         - Image|endswith: '\Applaunch.exe'
         - OriginalFileName: 'applaunch.exe'
     selection_cli:
-        CommandLine|contains: ' /activate'
+        CommandLine|contains:
+            - ' /activate'
+            - ' -activate'
     filter_main_dfsvc:
         ParentImage|endswith: '\dfsvc.exe'
     condition: all of selection_* and not 1 of filter_main_*
