@@ -1,0 +1,58 @@
+title: Potential Steam Phishing Domain
+id: a96c5746-7827-4534-bc31-e2edfe8d2a23
+status: experimental
+description: |
+    Detects web requests to a hostname that carries an official Steam domain, or
+    a Steam brand label joined by a hyphen, inside a domain Valve does not
+    control. Credential phishing against Steam commonly uses this shape, placing
+    the real domain in a subdomain or label of an attacker-owned host so that a
+    reader skimming the address bar sees the brand first.
+references:
+    - https://github.com/OmereKurt/steam-phishing-detector/blob/be89abe8062f7a5f6394114a592b8ca794d11286/docs/DESIGN.md
+author: Omer Kurt
+date: 2026-08-24
+tags:
+    - attack.credential-access
+    - attack.initial-access
+    - attack.t1566.002
+logsource:
+    category: proxy
+detection:
+    selection_embedded_domain:
+        cs-host|contains:
+            - 'steamcommunity.com'
+            - 'steamgames.com'
+            - 'steampowered.com'
+            - 'steamstatic.com'
+            - 'valvesoftware.com'
+    selection_hyphenated_brand:
+        cs-host|contains:
+            - '-steamcommunity'
+            - '-steamgames'
+            - '-steampowered'
+            - '-steamstatic'
+            - '-valvesoftware'
+            - 'steamcommunity-'
+            - 'steamgames-'
+            - 'steampowered-'
+            - 'steamstatic-'
+            - 'valvesoftware-'
+    filter_main_official_domain:
+        cs-host:
+            - 'steamcommunity.com'
+            - 'steamgames.com'
+            - 'steampowered.com'
+            - 'steamstatic.com'
+            - 'valvesoftware.com'
+    filter_main_official_subdomain:
+        cs-host|endswith:
+            - '.steamcommunity.com'
+            - '.steamgames.com'
+            - '.steampowered.com'
+            - '.steamstatic.com'
+            - '.valvesoftware.com'
+    condition: 1 of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Steam brand-protection domains that Valve registers defensively and redirects
+    - Security tooling and URL scanners that resolve candidate phishing hostnames
+level: medium
