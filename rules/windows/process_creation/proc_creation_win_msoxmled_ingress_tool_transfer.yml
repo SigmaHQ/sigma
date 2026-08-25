@@ -1,0 +1,28 @@
+title: Potential Ingress Tool Transfer Via Msoxmled.EXE
+id: 8d9be576-683f-4f33-80bf-d6961d4c1879
+status: experimental
+description: |
+    Detects execution of "msoxmled.exe" (Microsoft Office XML Editor) with the "/verb open" argument pointed at a remote URL.
+    This LOLBIN is meant to open local XML documents in Microsoft Office, but when pointed at a network location it will download and cache the remote payload, making it a potential ingress tool transfer technique.
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/9c5e3841081cac342e7603093253cb51512c8369/yml/OSBinaries/Msoxmled.yml
+author: Geovanny Basantes
+date: 2026-08-25
+tags:
+    - attack.command-and-control
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\msoxmled.exe'
+        - OriginalFileName: 'msoxmled.exe'
+    selection_cli:
+        CommandLine|contains: '/verb'
+    selection_url:
+        CommandLine|re: '(?i)https?://'
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: medium
