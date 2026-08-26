@@ -1,5 +1,8 @@
 title: Powershell Create Scheduled Task
 id: 363eccc0-279a-4ccf-a3ab-24c2e63b11fb
+similar:
+    - id: 3a00e18c-bde4-4e81-bc8f-500e24c720a6
+      type: similar
 status: test
 description: Adversaries may abuse the Windows Task Scheduler to perform task scheduling for initial or recurring execution of malicious code
 references:
@@ -7,7 +10,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1053.005/T1053.005.md#atomic-test-6---wmi-invoke-cimmethod-scheduled-task
 author: frack113
 date: 2021-12-28
-modified: 2025-10-07
+modified: 2026-08-25
 tags:
     - attack.privilege-escalation
     - attack.execution
@@ -33,6 +36,11 @@ detection:
             - 'PS_ScheduledTask'
             - '-NameSpace'
             - 'Root\Microsoft\Windows\TaskScheduler'
+    selection_com:
+        ScriptBlockText|contains|all:
+            - '-ComObject'
+            - 'Schedule.Service'
+            - 'RegisterTaskDefinition'
     filter_main_legitimate_scripts:
         ScriptBlockText|contains|all:
             - 'Microsoft.PowerShell.Core\Export-ModuleMember'
