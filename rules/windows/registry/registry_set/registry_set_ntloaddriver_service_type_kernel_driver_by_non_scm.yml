@@ -1,0 +1,46 @@
+title: Potential NtLoadDriver Syscall Abuse to Load Suspicious Kernel Driver Service
+id: 2e8a4f61-7d3b-4c95-a1e8-9f5c2b7d0413
+status: experimental
+description: |
+    Detects a service Type registry value being set to 1 (kernel driver) by potentially
+    suspicious non-legitimate processes. Calls the undocumented NtLoadDriver syscall,
+    this bypasses SCM, meaning Event ID 7045 will not trigger. Threat actors can abuse this
+    to load a malicious or vulnerable kernel driver in order to disable security products,
+    achieve persistence, or perform arbitrary kernel operations.
+references:
+    - https://research.checkpoint.com/2026/btr-reforged-weaponizing-defenders-remediation-driver-as-a-kernel-operation-primitive/
+    - http://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-24
+tags:
+    - attack.stealth
+    - attack.defense-impairment
+    - attack.persistence
+    - attack.t1543.003
+    - attack.t1112
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_target:
+        - TargetObject|contains:  '\SYSTEM\CurrentControlSet\Services\'
+        - TargetObject|contains|all:
+              - '\SYSTEM\ControlSet'
+              - '\Services\'
+    selection_details:
+        TargetObject|endswith: '\Type'
+        Details: 'DWORD (0x00000001)'
+    filter_main_scm:
+        Image|endswith: 'C:\Windows\system32\services.exe'
+    filter_main_poqexe:
+        Image|endswith: 'C:\Windows\system32\poqexec.exe'
+    filter_main_tiworker_1:
+        Image|endswith: 'C:\Windows\system32\TiWorker.exe'
+    filter_main_tiworker_2:
+        Image|startswith: 'C:\WINDOWS\winsxs\'
+        Image|endswith: '\TiWorker.exe'
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Third-party driver installers writing service keys directly via registry API
+level: medium
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_ntloaddriver_service_type_kernel_driver_by_non_scm/info.yml
