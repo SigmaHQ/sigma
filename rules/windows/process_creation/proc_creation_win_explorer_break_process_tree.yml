@@ -11,7 +11,7 @@ references:
     - https://securityboulevard.com/2019/09/deobfuscating-ostap-trickbots-34000-line-javascript-downloader/
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems), @gott_cyber
 date: 2019-06-29
-modified: 2025-10-31
+modified: 2026-08-27
 tags:
     - attack.stealth
     - attack.t1036
@@ -27,7 +27,10 @@ detection:
         CommandLine|contains|windash: ' /root,'
         # There exists almost infinite possibilities to spawn from explorer. The "/root" flag is just an example
         # It's better to have the ability to look at the process tree and look for explorer processes with "weird" flags to be able to catch this technique.
-    condition: 1 of selection_*
+    filter_optional_com_embedding:
+        CommandLine|endswith: '-Embedding'
+        ParentImage|endswith: '\svchost.exe'
+    condition: 1 of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: medium
