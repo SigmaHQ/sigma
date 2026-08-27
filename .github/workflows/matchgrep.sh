@@ -45,21 +45,21 @@ notfound_rows=()
 validation_failed=0
 
 if [[ ${#mismatch_rows[@]} -gt 0 ]]; then
-    >&2 echo "Rule name mismatches — update the CSV Name to match the Rule Title:"
+    >&2 echo "Rule name mismatches - update the CSV Name to match the Rule Title:"
     { echo "RuleId|Name in known-FPs.csv|Title in Rule File"; printf '%s\n' "${mismatch_rows[@]}"; } | column -t -s'|' >&2
     >&2 echo
     validation_failed=1
 fi
 
 if [[ ${#deprecated_rows[@]} -gt 0 ]]; then
-    >&2 echo "Deprecated rules — remove these entries from known-FPs.csv:"
+    >&2 echo "Deprecated rules - remove these entries from known-FPs.csv:"
     { echo "RuleId|Name in known-FPs.csv"; printf '%s\n' "${deprecated_rows[@]}"; } | column -t -s'|' >&2
     >&2 echo
     validation_failed=1
 fi
 
 if [[ ${#notfound_rows[@]} -gt 0 ]]; then
-    >&2 echo "Unknown rule IDs — not found in any rule directory:"
+    >&2 echo "Unknown rule IDs - not found in any rule directory:"
     { echo "RuleId|Name in known-FPs.csv"; printf '%s\n' "${notfound_rows[@]}"; } | column -t -s'|' >&2
     >&2 echo
     validation_failed=1
