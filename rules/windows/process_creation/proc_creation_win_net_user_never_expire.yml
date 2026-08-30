@@ -1,17 +1,21 @@
-title: New User Created Via Net.EXE With Never Expire Option
+title: User Account Configured With Never Expire Option Via Net.EXE
 id: b9f0e6f5-09b4-4358-bae4-08408705bd5c
 related:
     - id: cd219ff3-fa99-45d4-8380-a7d15116c6dc
       type: derived
 status: test
-description: Detects creation of local users via the net.exe command with the option "never expire"
+description: |
+    Detects configuration of user accounts with the "never expire" option via net.exe, either during account creation or when modifying an existing account.
+    This is a common technique used by adversaries to maintain persistence on a compromised system.
 references:
     - https://thedfirreport.com/2022/07/11/select-xmrig-from-sqlserver/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-07-12
-modified: 2023-02-21
+modified: 2026-07-03
 tags:
     - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098
     - attack.t1136.001
 logsource:
     category: process_creation
@@ -27,9 +31,9 @@ detection:
     selection_cli:
         CommandLine|contains|all:
             - 'user'
-            - 'add'
             - 'expires:never'
     condition: all of selection_*
 falsepositives:
     - Unlikely
 level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_net_user_never_expire/info.yml

@@ -1,0 +1,53 @@
+title: Local And Domain Account Discovery Via Net.EXE
+id: a46bc5a9-7a3c-416e-95d0-ff219c779002
+status: test
+description: |
+    Detects the use of net.exe to enumerate local or domain user accounts. This covers listing all accounts,
+    querying a specific account's details, or enumerating domain users via the /domain flag.
+references:
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/net-user
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-07-03
+tags:
+    - attack.discovery
+    - attack.t1087.001
+    - attack.t1087.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\net.exe'
+              - '\net1.exe'
+        - OriginalFileName:
+              - 'net.exe'
+              - 'net1.exe'
+    selection_user_option:
+        CommandLine|contains: ' user '
+    filter_main_manipulation:
+        # Exclude modification flags
+        CommandLine|contains:
+            - '/active'
+            - '/add'
+            - '/delete'
+            - '/expires'
+            - '/fullname'
+            - '/comment'
+            - '/homedir'
+            - '/passwordreq'
+            - '/passwordchg'
+            - '/logonpasswordchg'
+            - '/times'
+            - '/workstations'
+            - '/scriptpath'
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Administrators querying account status as part of routine checks or scripts
+level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_net_user_recon/info.yml
+simulation:
+    - type: atomic-red-team
+      name: Enumerate all accounts on Windows (Local)
+      technique: T1087.001
+      atomic_guid: 80887bec-5a9b-4efc-a81d-f83eb2eb32ab

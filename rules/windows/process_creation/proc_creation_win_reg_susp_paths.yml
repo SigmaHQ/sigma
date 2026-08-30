@@ -8,7 +8,7 @@ references:
     - https://www.absolomb.com/2018-01-26-Windows-Privilege-Escalation-Guide/
 author: frack113, Nasreddine Bencherchali (Nextron Systems)
 date: 2022-08-19
-modified: 2022-10-10
+modified: 2026-07-03
 tags:
     - attack.persistence
     - attack.defense-impairment
@@ -21,7 +21,9 @@ detection:
     selection_reg:
         - Image|endswith: '\reg.exe'
         - OriginalFileName: 'reg.exe'
-    selection_path:
+    selection_cli_action:
+        CommandLine|contains: ' add '
+    selection_cli_path:
         CommandLine|contains:
             # Add more suspicious registry locations below
             - '\AppDataLow\Software\Microsoft\'
@@ -34,3 +36,9 @@ detection:
 falsepositives:
     - Rare legitimate add to registry via cli (to these locations)
 level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_reg_susp_paths/info.yml
+simulation:
+    - type: atomic-red-team
+      name: Modify registry to store logon credentials
+      technique: T1112
+      atomic_guid: c0413fb5-33e2-40b7-9b6f-60b29f4a7a18
