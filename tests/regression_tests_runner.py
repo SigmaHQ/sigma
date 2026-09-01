@@ -255,17 +255,19 @@ def run_evtx_batch(
     evtx_test_items: List[tuple],
     evtx_checker_path: str,
     thor_config: str,
-) -> Dict[str, List[str]]:
+) -> Optional[Dict[str, List[str]]]:
     """Run evtx-sigma-checker once for all EVTX tests.
 
     Returns:
-        Dict mapping rule_id -> list of matching JSON output lines
+        Dict mapping rule_id -> list of matching JSON output lines, or None if the subprocess failed.
     """
     with tempfile.TemporaryDirectory() as tmpdir:
         rules_dir = os.path.join(tmpdir, "rules")
         evtx_dir = os.path.join(tmpdir, "evtx")
         os.makedirs(rules_dir)
         os.makedirs(evtx_dir)
+
+        id_to_path = {rule_info["id"]: rule_info["path"] for rule_info, _, _ in evtx_test_items}
 
         for rule_info, _, test_data in evtx_test_items:
             rule_path = rule_info["path"]
@@ -300,10 +302,14 @@ def run_evtx_batch(
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         except subprocess.TimeoutExpired:
             print("  Timeout: batched evtx-sigma-checker timed out")
-            return {}
+            return None
 
         if result.returncode != 0:
-            print(f"  Warning: evtx-sigma-checker exited with code {result.returncode}: {result.stderr}")
+            stderr = result.stderr
+            for rule_id, rule_path in id_to_path.items():
+                stderr = stderr.replace(os.path.join(rules_dir, f"{rule_id}.yml"), rule_path)
+            print(f"  Error: evtx-sigma-checker exited with code {result.returncode}: {stderr.strip()}")
+            return None
 
         matches: Dict[str, List[str]] = {}
         for line in result.stdout.strip().splitlines():
@@ -536,6 +542,18 @@ def run_tests(
             test_type = "evtx"
             test_path = test_data.get("path", "unknown")
 
+            if batch_matches is None:
+                failures.append({
+                    "rule_id": rule_id,
+                    "rule_path": rule_path,
+                    "test_name": test_name,
+                    "test_type": test_type,
+                    "test_path": test_path,
+                    "test_number": i + 1,
+                    "batch_failed": True,
+                })
+                continue
+
             match_outputs = batch_matches.get(rule_id, [])
             match_count = len(match_outputs)
             all_output = "\n    ".join(match_outputs)
@@ -721,7 +739,12 @@ def print_summary(total_tests: int, passed_tests: int, failures: List[Dict]) -> 
     if failures:
         print(f"\nFAILED TESTS ({len(failures)}):")
         print("-" * 40)
+        batch_failures = [f for f in failures if f.get("batch_failed")]
+        if batch_failures:
+            print(f"  evtx-sigma-checker batch failed ({len(batch_failures)} test(s) affected)\n")
         for failure in failures:
+            if failure.get("batch_failed"):
+                continue
             print(f"Rule: {failure['rule_id']}")
             print(f"  File: {failure['rule_path']}")
             print(f"  Test: {failure['test_name']} (type: {failure['test_type']})")
