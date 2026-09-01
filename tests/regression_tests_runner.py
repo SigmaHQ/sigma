@@ -309,6 +309,7 @@ def run_evtx_batch(
             for rule_id, rule_path in id_to_path.items():
                 stderr = stderr.replace(os.path.join(rules_dir, f"{rule_id}.yml"), rule_path)
             print(f"  Error: evtx-sigma-checker exited with code {result.returncode}: {stderr.strip()}")
+            print("  Aborting further EVTX tests. Fix the errors above before retrying.")
             return None
 
         matches: Dict[str, List[str]] = {}
