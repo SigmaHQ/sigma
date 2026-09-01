@@ -10,7 +10,7 @@ references:
     - https://www.cadosecurity.com/spinning-yarn-a-new-linux-malware-campaign-targets-docker-apache-hadoop-redis-and-confluence/
 author: Patrick Bareiss
 date: 2019-03-24
-modified: 2024-04-17
+modified: 2026-06-10
 tags:
     - attack.stealth
     - attack.t1070.003
@@ -18,20 +18,26 @@ logsource:
     product: linux
 detection:
     keywords:
+        - '"" >*sh_history'
+        - '> ~/.*sh_history'
         - 'cat /dev/null >*sh_history'
         - 'cat /dev/zero >*sh_history'
         - 'chattr +i*sh_history'
         - 'echo "" >*sh_history'
         - 'empty_bash_history'
+        - 'export HISTFILE=/dev/null'
         - 'export HISTFILESIZE=0'
+        - 'export HISTSIZE=0'
         - 'history -c'
         - 'history -w'
         - 'ln -sf /dev/null *sh_history'
         - 'ln -sf /dev/zero *sh_history'
         - 'rm *sh_history'
+        - 'rm $HISTFILE'
         - 'shopt -ou history'
         - 'shopt -uo history'
         - 'shred *sh_history'
+        - 'truncate --size=0 *sh_history'
         - 'truncate -s0 *sh_history'
         # - 'unset HISTFILE'  # prone to false positives
     condition: keywords
