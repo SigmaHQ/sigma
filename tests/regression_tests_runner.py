@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import yaml
 
@@ -209,7 +209,7 @@ def _process_rule_file(
 
 def find_rules_with_tests(
     rules_paths: List[str],
-    workers: int = None,
+    workers: Optional[int] = None,
 ) -> tuple[List[Dict], List[Dict], List[Dict]]:
     """Find all rules that have a 'regression_tests_path' attribute pointing to test info files.
 
@@ -230,14 +230,25 @@ def find_rules_with_tests(
                 if file.endswith(".yml"):
                     all_files.append(os.path.join(root, file))
 
-    actual_workers = workers or min(32, (os.cpu_count() or 1) * 4)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=actual_workers) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=_default_workers(workers)) as executor:
         for r, mf, mrp in executor.map(_process_rule_file, all_files):
             results.extend(r)
             missing_files.extend(mf)
             missing_regression_tests_path.extend(mrp)
 
     return results, missing_files, missing_regression_tests_path
+
+
+def _default_workers(n: Optional[int]) -> int:
+    return n if n is not None else min(32, (os.cpu_count() or 1) * 4)
+
+
+def _link(src: str, dst: str) -> None:
+    """Hardlink src to dst, falling back to copy if cross-filesystem."""
+    try:
+        os.link(src, dst)
+    except OSError:
+        shutil.copy2(src, dst)
 
 
 def run_evtx_batch(
@@ -256,13 +267,6 @@ def run_evtx_batch(
         os.makedirs(rules_dir)
         os.makedirs(evtx_dir)
 
-        def _link(src: str, dst: str) -> None:
-            """Hardlink src to dst, falling back to copy if cross-filesystem."""
-            try:
-                os.link(src, dst)
-            except OSError:
-                shutil.copy2(src, dst)
-
         for rule_info, _, test_data in evtx_test_items:
             rule_path = rule_info["path"]
             evtx_path = test_data["path"]
@@ -277,6 +281,12 @@ def run_evtx_batch(
                 evtx_dst = os.path.join(evtx_dir, os.path.basename(evtx_path))
                 if not os.path.exists(evtx_dst):
                     _link(os.path.abspath(evtx_path), evtx_dst)
+                else:
+                    print(
+                        f"  Warning: EVTX filename collision for '{os.path.basename(evtx_path)}' "
+                        f"(rule {rule_id}) - file already staged from another rule; "
+                        "review info.yml to ensure unique EVTX filenames"
+                    )
 
         cmd = [
             evtx_checker_path,
@@ -287,13 +297,13 @@ def run_evtx_batch(
         ]
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=600, check=True)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         except subprocess.TimeoutExpired:
             print("  Timeout: batched evtx-sigma-checker timed out")
             return {}
-        except subprocess.CalledProcessError as e:
-            print(f"  Error running batched evtx-sigma-checker: {e.stderr or e}")
-            return {}
+
+        if result.returncode != 0:
+            print(f"  Warning: evtx-sigma-checker exited with code {result.returncode}: {result.stderr}")
 
         matches: Dict[str, List[str]] = {}
         for line in result.stdout.strip().splitlines():
@@ -307,7 +317,6 @@ def run_evtx_batch(
                 print(f"  Warning: Skipping non-JSON line: {line}")
 
         return matches
-
 
 
 def compile_rule_to_expr(
@@ -590,8 +599,7 @@ def run_tests(
 
             return success, rule_id, rule_path, test_name, test_type, test_path, i + 1
 
-        workers = args.workers or min(32, (os.cpu_count() or 1) * 4)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=_default_workers(args.workers)) as executor:
             futures = [executor.submit(run_single, item) for item in other_items]
             for future in concurrent.futures.as_completed(futures):
                 success, rule_id, rule_path, test_name, test_type, test_path, test_num = future.result()
