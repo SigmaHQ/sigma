@@ -300,7 +300,8 @@ def run_evtx_batch(
             try:
                 json_obj = json.loads(line)
                 rid = json_obj.get("RuleId")
-                if rid:
+                evtx_stem = os.path.splitext(os.path.basename(json_obj.get("File", "")))[0]
+                if rid and evtx_stem == rid:
                     matches.setdefault(rid, []).append(line)
             except json.JSONDecodeError:
                 print(f"  Warning: Skipping non-JSON line: {line}")
