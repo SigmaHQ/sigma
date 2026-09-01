@@ -1,0 +1,58 @@
+title: Powershell Create Scheduled Task via CommandLine
+id: 3a00e18c-bde4-4e81-bc8f-500e24c720a6
+related:
+    - id: 363eccc0-279a-4ccf-a3ab-24c2e63b11fb
+      type: similar
+    - id: 3a734d25-df5c-4b99-8034-af1ddb5883a4
+      type: similar
+status: experimental
+description: |
+    Detects PowerShell invocations that create scheduled tasks via the command line.
+    Covers native PowerShell cmdlets (e.g. Register-ScheduledTask), the WMI/CIM method,
+    and the Schedule.Service COM object (which bypasses schtasks.exe-based detections).
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1053.005/T1053.005.md#atomic-test-4---powershell-cmdlet-scheduled-task
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1053.005/T1053.005.md#atomic-test-6---wmi-invoke-cimmethod-scheduled-task
+author: frack113, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-25
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1053.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'powershell.exe'
+              - 'pwsh.dll'
+    selection_cli_cmdlet:
+        CommandLine|contains:
+            - 'New-ScheduledTaskAction'
+            - 'New-ScheduledTaskTrigger'
+            - 'New-ScheduledTaskPrincipal'
+            - 'New-ScheduledTaskSettingsSet'
+            - 'New-ScheduledTask'
+            - 'Register-ScheduledTask'
+    selection_cli_cimmethod:
+        CommandLine|contains|all:
+            - 'Invoke-CimMethod'
+            - '-ClassName'
+            - 'PS_ScheduledTask'
+            - '-NameSpace'
+            - 'Root\Microsoft\Windows\TaskScheduler'
+    selection_cli_com:
+        CommandLine|contains|all:
+            - '-ComObject'
+            - 'Schedule.Service'
+            - 'RegisterTaskDefinition'
+    condition: selection_img and 1 of selection_cli_*
+falsepositives:
+    - Legitimate administrative scripts passed inline on the command line
+level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_powershell_create_schtasks/info.yml
