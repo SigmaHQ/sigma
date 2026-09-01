@@ -1,12 +1,15 @@
 title: Regsvr32 DLL Execution With Uncommon Extension
 id: 50919691-7302-437f-8e10-1fe088afa145
 status: test
-description: Detects a "regsvr32" execution where the DLL doesn't contain a common file extension.
+description: |
+    Detects a "regsvr32" execution where the DLL doesn't contain a common file extension.
+    Threat actors often rename their malicious DLLs to often benign file extensions
+    to avoid detection.
 references:
     - https://app.any.run/tasks/34221348-072d-4b70-93f3-aa71f6ebecad/
 author: Florian Roth (Nextron Systems)
 date: 2019-07-17
-modified: 2023-05-24
+modified: 2026-07-10
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -35,7 +38,10 @@ detection:
         CommandLine: null
     filter_main_empty_4688:
         CommandLine: ''
+    filter_main_regsvr32:
+        CommandLine: '"C:\WINDOWS\system32\regsvr32.exe"'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Other legitimate extensions currently not in the list either from third party or specific Windows components.
 level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_regsvr32_uncommon_extension/info.yml

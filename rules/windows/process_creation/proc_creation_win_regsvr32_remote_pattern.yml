@@ -1,0 +1,42 @@
+title: Potentially Suspicious Regsvr32 Remote Pattern
+id: 867356ee-9352-41c9-a8f2-1be690d78216
+related:
+    - id: 8e2b24c9-4add-46a0-b4bb-0057b4e6187d
+      type: obsolete
+status: test
+description: |
+    Detects regsvr32 execution to load/register DLLs from remote locations via HTTP, HTTPS, or FTP protocols.
+    This is a common technique used by attackers to bypass application whitelisting and execute malicious code.
+references:
+    - https://twitter.com/mrd0x/status/1461041276514623491
+    - https://twitter.com/tccontre18/status/1480950986650832903
+    - https://lolbas-project.github.io/lolbas/Binaries/Regsvr32/
+    - https://www.cyberproof.com/blog/beyond-powershell-analyzing-the-multi-action-clickfix-variant/
+    - https://github.com/SuperKieran/WooyunDrops/blob/gh-pages/static/drops/1161.Use%20SCT%20to%20Bypass%20Application%20Whitelisting%20Protection.html
+author: Florian Roth (Nextron Systems)
+date: 2023-05-24
+modified: 2026-07-10
+tags:
+    - attack.stealth
+    - attack.t1218.010
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\regsvr32.exe'
+        - OriginalFileName: 'REGSVR32.EXE'
+    selection_http_ftp_flag:
+        CommandLine|contains|windash:
+            - ' /i'
+            - ' /s'
+    selection_protocol_handler:
+        CommandLine|contains:
+            - 'ftp://'
+            - 'http://'
+            - 'https://'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_regsvr32_remote_pattern/info.yml

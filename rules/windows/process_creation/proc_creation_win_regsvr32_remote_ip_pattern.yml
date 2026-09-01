@@ -1,0 +1,73 @@
+title: Potentially Suspicious Regsvr32 Remote IPv4 Pattern
+id: 2dd2c217-bf68-437a-b57c-fe9fd01d5de8
+status: test
+description: |
+    Detects regsvr32 execution to load DLLs from remote IPv4 addresses via HTTP, HTTPS, FTP, or UNC paths.
+    Regsvr32 executing DLLs from remote IPv4 address is a very strong
+    indicator of a threat actor trying to execute malicious DLLs hosted on their infrastructure.
+references:
+    - https://twitter.com/mrd0x/status/1461041276514623491
+    - https://twitter.com/tccontre18/status/1480950986650832903
+    - https://lolbas-project.github.io/lolbas/Binaries/Regsvr32/
+    - https://www.cyberproof.com/blog/beyond-powershell-analyzing-the-multi-action-clickfix-variant/
+    - https://github.com/SuperKieran/WooyunDrops/blob/gh-pages/static/drops/1161.Use%20SCT%20to%20Bypass%20Application%20Whitelisting%20Protection.html
+author: Florian Roth (Nextron Systems)
+date: 2022-01-11
+modified: 2026-07-10
+tags:
+    - attack.stealth
+    - attack.t1218.010
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\regsvr32.exe'
+        - OriginalFileName: 'REGSVR32.EXE'
+    selection_cli_flag:
+        CommandLine|contains|windash:
+            - ' /i'
+            - ' /s'
+    selection_ip:
+        CommandLine|contains:
+            - 'http://1'
+            - 'http://2'
+            - 'http://3'
+            - 'http://4'
+            - 'http://5'
+            - 'http://6'
+            - 'http://7'
+            - 'http://8'
+            - 'http://9'
+            - 'https://1'
+            - 'https://2'
+            - 'https://3'
+            - 'https://4'
+            - 'https://5'
+            - 'https://6'
+            - 'https://7'
+            - 'https://8'
+            - 'https://9'
+            - 'ftp://1'
+            - 'ftp://2'
+            - 'ftp://3'
+            - 'ftp://4'
+            - 'ftp://5'
+            - 'ftp://6'
+            - 'ftp://7'
+            - 'ftp://8'
+            - 'ftp://9'
+            - '\\\\1'
+            - '\\\\2'
+            - '\\\\3'
+            - '\\\\4'
+            - '\\\\5'
+            - '\\\\6'
+            - '\\\\7'
+            - '\\\\8'
+            - '\\\\9'
+    condition: all of selection_*
+falsepositives:
+    - FQDNs that start with a number such as "7-Zip"
+level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_regsvr32_remote_ip_pattern/info.yml
