@@ -538,13 +538,6 @@ def parse_arguments() -> argparse.Namespace:
         help="Number of parallel workers for running tests (default: auto based on CPU count)",
     )
 
-    parser.add_argument(
-        "--shard",
-        default=None,
-        metavar="INDEX/TOTAL",
-        help="Run a shard of tests, e.g. --shard 2/4 runs the second quarter of all tests",
-    )
-
     return parser.parse_args()
 
 
@@ -942,22 +935,7 @@ def main():
         find_rules_with_tests(args.rules_paths, workers=args.workers)
     )
 
-    print(f"Found {len(rules_with_tests)} rule(s) with regression tests configured.")
-
-    if args.shard:
-        try:
-            index, total = map(int, args.shard.split("/"))
-            if not (1 <= index <= total):
-                print(f"Error: shard index must be between 1 and {total}")
-                sys.exit(1)
-        except ValueError:
-            print(f"Error: --shard must be in INDEX/TOTAL format, e.g. --shard 2/4")
-            sys.exit(1)
-        rules_with_tests.sort(key=lambda r: r["path"])
-        rules_with_tests = rules_with_tests[index - 1 :: total]
-        print(f"Shard {index}/{total}: running {len(rules_with_tests)} rule(s).\n")
-    else:
-        print()
+    print(f"Found {len(rules_with_tests)} rule(s) with regression tests configured.\n")
 
     print("Checking for consistent rule <--> test mapping...")
     inconsistent_rules = check_rule_id_consistency(rules_with_tests)
