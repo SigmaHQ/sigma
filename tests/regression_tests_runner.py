@@ -309,81 +309,6 @@ def run_evtx_batch(
         return matches
 
 
-def run_evtx_checker(
-    rule_path: str,
-    rule_id: str,
-    test_data: Dict,
-    evtx_checker_path: str,
-    thor_config: str,
-) -> tuple[bool, str]:
-    """Run evtx-sigma-checker and check if rule ID is in output."""
-    evtx_path = test_data["path"]
-
-    # File existence is now checked upfront in find_rules_with_tests
-    # No need to check again here
-
-    cmd = [
-        evtx_checker_path,
-        "--log-source",
-        thor_config,
-        "--evtx-path",
-        evtx_path,
-        "--rule-level",
-        "informational",
-        "--rule-path",
-        os.path.dirname(rule_path),
-    ]
-
-    try:
-        result = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=300, check=True
-        )
-
-        if result.returncode != 0:
-            print(f"  Warning: evtx-sigma-checker failed: {result.stderr}")
-            return False, ""
-
-        # Check if rule ID appears in output
-        output_lines = result.stdout.strip().splitlines()
-        match_outputs = []
-
-        for line in output_lines:
-            try:
-                json_obj = json.loads(line)
-                if json_obj.get("RuleId") == rule_id:
-                    match_outputs.append(line)
-            except json.JSONDecodeError:
-                # Skip lines that aren't valid JSON
-                print(f"  Warning: Skipping non-JSON line: {line}")
-                continue
-
-        match_count = len(match_outputs)
-        all_output = "\n    ".join(match_outputs)
-
-        expected_count = test_data.get("match_count")
-        if expected_count is not None:
-            if match_count < expected_count:
-                print(
-                    f"  Error: {rule_id}: Match count too low: expected {expected_count}, got {match_count}"
-                )
-                return False, all_output
-            if match_count > expected_count:
-                print(
-                    f"  Warning: {rule_id}: Got {match_count} matches but only {expected_count} expected - consider updating match_count in info.yml"
-                )
-            return True, all_output
-
-        return match_count > 0, all_output
-
-    except subprocess.TimeoutExpired:
-        print("  Timeout: evtx-sigma-checker timed out")
-        return False, ""
-    except subprocess.CalledProcessError as e:
-        print(f"  Error running evtx-sigma-checker: {e}")
-        if e.stderr:
-            print(f"  Output: {e.stderr}")
-        return False, ""
-
 
 def compile_rule_to_expr(
     rule_path: str, pipelines: List[str], filters: List[str]
@@ -464,18 +389,11 @@ def run_test(
     rule_path: str,
     rule_id: str,
     test_data: Dict,
-    evtx_checker_path: str,
-    thor_config: str,
     json_checker_path: str,
 ) -> tuple[bool, str]:
     """Run a test based on its type."""
     test_type = test_data.get("type", "unknown")
 
-    if test_type == "evtx":
-        return run_evtx_checker(
-            rule_path, rule_id, test_data, evtx_checker_path, thor_config
-        )
-    
     if test_type in {"json", "ndjson", "jsonl"}:
         if not json_checker_path:
             print("  Error: --json-checker is required for 'ndjson/json/jsonl' tests")
@@ -656,8 +574,7 @@ def run_tests(
                 print(f"\nTesting rule: {rule_id} - {test_name} (type: {test_type}): {test_path}")
 
             success, output = run_test(
-                rule_path, rule_id, test_data,
-                args.evtx_checker, args.thor_config, args.json_checker,
+                rule_path, rule_id, test_data, args.json_checker,
             )
 
             if args.verbose:
