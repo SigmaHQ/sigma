@@ -5,15 +5,10 @@ on: [push, pull_request, workflow_dispatch]
 env:
   EVTX_BASELINE_VERSION: v0.8.4
   JSON_MATCHER_VERSION: v0.0.2
-  TOTAL_SHARDS: 4
 
 jobs:
   true-positive-tests:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        shard: ["1/4", "2/4", "3/4", "4/4"]
-    name: "Regression Tests (shard ${{ matrix.shard }})"
     steps:
     - uses: actions/checkout@v5
 
@@ -65,17 +60,4 @@ jobs:
 
     - name: Run regression tests
       run: |
-        python tests/regression_tests_runner.py --rules-paths rules rules-emerging-threats rules-threat-hunting --evtx-checker ./evtx-sigma-checker --thor-config tests/thor.yml --ignore-validation --json-checker ./json_checker --workers 8 --shard ${{ matrix.shard }}
-
-  all-shards-passed:
-    needs: [true-positive-tests]
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Check all shards passed
-        run: |
-          if [[ "${{ needs.true-positive-tests.result }}" != "success" ]]; then
-            echo "One or more shards failed"
-            exit 1
-          fi
-          echo "All shards passed"
+        python tests/regression_tests_runner.py --rules-paths rules rules-emerging-threats rules-threat-hunting --evtx-checker ./evtx-sigma-checker --thor-config tests/thor.yml --ignore-validation --json-checker ./json_checker --workers 8

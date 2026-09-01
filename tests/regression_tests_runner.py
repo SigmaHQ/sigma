@@ -4,8 +4,10 @@ import argparse
 import concurrent.futures
 import json
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from typing import Dict, List
 
 import yaml
@@ -236,6 +238,74 @@ def find_rules_with_tests(
             missing_regression_tests_path.extend(mrp)
 
     return results, missing_files, missing_regression_tests_path
+
+
+def run_evtx_batch(
+    evtx_test_items: List[tuple],
+    evtx_checker_path: str,
+    thor_config: str,
+) -> Dict[str, List[str]]:
+    """Run evtx-sigma-checker once for all EVTX tests.
+
+    Returns:
+        Dict mapping rule_id -> list of matching JSON output lines
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        rules_dir = os.path.join(tmpdir, "rules")
+        evtx_dir = os.path.join(tmpdir, "evtx")
+        os.makedirs(rules_dir)
+        os.makedirs(evtx_dir)
+
+        def _link(src: str, dst: str) -> None:
+            """Hardlink src to dst, falling back to copy if cross-filesystem."""
+            try:
+                os.link(src, dst)
+            except OSError:
+                shutil.copy2(src, dst)
+
+        for rule_info, _, test_data in evtx_test_items:
+            rule_path = rule_info["path"]
+            evtx_path = test_data["path"]
+            rule_id = rule_info["id"]
+
+            # Use rule_id as filename to avoid collisions across directories
+            rule_dst = os.path.join(rules_dir, f"{rule_id}.yml")
+            if not os.path.exists(rule_dst):
+                _link(os.path.abspath(rule_path), rule_dst)
+
+            if os.path.exists(evtx_path):
+                evtx_dst = os.path.join(evtx_dir, os.path.basename(evtx_path))
+                if not os.path.exists(evtx_dst):
+                    _link(os.path.abspath(evtx_path), evtx_dst)
+
+        cmd = [
+            evtx_checker_path,
+            "--log-source", thor_config,
+            "--evtx-path", evtx_dir,
+            "--rule-level", "informational",
+            "--rule-path", rules_dir,
+        ]
+
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=600, check=True)
+        except subprocess.TimeoutExpired:
+            print("  Timeout: batched evtx-sigma-checker timed out")
+            return {}
+        except subprocess.CalledProcessError as e:
+            print(f"  Error running batched evtx-sigma-checker: {e.stderr or e}")
+            return {}
+
+        matches: Dict[str, List[str]] = {}
+        for line in result.stdout.strip().splitlines():
+            try:
+                json_obj = json.loads(line)
+                rid = json_obj.get("RuleId")
+                if rid:
+                    matches.setdefault(rid, []).append(line)
+            except json.JSONDecodeError:
+                print(f"  Warning: Skipping non-JSON line: {line}")
+
+        return matches
 
 
 def run_evtx_checker(
@@ -517,10 +587,10 @@ def init_checks(args: argparse.Namespace) -> None:
 def run_tests(
     args: argparse.Namespace, rules_with_tests
 ) -> tuple[int, int, List[Dict]]:
-    """Run tests for all rules with test data in parallel."""
+    """Run tests for all rules: EVTX tests in one batch call, JSON tests in parallel."""
     failures = []
+    passed_tests = 0
 
-    # Flatten all (rule_info, test_index, test_data) tuples upfront
     all_test_items = [
         (rule_info, i, test_data)
         for rule_info in rules_with_tests
@@ -528,52 +598,100 @@ def run_tests(
     ]
     total_tests = len(all_test_items)
 
-    def run_single(item: tuple) -> tuple:
-        rule_info, i, test_data = item
-        rule_path = rule_info["path"]
-        rule_id = rule_info["id"]
-        test_name = test_data.get("name", f"Test {i + 1}")
-        test_type = test_data.get("type", "unknown")
-        test_path = test_data.get("path", "unknown")
+    evtx_items = [(ri, i, td) for ri, i, td in all_test_items if td.get("type") == "evtx"]
+    other_items = [(ri, i, td) for ri, i, td in all_test_items if td.get("type") != "evtx"]
 
-        if args.verbose:
-            print(f"\nTesting rule: {rule_id} - {test_name} (type: {test_type}): {test_path}")
+    # --- EVTX: single batched subprocess call ---
+    if evtx_items:
+        batch_matches = run_evtx_batch(evtx_items, args.evtx_checker, args.thor_config)
 
-        success, output = run_test(
-            rule_path, rule_id, test_data,
-            args.evtx_checker, args.thor_config, args.json_checker,
-        )
+        for rule_info, i, test_data in evtx_items:
+            rule_id = rule_info["id"]
+            rule_path = rule_info["path"]
+            test_name = test_data.get("name", f"Test {i + 1}")
+            test_type = "evtx"
+            test_path = test_data.get("path", "unknown")
 
-        if args.verbose:
-            if success:
-                print(f"    ✓ PASS - Match found for Rule ID: {rule_id}")
-                if output:
-                    print(f"    Output: {output}")
+            match_outputs = batch_matches.get(rule_id, [])
+            match_count = len(match_outputs)
+            all_output = "\n    ".join(match_outputs)
+            expected_count = test_data.get("match_count")
+
+            if expected_count is not None:
+                if match_count < expected_count:
+                    print(f"  Error: {rule_id}: Match count too low: expected {expected_count}, got {match_count}")
+                    success = False
+                else:
+                    if match_count > expected_count:
+                        print(f"  Warning: {rule_id}: Got {match_count} matches but only {expected_count} expected - consider updating match_count in info.yml")
+                    success = True
             else:
-                print(f"    ✗ FAIL: {rule_id}")
+                success = match_count > 0
 
-        return success, rule_id, rule_path, test_name, test_type, test_path, i + 1
+            if args.verbose:
+                if success:
+                    print(f"    ✓ PASS - Match found for Rule ID: {rule_id}")
+                    if all_output:
+                        print(f"    Output: {all_output}")
+                else:
+                    print(f"    ✗ FAIL: {rule_id}")
 
-    workers = args.workers if args.workers else min(32, (os.cpu_count() or 1) * 4)
-    passed_tests = 0
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
-        futures = [executor.submit(run_single, item) for item in all_test_items]
-        for future in concurrent.futures.as_completed(futures):
-            success, rule_id, rule_path, test_name, test_type, test_path, test_num = future.result()
             if success:
                 passed_tests += 1
             else:
-                failures.append(
-                    {
+                failures.append({
+                    "rule_id": rule_id,
+                    "rule_path": rule_path,
+                    "test_name": test_name,
+                    "test_type": test_type,
+                    "test_path": test_path,
+                    "test_number": i + 1,
+                })
+
+    # --- JSON/NDJSON/JSONL: parallel workers ---
+    if other_items:
+        def run_single(item: tuple) -> tuple:
+            rule_info, i, test_data = item
+            rule_path = rule_info["path"]
+            rule_id = rule_info["id"]
+            test_name = test_data.get("name", f"Test {i + 1}")
+            test_type = test_data.get("type", "unknown")
+            test_path = test_data.get("path", "unknown")
+
+            if args.verbose:
+                print(f"\nTesting rule: {rule_id} - {test_name} (type: {test_type}): {test_path}")
+
+            success, output = run_test(
+                rule_path, rule_id, test_data,
+                args.evtx_checker, args.thor_config, args.json_checker,
+            )
+
+            if args.verbose:
+                if success:
+                    print(f"    ✓ PASS - Match found for Rule ID: {rule_id}")
+                    if output:
+                        print(f"    Output: {output}")
+                else:
+                    print(f"    ✗ FAIL: {rule_id}")
+
+            return success, rule_id, rule_path, test_name, test_type, test_path, i + 1
+
+        workers = args.workers if args.workers else min(32, (os.cpu_count() or 1) * 4)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = [executor.submit(run_single, item) for item in other_items]
+            for future in concurrent.futures.as_completed(futures):
+                success, rule_id, rule_path, test_name, test_type, test_path, test_num = future.result()
+                if success:
+                    passed_tests += 1
+                else:
+                    failures.append({
                         "rule_id": rule_id,
                         "rule_path": rule_path,
                         "test_name": test_name,
                         "test_type": test_type,
                         "test_path": test_path,
                         "test_number": test_num,
-                    }
-                )
+                    })
 
     return total_tests, passed_tests, failures
 
