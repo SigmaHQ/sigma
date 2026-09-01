@@ -457,7 +457,10 @@ def parse_arguments() -> argparse.Namespace:
         help="Number of parallel workers for running tests (default: auto based on CPU count)",
     )
 
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.workers is not None and args.workers < 1:
+        parser.error("--workers must be >= 1")
+    return args
 
 
 def init_checks(args: argparse.Namespace) -> None:
@@ -587,7 +590,7 @@ def run_tests(
 
             return success, rule_id, rule_path, test_name, test_type, test_path, i + 1
 
-        workers = args.workers if args.workers else min(32, (os.cpu_count() or 1) * 4)
+        workers = args.workers or min(32, (os.cpu_count() or 1) * 4)
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
             futures = [executor.submit(run_single, item) for item in other_items]
             for future in concurrent.futures.as_completed(futures):
