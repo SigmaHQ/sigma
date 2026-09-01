@@ -1,6 +1,7 @@
 """Run regression tests for Sigma rules based on their regression_tests_path attribute."""
 
 import argparse
+import concurrent.futures
 import json
 import os
 import subprocess
@@ -8,6 +9,11 @@ import sys
 from typing import Dict, List
 
 import yaml
+
+try:
+    from yaml import CSafeLoader as _YAMLLoader
+except ImportError:
+    from yaml import SafeLoader as _YAMLLoader  # type: ignore[assignment]
 
 
 def get_absolute_path(base_path: str, relative_path: str) -> str:
@@ -46,7 +52,7 @@ def load_info_yaml(
 
     try:
         with open(regression_tests_path, "r", encoding="utf-8") as f:
-            info_data = yaml.safe_load(f)
+            info_data = yaml.load(f, Loader=_YAMLLoader)
 
         if not info_data or "regression_tests_info" not in info_data:
             print(f"Warning: No regression_tests_info found in {regression_tests_path}")
@@ -176,9 +182,32 @@ def find_rule_tests(rule_data: Dict, file_path: str) -> tuple[List[Dict], List[D
     return results, missing_files
 
 
-# pylint: disable=too-many-locals
+def _process_rule_file(
+    file_path: str,
+) -> tuple[List[Dict], List[Dict], List[Dict]]:
+    """Load and process a single rule file.
+
+    Returns:
+        tuple: (results, missing_files, missing_regression_tests_path)
+    """
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            rule_data = yaml.load(f, Loader=_YAMLLoader)
+        if not rule_data:
+            return [], [], []
+        skip, missing_test = find_rule_missing_test(rule_data, file_path)
+        if skip:
+            return [], [], missing_test
+        result, missing_file = find_rule_tests(rule_data, file_path)
+        return result, missing_file, missing_test
+    except yaml.YAMLError as e:
+        print(f"Warning: Could not parse {file_path}: {e}")
+        return [], [], []
+
+
 def find_rules_with_tests(
     rules_paths: List[str],
+    workers: int = None,
 ) -> tuple[List[Dict], List[Dict], List[Dict]]:
     """Find all rules that have a 'regression_tests_path' attribute pointing to test info files.
 
@@ -189,40 +218,22 @@ def find_rules_with_tests(
     missing_files = []
     missing_regression_tests_path = []
 
+    all_files = []
     for rules_path in rules_paths:
         if not os.path.exists(rules_path):
             print(f"Warning: Rules path {rules_path} does not exist")
             continue
-
         for root, _, files in os.walk(rules_path):
             for file in files:
-                if not file.endswith(".yml"):
-                    continue
+                if file.endswith(".yml"):
+                    all_files.append(os.path.join(root, file))
 
-                file_path = os.path.join(root, file)
-                try:
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        rule_data = yaml.safe_load(f)
-
-                    if not rule_data:
-                        continue
-
-                    # Check for missing regression_tests_path
-                    skip, missing_test = find_rule_missing_test(rule_data, file_path)
-                    missing_regression_tests_path.extend(missing_test)
-                    if skip:
-                        continue
-
-                    # Find tests for the rule
-                    (
-                        result,
-                        missing_file,
-                    ) = find_rule_tests(rule_data, file_path)
-                    results.extend(result)
-                    missing_files.extend(missing_file)
-
-                except yaml.YAMLError as e:
-                    print(f"Warning: Could not parse {file_path}: {e}")
+    actual_workers = workers or min(32, (os.cpu_count() or 1) * 4)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=actual_workers) as executor:
+        for r, mf, mrp in executor.map(_process_rule_file, all_files):
+            results.extend(r)
+            missing_files.extend(mf)
+            missing_regression_tests_path.extend(mrp)
 
     return results, missing_files, missing_regression_tests_path
 
@@ -450,6 +461,20 @@ def parse_arguments() -> argparse.Namespace:
         help="Enable verbose output, showing successful test results as well",
     )
 
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of parallel workers for running tests (default: auto based on CPU count)",
+    )
+
+    parser.add_argument(
+        "--shard",
+        default=None,
+        metavar="INDEX/TOTAL",
+        help="Run a shard of tests, e.g. --shard 2/4 runs the second quarter of all tests",
+    )
+
     return parser.parse_args()
 
 
@@ -489,46 +514,55 @@ def init_checks(args: argparse.Namespace) -> None:
     print()
 
 
-# pylint: disable=too-many-locals
 def run_tests(
     args: argparse.Namespace, rules_with_tests
 ) -> tuple[int, int, List[Dict]]:
-    """Run tests for all rules with test data."""
-    total_tests = 0
-    passed_tests = 0
+    """Run tests for all rules with test data in parallel."""
     failures = []
-    for rule_info in rules_with_tests:
+
+    # Flatten all (rule_info, test_index, test_data) tuples upfront
+    all_test_items = [
+        (rule_info, i, test_data)
+        for rule_info in rules_with_tests
+        for i, test_data in enumerate(rule_info["tests"])
+    ]
+    total_tests = len(all_test_items)
+
+    def run_single(item: tuple) -> tuple:
+        rule_info, i, test_data = item
         rule_path = rule_info["path"]
         rule_id = rule_info["id"]
-        tests = rule_info["tests"]
+        test_name = test_data.get("name", f"Test {i + 1}")
+        test_type = test_data.get("type", "unknown")
+        test_path = test_data.get("path", "unknown")
 
         if args.verbose:
-            print(f"\nTesting rule: {rule_id}")
-            print(f"  File: {rule_path}")
+            print(f"\nTesting rule: {rule_id} - {test_name} (type: {test_type}): {test_path}")
 
-        for i, test_data in enumerate(tests):
-            test_name = test_data.get("name", f"Test {i+1}")
-            test_type = test_data.get("type", "unknown")
-            test_path = test_data.get("path", "unknown")
+        success, output = run_test(
+            rule_path, rule_id, test_data,
+            args.evtx_checker, args.thor_config, args.json_checker,
+        )
 
-            if args.verbose:
-                print(f"  {test_name} (type: {test_type}): {test_path}")
-            total_tests += 1
+        if args.verbose:
+            if success:
+                print(f"    ✓ PASS - Match found for Rule ID: {rule_id}")
+                if output:
+                    print(f"    Output: {output}")
+            else:
+                print(f"    ✗ FAIL: {rule_id}")
 
-            success, output = run_test(
-                rule_path,
-                rule_id,
-                test_data,
-                args.evtx_checker,
-                args.thor_config,
-                args.json_checker,
-            )
+        return success, rule_id, rule_path, test_name, test_type, test_path, i + 1
 
+    workers = args.workers if args.workers else min(32, (os.cpu_count() or 1) * 4)
+    passed_tests = 0
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = [executor.submit(run_single, item) for item in all_test_items]
+        for future in concurrent.futures.as_completed(futures):
+            success, rule_id, rule_path, test_name, test_type, test_path, test_num = future.result()
             if success:
                 passed_tests += 1
-                if args.verbose:
-                    print(f"    ✓ PASS - Match found for Rule ID: {rule_id}\n")
-                    print(f"    Output: {output}")
             else:
                 failures.append(
                     {
@@ -537,14 +571,10 @@ def run_tests(
                         "test_name": test_name,
                         "test_type": test_type,
                         "test_path": test_path,
-                        "test_number": i + 1,
+                        "test_number": test_num,
                     }
                 )
-                if args.verbose:
-                    print("    ✗ FAIL")
 
-        if args.verbose:
-            print()
     return total_tests, passed_tests, failures
 
 
@@ -791,10 +821,25 @@ def main():
     # Find rules with tests
     print("Scanning for rules with test data...")
     rules_with_tests, missing_files, missing_regression_tests_path = (
-        find_rules_with_tests(args.rules_paths)
+        find_rules_with_tests(args.rules_paths, workers=args.workers)
     )
 
-    print(f"Found {len(rules_with_tests)} rule(s) with regression tests configured.\n")
+    print(f"Found {len(rules_with_tests)} rule(s) with regression tests configured.")
+
+    if args.shard:
+        try:
+            index, total = map(int, args.shard.split("/"))
+            if not (1 <= index <= total):
+                print(f"Error: shard index must be between 1 and {total}")
+                sys.exit(1)
+        except ValueError:
+            print(f"Error: --shard must be in INDEX/TOTAL format, e.g. --shard 2/4")
+            sys.exit(1)
+        rules_with_tests.sort(key=lambda r: r["path"])
+        rules_with_tests = rules_with_tests[index - 1 :: total]
+        print(f"Shard {index}/{total}: running {len(rules_with_tests)} rule(s).\n")
+    else:
+        print()
 
     print("Checking for consistent rule <--> test mapping...")
     inconsistent_rules = check_rule_id_consistency(rules_with_tests)
