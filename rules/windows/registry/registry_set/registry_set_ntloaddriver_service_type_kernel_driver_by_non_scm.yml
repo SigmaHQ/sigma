@@ -55,7 +55,13 @@ detection:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
             - 'C:\ProgramData\'
-    condition: all of selection_* and not 1 of filter_main_*
+    filter_optional_procexp:
+        Image|endswith:
+            - '\procexp.exe'
+            - '\procexp64.exe'
+            - '\procexp64a.exe'
+        TargetObject|contains: '\Services\PROCEXP'
+    condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Third-party driver installers writing service keys directly via registry API
 level: medium
