@@ -23,22 +23,37 @@ logsource:
     product: windows
 detection:
     selection_target:
-        - TargetObject|contains:  '\SYSTEM\CurrentControlSet\Services\'
+        - TargetObject|contains: '\SYSTEM\CurrentControlSet\Services\'
         - TargetObject|contains|all:
               - '\SYSTEM\ControlSet'
               - '\Services\'
     selection_details:
         TargetObject|endswith: '\Type'
         Details: 'DWORD (0x00000001)'
-    filter_main_scm:
-        Image|endswith: 'C:\Windows\system32\services.exe'
-    filter_main_poqexe:
-        Image|endswith: 'C:\Windows\system32\poqexec.exe'
-    filter_main_tiworker_1:
-        Image|endswith: 'C:\Windows\system32\TiWorker.exe'
-    filter_main_tiworker_2:
-        Image|startswith: 'C:\WINDOWS\winsxs\'
-        Image|endswith: '\TiWorker.exe'
+    filter_main_systemfiles:
+        Image|startswith:
+            - 'C:\Windows\system32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
+            - 'C:\Windows\uus\'
+        Image|endswith:
+            - '\drvinst.exe'
+            - '\loginui.exe'
+            - '\loginw32.exe'
+            - '\msiexec.exe'
+            - '\ntoskrnl.exe'
+            - '\poqexec.exe'
+            - '\rundll32.exe'
+            - '\services.exe'
+            - '\silsvc.exe'
+            - '\TiWorker.exe'
+            - '\waasmedicagent.exe'
+            - '\wininit.exe'
+    filter_main_programfiles:
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\ProgramData\'
     condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
     - Third-party driver installers writing service keys directly via registry API
