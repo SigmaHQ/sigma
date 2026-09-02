@@ -78,6 +78,14 @@ def load_info_yaml(
                     }
                 )
 
+            base_dir = os.path.dirname(regression_tests_path)
+            pipelines = [
+                get_absolute_path(base_dir, p) for p in test.get("pipelines", [])
+            ]
+            filters = [
+                get_absolute_path(base_dir, f) for f in test.get("filters", [])
+            ]
+
             test_data.append(
                 {
                     "type": test.get("type", "unknown"),
@@ -85,6 +93,8 @@ def load_info_yaml(
                     "name": test.get("name", "Unnamed Test"),
                     "provider": test.get("provider", ""),
                     "match_count": test.get("match_count"),
+                    "pipelines": pipelines,
+                    "filters": filters,
                 }
             )
         info_metadata_rule_id = None
@@ -293,12 +303,88 @@ def run_evtx_checker(
         return False, ""
 
 
+def compile_rule_to_expr(
+    rule_path: str, pipelines: List[str], filters: List[str]
+) -> str:
+    """Compile a Sigma rule to a golang_expr query via the sigma CLI."""
+    cmd = ["sigma", "convert", "-t", "golang_expr"]
+    for pipeline in pipelines:
+        cmd += ["-p", pipeline]
+    if len(pipelines) == 0:
+        cmd += ["--without-pipeline"]
+    for filter in filters:
+        cmd += ["--filter", filter]
+    cmd.append(rule_path)
+
+    result = subprocess.run(
+        cmd, capture_output=True, text=True, timeout=300, check=True
+    )
+
+    return result.stdout.strip()
+
+
+def run_json_checker(
+    test_type: str,
+    rule_path: str,
+    rule_id: str,
+    test_data: Dict,
+    json_checker_path: str,
+) -> tuple[bool, str]:
+    """Compile the rule to an expr query and run json_checker against the events."""
+    try:
+        expr_query = compile_rule_to_expr(
+            rule_path, test_data.get("pipelines", []), test_data.get("filters", [])
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"  Error compiling rule {rule_id} with sigma: {e.stderr or e}")
+        return False, ""
+    except subprocess.TimeoutExpired:
+        print(f"  Timeout compiling rule {rule_id} with sigma")
+        return False, ""
+
+    if not expr_query:
+        print(f"  Error: sigma produced an empty expr query for {rule_id}")
+        return False, ""
+
+    cmd = [json_checker_path, "--event", test_data["path"], "--expr", expr_query, "--test-type", test_type]
+    try:
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=300, check=True
+        )
+    except subprocess.TimeoutExpired:
+        print("  Timeout: json_checker timed out")
+        return False, ""
+    except subprocess.CalledProcessError as e:
+        print(f"  Error running json_checker: {e.stderr or e}")
+        return False, ""
+
+    match_lines = [ln for ln in result.stdout.splitlines() if ln.endswith("MATCH")]
+    match_count = len(match_lines)
+    all_output = "\n    ".join(match_lines)
+
+    expected_count = test_data.get("match_count")
+    if expected_count is not None:
+        if match_count < expected_count:
+            print(
+                f"  Error: {rule_id}: Match count too low: expected {expected_count}, got {match_count}"
+            )
+            return False, all_output
+        if match_count > expected_count:
+            print(
+                f"  Warning: {rule_id}: Got {match_count} matches but only {expected_count} expected - consider updating match_count in info.yml"
+            )
+        return True, all_output
+
+    return match_count > 0, all_output
+
+
 def run_test(
     rule_path: str,
     rule_id: str,
     test_data: Dict,
     evtx_checker_path: str,
     thor_config: str,
+    json_checker_path: str,
 ) -> tuple[bool, str]:
     """Run a test based on its type."""
     test_type = test_data.get("type", "unknown")
@@ -307,6 +393,12 @@ def run_test(
         return run_evtx_checker(
             rule_path, rule_id, test_data, evtx_checker_path, thor_config
         )
+    
+    if test_type in {"json", "ndjson", "jsonl"}:
+        if not json_checker_path:
+            print("  Error: --json-checker is required for 'ndjson/json/jsonl' tests")
+            return False, ""
+        return run_json_checker(test_type, rule_path, rule_id, test_data, json_checker_path)
     print(f"  Warning: Unknown test type '{test_type}', skipping")
     return False, ""
 
@@ -333,6 +425,11 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--thor-config",
         help="Path to thor.yml configuration file (required unless using --validate-only)",
+    )
+
+    parser.add_argument(
+        "--json-checker",
+        help="Path to json_checker binary (required for 'ndjson/json/jsonl' tests)",
     )
 
     parser.add_argument(
@@ -379,6 +476,11 @@ def init_checks(args: argparse.Namespace) -> None:
         if not os.path.exists(args.thor_config):
             print(f"Error: Thor config not found at {args.thor_config}")
             sys.exit(1)
+
+        # json_checker is optional; only needed for 'ndjson/json/jsonl' tests
+        if args.json_checker and not os.path.exists(args.json_checker):
+            print(f"Error: json_checker not found at {args.json_checker}")
+            sys.exit(1)
         print(f"Rules paths: {args.rules_paths}")
 
     if not args.validate_only:
@@ -414,7 +516,12 @@ def run_tests(
             total_tests += 1
 
             success, output = run_test(
-                rule_path, rule_id, test_data, args.evtx_checker, args.thor_config
+                rule_path,
+                rule_id,
+                test_data,
+                args.evtx_checker,
+                args.thor_config,
+                args.json_checker,
             )
 
             if success:
