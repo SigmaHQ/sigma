@@ -1,0 +1,37 @@
+title: Potential Malicious Extension Loading via Chromium Flag on Linux
+id: 888fb8a4-5004-4449-b3b2-a42da785f21f
+related:
+    - id: 97663168-bf6e-4acf-84dd-3c1abe1ca5f1
+      type: similar
+    - id: 88d6e60c-759d-4ac1-a447-c0f1466c2d21
+      type: similar
+status: experimental
+description: |
+    Detects the use of the '--load-extension' Chromium flag on any
+    process on Linux. This parameter exists in all Chromium-based
+    applications including browsers (Chrome, Edge, Brave, etc.),
+    Electron apps (Discord, Slack, VS Code, Teams, etc.), and CEF
+    framework applications. Adversaries may abuse this feature to
+    load malicious extensions for persistence, credential theft,
+    cookie stealing, or browser session hijacking.
+references:
+    - https://redcanary.com/blog/chromeloader/
+    - https://github.com/cedowens/Dump-Chrome-Cookies
+    - https://www.electronjs.org/docs/latest/api/command-line-switches
+author: PersonalRules
+date: 2026-04-21
+tags:
+    - attack.persistence
+    - attack.t1176.001
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains: '--load-extension='
+    condition: selection
+falsepositives:
+    - Automated testing frameworks such as Selenium, Cypress, or Playwright
+    - Browser extension development and debugging
+    - Electron app development using remote debugging or custom extensions
+level: medium
