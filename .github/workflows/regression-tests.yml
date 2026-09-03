@@ -4,6 +4,7 @@ on: [push, pull_request, workflow_dispatch]
 
 env:
   EVTX_BASELINE_VERSION: v0.8.4
+  JSON_MATCHER_VERSION: v0.0.2
 
 jobs:
   true-positive-tests:
@@ -15,17 +16,48 @@ jobs:
       uses: actions/setup-python@v6
       with:
         python-version: '3.11'
+        cache: 'pip'
+        cache-dependency-path: tests/regression_requirements.txt
 
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyyaml
+        pip install -r tests/regression_requirements.txt
+
+    - name: Cache evtx-sigma-checker
+      id: cache-evtx-checker
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+      with:
+        path: evtx-sigma-checker
+        key: evtx-sigma-checker-${{ env.EVTX_BASELINE_VERSION }}
 
     - name: Download evtx-sigma-checker
+      if: steps.cache-evtx-checker.outputs.cache-hit != 'true'
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
         chmod +x evtx-sigma-checker
 
+    - name: Set evtx-sigma-checker permissions
+      if: steps.cache-evtx-checker.outputs.cache-hit == 'true'
+      run: chmod +x evtx-sigma-checker
+
+    - name: Cache json-checker
+      id: cache-json-checker
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+      with:
+        path: json_checker
+        key: json-checker-${{ env.JSON_MATCHER_VERSION }}
+
+    - name: Download json-checker
+      if: steps.cache-json-checker.outputs.cache-hit != 'true'
+      run: |
+        wget --no-verbose https://github.com/SigmaHQ/json_matcher/releases/download/$JSON_MATCHER_VERSION/json_matcher_$JSON_MATCHER_VERSION -O json_checker
+        chmod +x json_checker
+
+    - name: Set json-checker permissions
+      if: steps.cache-json-checker.outputs.cache-hit == 'true'
+      run: chmod +x json_checker
+
     - name: Run regression tests
       run: |
-        python tests/regression_tests_runner.py --rules-paths rules rules-emerging-threats rules-threat-hunting --evtx-checker ./evtx-sigma-checker --thor-config tests/thor.yml --ignore-validation
+        python tests/regression_tests_runner.py --rules-paths rules rules-emerging-threats rules-threat-hunting --evtx-checker ./evtx-sigma-checker --thor-config tests/thor.yml --ignore-validation --json-checker ./json_checker
