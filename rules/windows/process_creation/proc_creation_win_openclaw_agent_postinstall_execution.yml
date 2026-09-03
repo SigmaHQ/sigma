@@ -1,0 +1,39 @@
+title: Potential Autonomous AI Agent Postinstall Script Execution
+id: 0a004998-6182-4a08-a00c-a6c9a061097e
+status: experimental
+description: |
+    Detects execution of a process whose CurrentDirectory is inside an OpenClaw-family or copycat agent package directory under the global npm node_modules folder.
+    Fires on the npm postinstall phase, where the agent's setup script spawns node, cmd, or other helpers to bootstrap its workspace, credentials, and sessions.
+    Earliest reliable detection point in the supply chain install flow, ahead of dot-folder workspace creation.
+references:
+    - https://github.com/openclaw/openclaw/blob/ea16a5e9e10c5b2be28ed46ea77ba5a7aa787d8c/docs/start/getting-started.md
+    - https://github.com/HKUDS/nanobot/blob/9ccef018c222b198991d36db8166cfc0c3aa7ea5/README.md
+    - https://github.com/nanocoai/nanoclaw/blob/975a2f0f5b0ea19bbf35fadfd394df35e5341d3a/README.md
+author: David El (0xdavidel)
+date: 2026-05-15
+tags:
+    - attack.initial-access
+    - attack.t1195.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cwd:
+        CurrentDirectory|contains:
+            - '\node_modules\openclaw\'
+            - '\node_modules\moltbot\'
+            - '\node_modules\moltbook\'
+            - '\node_modules\clawdbot\'
+            - '\node_modules\clawbot\'
+            - '\node_modules\nanobot\'
+            - '\node_modules\nanoclaw\'
+            - '\node_modules\picoclaw\'
+            - '\node_modules\zeroclaw\'
+            - '\node_modules\moltis\'
+            - '\node_modules\agentzero\'
+    condition: selection_cwd
+falsepositives:
+    - Sanctioned install of these packages. Apply a per-host or per-user allowlist filter.
+    - Other software that ships an internal subpackage with one of these names. Unlikely for the agent-family names.
+level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_openclaw_agent_postinstall_execution/info.yml
