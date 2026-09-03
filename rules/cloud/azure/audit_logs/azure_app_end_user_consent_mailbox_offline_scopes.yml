@@ -1,0 +1,48 @@
+title: End User Consent To App With Mailbox And Offline Access Delegated Scopes
+id: e8b4ed00-c221-4a58-81b5-196c14ffebe2
+related:
+    - id: 9b2cc4c4-2ad4-416d-8e8e-ee6aa6f5035a
+      type: derived
+status: experimental
+description: |
+    Detects an illicit consent grant (OAuth phishing) where a non-admin user
+    consents to an application that requests high-risk delegated mailbox
+    permissions (Mail.Read/Mail.ReadWrite/Mail.Send/MailboxSettings.ReadWrite)
+    together with offline_access. offline_access yields a long-lived refresh
+    token, so a single successful consent gives an attacker-controlled app
+    durable, silent read/exfiltration access to the victim's mailbox without
+    stealing a password or prompting for MFA again. This narrows the broad
+    "End User Consent" event to the specific high-fidelity scope combination
+    used in real consent-phishing campaigns.
+references:
+    - https://learn.microsoft.com/en-us/entra/architecture/security-operations-applications#end-user-consent
+    - https://learn.microsoft.com/en-us/security/operations/incident-response-playbook-app-consent
+    - https://attack.mitre.org/techniques/T1528/
+author: Eduard Arbona (@earbona23)
+date: 2026-09-03
+tags:
+    - attack.credential-access
+    - attack.t1528
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection_consent:
+        properties.message: 'Consent to application'
+    selection_enduser:
+        ConsentContext.IsAdminConsent: 'false'
+    selection_mailbox_scope:
+        TargetResources.modifiedProperties.newValue|contains:
+            - 'Mail.Read'
+            - 'Mail.ReadWrite'
+            - 'Mail.Send'
+            - 'MailboxSettings.ReadWrite'
+    selection_offline_access:
+        TargetResources.modifiedProperties.newValue|contains: 'offline_access'
+    condition: all of selection_*
+falsepositives:
+    - Onboarding of a sanctioned mail client, add-in, backup or archiving tool.
+      Tune by allowlisting the AppId/ServicePrincipal of approved applications,
+      or restrict end-user consent to verified publishers so only this residual
+      set of unsanctioned apps surfaces.
+level: high
