@@ -6,6 +6,7 @@ references:
     - https://learn.microsoft.com/en-us/entra/architecture/security-operations-devices#device-registrations-and-joins-outside-policy
 author: Michael Epping, '@mepples21'
 date: 2022-06-28
+modified: 2026-05-08
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -17,10 +18,10 @@ logsource:
     service: signinlogs
 detection:
     selection:
-        ResourceDisplayName: 'Device Registration Service'
-        conditionalAccessStatus: 'success'
+        properties.resourceDisplayName: 'Device Registration Service'
+        properties.conditionalAccessStatus: 'success'
     filter_mfa:
-        AuthenticationRequirement: 'multiFactorAuthentication'
+        properties.authenticationRequirement: 'multiFactorAuthentication'
     condition: selection and not filter_mfa
 falsepositives:
     - Unknown

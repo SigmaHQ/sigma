@@ -4,8 +4,10 @@ status: test
 description: User has indicated they haven't instigated the MFA prompt and could indicate an attacker has the password for the account.
 references:
     - https://www.microsoft.com/security/blog/2022/03/22/dev-0537-criminal-actor-targeting-organizations-for-data-exfiltration-and-destruction/
+    - https://research.splunk.com/cloud/d0895c20-de71-4fd2-b56c-3fcdb888eba1/
 author: AlertIQ
 date: 2022-03-24
+modified: 2026-05-08
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -20,8 +22,8 @@ logsource:
     service: signinlogs
 detection:
     selection:
-        AuthenticationRequirement: 'multiFactorAuthentication'
-        Status|contains: 'MFA Denied'
+        properties.authenticationRequirement: 'multiFactorAuthentication'
+        properties.status.additionalDetails|contains: 'MFA Denied'
     condition: selection
 falsepositives:
     - Users actually login but miss-click into the Deny button when MFA prompt.
