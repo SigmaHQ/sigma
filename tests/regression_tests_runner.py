@@ -1,13 +1,21 @@
 """Run regression tests for Sigma rules based on their regression_tests_path attribute."""
 
 import argparse
+import concurrent.futures
 import json
 import os
+import shutil
 import subprocess
 import sys
-from typing import Dict, List
+import tempfile
+from typing import Dict, List, Optional
 
 import yaml
+
+try:
+    from yaml import CSafeLoader as _YAMLLoader
+except ImportError:
+    from yaml import SafeLoader as _YAMLLoader  # type: ignore[assignment]
 
 
 def get_absolute_path(base_path: str, relative_path: str) -> str:
@@ -46,7 +54,7 @@ def load_info_yaml(
 
     try:
         with open(regression_tests_path, "r", encoding="utf-8") as f:
-            info_data = yaml.safe_load(f)
+            info_data = yaml.load(f, Loader=_YAMLLoader)
 
         if not info_data or "regression_tests_info" not in info_data:
             print(f"Warning: No regression_tests_info found in {regression_tests_path}")
@@ -78,6 +86,14 @@ def load_info_yaml(
                     }
                 )
 
+            base_dir = os.path.dirname(regression_tests_path)
+            pipelines = [
+                get_absolute_path(base_dir, p) for p in test.get("pipelines", [])
+            ]
+            filters = [
+                get_absolute_path(base_dir, f) for f in test.get("filters", [])
+            ]
+
             test_data.append(
                 {
                     "type": test.get("type", "unknown"),
@@ -85,6 +101,8 @@ def load_info_yaml(
                     "name": test.get("name", "Unnamed Test"),
                     "provider": test.get("provider", ""),
                     "match_count": test.get("match_count"),
+                    "pipelines": pipelines,
+                    "filters": filters,
                 }
             )
         info_metadata_rule_id = None
@@ -166,9 +184,32 @@ def find_rule_tests(rule_data: Dict, file_path: str) -> tuple[List[Dict], List[D
     return results, missing_files
 
 
-# pylint: disable=too-many-locals
+def _process_rule_file(
+    file_path: str,
+) -> tuple[List[Dict], List[Dict], List[Dict]]:
+    """Load and process a single rule file.
+
+    Returns:
+        tuple: (results, missing_files, missing_regression_tests_path)
+    """
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            rule_data = yaml.load(f, Loader=_YAMLLoader)
+        if not rule_data:
+            return [], [], []
+        skip, missing_test = find_rule_missing_test(rule_data, file_path)
+        if skip:
+            return [], [], missing_test
+        result, missing_file = find_rule_tests(rule_data, file_path)
+        return result, missing_file, missing_test
+    except yaml.YAMLError as e:
+        print(f"Warning: Could not parse {file_path}: {e}")
+        return [], [], []
+
+
 def find_rules_with_tests(
     rules_paths: List[str],
+    workers: Optional[int] = None,
 ) -> tuple[List[Dict], List[Dict], List[Dict]]:
     """Find all rules that have a 'regression_tests_path' attribute pointing to test info files.
 
@@ -179,134 +220,201 @@ def find_rules_with_tests(
     missing_files = []
     missing_regression_tests_path = []
 
+    all_files = []
     for rules_path in rules_paths:
         if not os.path.exists(rules_path):
             print(f"Warning: Rules path {rules_path} does not exist")
             continue
-
         for root, _, files in os.walk(rules_path):
             for file in files:
-                if not file.endswith(".yml"):
-                    continue
+                if file.endswith(".yml"):
+                    all_files.append(os.path.join(root, file))
 
-                file_path = os.path.join(root, file)
-                try:
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        rule_data = yaml.safe_load(f)
-
-                    if not rule_data:
-                        continue
-
-                    # Check for missing regression_tests_path
-                    skip, missing_test = find_rule_missing_test(rule_data, file_path)
-                    missing_regression_tests_path.extend(missing_test)
-                    if skip:
-                        continue
-
-                    # Find tests for the rule
-                    (
-                        result,
-                        missing_file,
-                    ) = find_rule_tests(rule_data, file_path)
-                    results.extend(result)
-                    missing_files.extend(missing_file)
-
-                except yaml.YAMLError as e:
-                    print(f"Warning: Could not parse {file_path}: {e}")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=_default_workers(workers)) as executor:
+        for r, mf, mrp in executor.map(_process_rule_file, all_files):
+            results.extend(r)
+            missing_files.extend(mf)
+            missing_regression_tests_path.extend(mrp)
 
     return results, missing_files, missing_regression_tests_path
 
 
-def run_evtx_checker(
+def _default_workers(n: Optional[int]) -> int:
+    return n if n is not None else min(32, (os.cpu_count() or 1) * 4)
+
+
+def _link(src: str, dst: str) -> None:
+    """Hardlink src to dst, falling back to copy if cross-filesystem."""
+    try:
+        os.link(src, dst)
+    except OSError:
+        shutil.copy2(src, dst)
+
+
+def run_evtx_batch(
+    evtx_test_items: List[tuple],
+    evtx_checker_path: str,
+    thor_config: str,
+) -> Optional[Dict[str, List[str]]]:
+    """Run evtx-sigma-checker once for all EVTX tests.
+
+    Returns:
+        Dict mapping rule_id -> list of matching JSON output lines, or None if the subprocess failed.
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        rules_dir = os.path.join(tmpdir, "rules")
+        evtx_dir = os.path.join(tmpdir, "evtx")
+        os.makedirs(rules_dir)
+        os.makedirs(evtx_dir)
+
+        id_to_path = {rule_info["id"]: rule_info["path"] for rule_info, _, _ in evtx_test_items}
+
+        for rule_info, _, test_data in evtx_test_items:
+            rule_path = rule_info["path"]
+            evtx_path = test_data["path"]
+            rule_id = rule_info["id"]
+
+            # Use rule_id as filename to avoid collisions across directories
+            rule_dst = os.path.join(rules_dir, f"{rule_id}.yml")
+            if not os.path.exists(rule_dst):
+                _link(os.path.abspath(rule_path), rule_dst)
+
+            if os.path.exists(evtx_path):
+                evtx_dst = os.path.join(evtx_dir, os.path.basename(evtx_path))
+                if not os.path.exists(evtx_dst):
+                    _link(os.path.abspath(evtx_path), evtx_dst)
+                else:
+                    print(
+                        f"  Warning: EVTX filename collision for '{os.path.basename(evtx_path)}' "
+                        f"(rule {rule_id}) - file already staged from another rule; "
+                        "review info.yml to ensure unique EVTX filenames"
+                    )
+
+        cmd = [
+            evtx_checker_path,
+            "--log-source", thor_config,
+            "--evtx-path", evtx_dir,
+            "--rule-level", "informational",
+            "--rule-path", rules_dir,
+        ]
+
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        except subprocess.TimeoutExpired:
+            print("  Timeout: batched evtx-sigma-checker timed out")
+            return None
+
+        if result.returncode != 0:
+            stderr = result.stderr
+            for rule_id, rule_path in id_to_path.items():
+                stderr = stderr.replace(os.path.join(rules_dir, f"{rule_id}.yml"), rule_path)
+            print(f"  Error: evtx-sigma-checker exited with code {result.returncode}: {stderr.strip()}")
+            print("  Aborting further EVTX tests. Fix the errors above before retrying.")
+            return None
+
+        matches: Dict[str, List[str]] = {}
+        for line in result.stdout.strip().splitlines():
+            try:
+                json_obj = json.loads(line)
+                rid = json_obj.get("RuleId")
+                evtx_stem = os.path.splitext(os.path.basename(json_obj.get("File", "")))[0]
+                if rid and evtx_stem == rid:
+                    matches.setdefault(rid, []).append(line)
+            except json.JSONDecodeError:
+                print(f"  Warning: Skipping non-JSON line: {line}")
+
+        return matches
+
+
+def compile_rule_to_expr(
+    rule_path: str, pipelines: List[str], filters: List[str]
+) -> str:
+    """Compile a Sigma rule to a golang_expr query via the sigma CLI."""
+    cmd = ["sigma", "convert", "-t", "golang_expr"]
+    for pipeline in pipelines:
+        cmd += ["-p", pipeline]
+    if len(pipelines) == 0:
+        cmd += ["--without-pipeline"]
+    for filter in filters:
+        cmd += ["--filter", filter]
+    cmd.append(rule_path)
+
+    result = subprocess.run(
+        cmd, capture_output=True, text=True, timeout=300, check=True
+    )
+
+    return result.stdout.strip()
+
+
+def run_json_checker(
+    test_type: str,
     rule_path: str,
     rule_id: str,
     test_data: Dict,
-    evtx_checker_path: str,
-    thor_config: str,
+    json_checker_path: str,
 ) -> tuple[bool, str]:
-    """Run evtx-sigma-checker and check if rule ID is in output."""
-    evtx_path = test_data["path"]
+    """Compile the rule to an expr query and run json_checker against the events."""
+    try:
+        expr_query = compile_rule_to_expr(
+            rule_path, test_data.get("pipelines", []), test_data.get("filters", [])
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"  Error compiling rule {rule_id} with sigma: {e.stderr or e}")
+        return False, ""
+    except subprocess.TimeoutExpired:
+        print(f"  Timeout compiling rule {rule_id} with sigma")
+        return False, ""
 
-    # File existence is now checked upfront in find_rules_with_tests
-    # No need to check again here
+    if not expr_query:
+        print(f"  Error: sigma produced an empty expr query for {rule_id}")
+        return False, ""
 
-    cmd = [
-        evtx_checker_path,
-        "--log-source",
-        thor_config,
-        "--evtx-path",
-        evtx_path,
-        "--rule-level",
-        "informational",
-        "--rule-path",
-        os.path.dirname(rule_path),
-    ]
-
+    cmd = [json_checker_path, "--event", test_data["path"], "--expr", expr_query, "--test-type", test_type]
     try:
         result = subprocess.run(
             cmd, capture_output=True, text=True, timeout=300, check=True
         )
-
-        if result.returncode != 0:
-            print(f"  Warning: evtx-sigma-checker failed: {result.stderr}")
-            return False, ""
-
-        # Check if rule ID appears in output
-        output_lines = result.stdout.strip().splitlines()
-        match_outputs = []
-
-        for line in output_lines:
-            try:
-                json_obj = json.loads(line)
-                if json_obj.get("RuleId") == rule_id:
-                    match_outputs.append(line)
-            except json.JSONDecodeError:
-                # Skip lines that aren't valid JSON
-                print(f"  Warning: Skipping non-JSON line: {line}")
-                continue
-
-        match_count = len(match_outputs)
-        all_output = "\n    ".join(match_outputs)
-
-        expected_count = test_data.get("match_count")
-        if expected_count is not None:
-            if match_count < expected_count:
-                print(
-                    f"  Error: {rule_id}: Match count too low: expected {expected_count}, got {match_count}"
-                )
-                return False, all_output
-            if match_count > expected_count:
-                print(
-                    f"  Warning: {rule_id}: Got {match_count} matches but only {expected_count} expected - consider updating match_count in info.yml"
-                )
-            return True, all_output
-
-        return match_count > 0, all_output
-
     except subprocess.TimeoutExpired:
-        print("  Timeout: evtx-sigma-checker timed out")
+        print("  Timeout: json_checker timed out")
         return False, ""
     except subprocess.CalledProcessError as e:
-        print(f"  Error running evtx-sigma-checker: {e}")
-        if e.stderr:
-            print(f"  Output: {e.stderr}")
+        print(f"  Error running json_checker: {e.stderr or e}")
         return False, ""
+
+    match_lines = [ln for ln in result.stdout.splitlines() if ln.endswith("MATCH")]
+    match_count = len(match_lines)
+    all_output = "\n    ".join(match_lines)
+
+    expected_count = test_data.get("match_count")
+    if expected_count is not None:
+        if match_count < expected_count:
+            print(
+                f"  Error: {rule_id}: Match count too low: expected {expected_count}, got {match_count}"
+            )
+            return False, all_output
+        if match_count > expected_count:
+            print(
+                f"  Warning: {rule_id}: Got {match_count} matches but only {expected_count} expected - consider updating match_count in info.yml"
+            )
+        return True, all_output
+
+    return match_count > 0, all_output
 
 
 def run_test(
     rule_path: str,
     rule_id: str,
     test_data: Dict,
-    evtx_checker_path: str,
-    thor_config: str,
+    json_checker_path: str,
 ) -> tuple[bool, str]:
     """Run a test based on its type."""
     test_type = test_data.get("type", "unknown")
 
-    if test_type == "evtx":
-        return run_evtx_checker(
-            rule_path, rule_id, test_data, evtx_checker_path, thor_config
-        )
+    if test_type in {"json", "ndjson", "jsonl"}:
+        if not json_checker_path:
+            print("  Error: --json-checker is required for 'ndjson/json/jsonl' tests")
+            return False, ""
+        return run_json_checker(test_type, rule_path, rule_id, test_data, json_checker_path)
     print(f"  Warning: Unknown test type '{test_type}', skipping")
     return False, ""
 
@@ -336,6 +444,11 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--json-checker",
+        help="Path to json_checker binary (required for 'ndjson/json/jsonl' tests)",
+    )
+
+    parser.add_argument(
         "--validate-only",
         action="store_true",
         help="Only validate rule status requirements without running tests",
@@ -353,7 +466,17 @@ def parse_arguments() -> argparse.Namespace:
         help="Enable verbose output, showing successful test results as well",
     )
 
-    return parser.parse_args()
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of parallel workers for running tests (default: auto based on CPU count)",
+    )
+
+    args = parser.parse_args()
+    if args.workers is not None and args.workers < 1:
+        parser.error("--workers must be >= 1")
+    return args
 
 
 def init_checks(args: argparse.Namespace) -> None:
@@ -379,6 +502,11 @@ def init_checks(args: argparse.Namespace) -> None:
         if not os.path.exists(args.thor_config):
             print(f"Error: Thor config not found at {args.thor_config}")
             sys.exit(1)
+
+        # json_checker is optional; only needed for 'ndjson/json/jsonl' tests
+        if args.json_checker and not os.path.exists(args.json_checker):
+            print(f"Error: json_checker not found at {args.json_checker}")
+            sys.exit(1)
         print(f"Rules paths: {args.rules_paths}")
 
     if not args.validate_only:
@@ -387,57 +515,125 @@ def init_checks(args: argparse.Namespace) -> None:
     print()
 
 
-# pylint: disable=too-many-locals
 def run_tests(
     args: argparse.Namespace, rules_with_tests
 ) -> tuple[int, int, List[Dict]]:
-    """Run tests for all rules with test data."""
-    total_tests = 0
-    passed_tests = 0
+    """Run tests for all rules: EVTX tests in one batch call, JSON tests in parallel."""
     failures = []
-    for rule_info in rules_with_tests:
-        rule_path = rule_info["path"]
-        rule_id = rule_info["id"]
-        tests = rule_info["tests"]
+    passed_tests = 0
 
-        if args.verbose:
-            print(f"\nTesting rule: {rule_id}")
-            print(f"  File: {rule_path}")
+    all_test_items = [
+        (rule_info, i, test_data)
+        for rule_info in rules_with_tests
+        for i, test_data in enumerate(rule_info["tests"])
+    ]
+    total_tests = len(all_test_items)
 
-        for i, test_data in enumerate(tests):
-            test_name = test_data.get("name", f"Test {i+1}")
+    evtx_items = [(ri, i, td) for ri, i, td in all_test_items if td.get("type") == "evtx"]
+    other_items = [(ri, i, td) for ri, i, td in all_test_items if td.get("type") != "evtx"]
+
+    # --- EVTX: single batched subprocess call ---
+    if evtx_items:
+        batch_matches = run_evtx_batch(evtx_items, args.evtx_checker, args.thor_config)
+
+        for rule_info, i, test_data in evtx_items:
+            rule_id = rule_info["id"]
+            rule_path = rule_info["path"]
+            test_name = test_data.get("name", f"Test {i + 1}")
+            test_type = "evtx"
+            test_path = test_data.get("path", "unknown")
+
+            if batch_matches is None:
+                failures.append({
+                    "rule_id": rule_id,
+                    "rule_path": rule_path,
+                    "test_name": test_name,
+                    "test_type": test_type,
+                    "test_path": test_path,
+                    "test_number": i + 1,
+                    "batch_failed": True,
+                })
+                continue
+
+            match_outputs = batch_matches.get(rule_id, [])
+            match_count = len(match_outputs)
+            all_output = "\n    ".join(match_outputs)
+            expected_count = test_data.get("match_count")
+
+            if expected_count is not None:
+                if match_count < expected_count:
+                    print(f"  Error: {rule_id}: Match count too low: expected {expected_count}, got {match_count}")
+                    success = False
+                else:
+                    if match_count > expected_count:
+                        print(f"  Warning: {rule_id}: Got {match_count} matches but only {expected_count} expected - consider updating match_count in info.yml")
+                    success = True
+            else:
+                success = match_count > 0
+
+            if args.verbose:
+                if success:
+                    print(f"    ✓ PASS - Match found for Rule ID: {rule_id}")
+                    if all_output:
+                        print(f"    Output: {all_output}")
+                else:
+                    print(f"    ✗ FAIL: {rule_id}")
+
+            if success:
+                passed_tests += 1
+            else:
+                failures.append({
+                    "rule_id": rule_id,
+                    "rule_path": rule_path,
+                    "test_name": test_name,
+                    "test_type": test_type,
+                    "test_path": test_path,
+                    "test_number": i + 1,
+                })
+
+    # --- JSON/NDJSON/JSONL: parallel workers ---
+    if other_items:
+        def run_single(item: tuple) -> tuple:
+            rule_info, i, test_data = item
+            rule_path = rule_info["path"]
+            rule_id = rule_info["id"]
+            test_name = test_data.get("name", f"Test {i + 1}")
             test_type = test_data.get("type", "unknown")
             test_path = test_data.get("path", "unknown")
 
             if args.verbose:
-                print(f"  {test_name} (type: {test_type}): {test_path}")
-            total_tests += 1
+                print(f"\nTesting rule: {rule_id} - {test_name} (type: {test_type}): {test_path}")
 
             success, output = run_test(
-                rule_path, rule_id, test_data, args.evtx_checker, args.thor_config
+                rule_path, rule_id, test_data, args.json_checker,
             )
 
-            if success:
-                passed_tests += 1
-                if args.verbose:
-                    print(f"    ✓ PASS - Match found for Rule ID: {rule_id}\n")
-                    print(f"    Output: {output}")
-            else:
-                failures.append(
-                    {
+            if args.verbose:
+                if success:
+                    print(f"    ✓ PASS - Match found for Rule ID: {rule_id}")
+                    if output:
+                        print(f"    Output: {output}")
+                else:
+                    print(f"    ✗ FAIL: {rule_id}")
+
+            return success, rule_id, rule_path, test_name, test_type, test_path, i + 1
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=_default_workers(args.workers)) as executor:
+            futures = [executor.submit(run_single, item) for item in other_items]
+            for future in concurrent.futures.as_completed(futures):
+                success, rule_id, rule_path, test_name, test_type, test_path, test_num = future.result()
+                if success:
+                    passed_tests += 1
+                else:
+                    failures.append({
                         "rule_id": rule_id,
                         "rule_path": rule_path,
                         "test_name": test_name,
                         "test_type": test_type,
                         "test_path": test_path,
-                        "test_number": i + 1,
-                    }
-                )
-                if args.verbose:
-                    print("    ✗ FAIL")
+                        "test_number": test_num,
+                    })
 
-        if args.verbose:
-            print()
     return total_tests, passed_tests, failures
 
 
@@ -544,7 +740,12 @@ def print_summary(total_tests: int, passed_tests: int, failures: List[Dict]) -> 
     if failures:
         print(f"\nFAILED TESTS ({len(failures)}):")
         print("-" * 40)
+        batch_failures = [f for f in failures if f.get("batch_failed")]
+        if batch_failures:
+            print(f"  evtx-sigma-checker batch failed ({len(batch_failures)} test(s) affected)\n")
         for failure in failures:
+            if failure.get("batch_failed"):
+                continue
             print(f"Rule: {failure['rule_id']}")
             print(f"  File: {failure['rule_path']}")
             print(f"  Test: {failure['test_name']} (type: {failure['test_type']})")
@@ -684,7 +885,7 @@ def main():
     # Find rules with tests
     print("Scanning for rules with test data...")
     rules_with_tests, missing_files, missing_regression_tests_path = (
-        find_rules_with_tests(args.rules_paths)
+        find_rules_with_tests(args.rules_paths, workers=args.workers)
     )
 
     print(f"Found {len(rules_with_tests)} rule(s) with regression tests configured.\n")

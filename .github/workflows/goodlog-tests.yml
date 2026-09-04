@@ -12,17 +12,22 @@ jobs:
   check-baseline-win7:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Download evtx-sigma-checker
       run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
     - name: Download and extract Windows 7 32-bit baseline
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win7-x86.tgz
         tar xzf win7-x86.tgz
+    - name: Verify baseline contains EVTX files
+      run: |
+        count=$(find win7-x86/ -name '*.evtx' | wc -l)
+        echo "Found ${count} .evtx file(s) in win7-x86/"
+        [ "${count}" -gt 0 ] || { echo "ERROR: No .evtx files found"; exit 1; }
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
-        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path win7_x86/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path win7-x86/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
     - name: Show findings excluding known FPs
       run: |
         chmod +x .github/workflows/matchgrep.sh
@@ -31,13 +36,18 @@ jobs:
   check-baseline-win10:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Download evtx-sigma-checker
       run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
     - name: Download and extract Windows 10 baseline
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win10-client.tgz
         tar xzf win10-client.tgz
+    - name: Verify baseline contains EVTX files
+      run: |
+        count=$(find Logs_Client/ -name '*.evtx' | wc -l)
+        echo "Found ${count} .evtx file(s) in Logs_Client/"
+        [ "${count}" -gt 0 ] || { echo "ERROR: No .evtx files found"; exit 1; }
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
@@ -50,13 +60,18 @@ jobs:
   check-baseline-win11:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Download evtx-sigma-checker
       run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
     - name: Download and extract Windows 11 baseline
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win11-client.tgz
         tar xzf win11-client.tgz
+    - name: Verify baseline contains EVTX files
+      run: |
+        count=$(find Logs_Win11/ -name '*.evtx' | wc -l)
+        echo "Found ${count} .evtx file(s) in Logs_Win11/"
+        [ "${count}" -gt 0 ] || { echo "ERROR: No .evtx files found"; exit 1; }
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
@@ -69,13 +84,18 @@ jobs:
   check-baseline-win11-2023:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Download evtx-sigma-checker
       run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
     - name: Download and extract Windows 11 baseline
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win11-client-2023.tgz
         tar xzf win11-client-2023.tgz
+    - name: Verify baseline contains EVTX files
+      run: |
+        count=$(find Logs_Win11_2023/ -name '*.evtx' | wc -l)
+        echo "Found ${count} .evtx file(s) in Logs_Win11_2023/"
+        [ "${count}" -gt 0 ] || { echo "ERROR: No .evtx files found"; exit 1; }
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
@@ -88,13 +108,18 @@ jobs:
   check-baseline-win2022:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Download evtx-sigma-checker
       run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
     - name: Download and extract Windows 2022 baseline
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win2022-evtx.tgz
         tar xzf win2022-evtx.tgz
+    - name: Verify baseline contains EVTX files
+      run: |
+        count=$(find win2022-evtx/ -name '*.evtx' | wc -l)
+        echo "Found ${count} .evtx file(s) in win2022-evtx/"
+        [ "${count}" -gt 0 ] || { echo "ERROR: No .evtx files found"; exit 1; }
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
@@ -105,13 +130,18 @@ jobs:
   check-baseline-win2022-domain-controller:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Download evtx-sigma-checker
       run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
     - name: Download and extract Windows 2022 baseline
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win2022-ad.tgz
         tar xzf win2022-ad.tgz
+    - name: Verify baseline contains EVTX files
+      run: |
+        count=$(find Win2022-AD/ -name '*.evtx' | wc -l)
+        echo "Found ${count} .evtx file(s) in Win2022-AD/"
+        [ "${count}" -gt 0 ] || { echo "ERROR: No .evtx files found"; exit 1; }
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
@@ -122,13 +152,18 @@ jobs:
   check-baseline-win2022-0-20348-azure:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Download evtx-sigma-checker
       run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
     - name: Download and extract Windows 2022.0.20348 Azure baseline
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win2022-0-20348-azure.tgz
         tar xzf win2022-0-20348-azure.tgz
+    - name: Verify baseline contains EVTX files
+      run: |
+        count=$(find win2022-0-20348-azure/ -name '*.evtx' | wc -l)
+        echo "Found ${count} .evtx file(s) in win2022-0-20348-azure/"
+        [ "${count}" -gt 0 ] || { echo "ERROR: No .evtx files found"; exit 1; }
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
