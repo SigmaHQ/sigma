@@ -1,0 +1,35 @@
+title: Microsoft Defender for Office365 Malicious URL Blocked
+id: 33130063-1adc-4767-be31-a85e21e14a58
+status: experimental
+description: |
+    Detects instances where Microsoft Defender for Office 365 successfully blocked a user from accessing a malicious URL or held the user on a detonation pending page.
+    It could indicate user trying to access known malicious or unsafe URLs, which may be part of phishing campaigns or other malicious activities.
+    This rule can help identify potential threats and prompt further investigation into the user's activity and the nature of the blocked URLs.
+references:
+    - https://learn.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema#microsoft-defender-for-office-365-and-threat-investigation-and-response-schema
+    - https://learn.microsoft.com/en-us/defender-office-365/safe-links-about
+    - https://learn.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema#urlclickaction
+author: Tom Kluter
+date: 2026-03-18
+tags:
+    - attack.initial-access
+    - attack.execution
+    - attack.command-and-control
+    - attack.t1566.002
+    - attack.t1071.001
+    - attack.t1204.001
+logsource:
+    service: audit
+    product: m365
+detection:
+    selection:
+        Workload: 'ThreatIntelligence'
+        Operation: 'TIUrlClickData'
+        UrlClickAction:
+            - 2 # Blockpage (User blocked from navigating to the URL by Safe Links)
+            - 3 # PendingDetonationPage (User held on the detonation pending page by Safe Links)
+    condition: selection
+falsepositives:
+    - Authorized security testing or automated URL scanning by internal security tools.
+    - Phishing simulations where the bypass header wasn't correctly configured.
+level: medium
