@@ -1,0 +1,45 @@
+title: Linux Reverse Shell or Code Execution via Rview Binary
+id: b2d7c3f1-4e8a-4b43-c1d2-3f9e5a8b7c20
+status: experimental
+description: |
+    Detects suspicious use of the rview binary with embedded scripting arguments
+    that can spawn shells, establish network connections, or load shared libraries.
+    Rview is the restricted view mode of Vim, but it supports Python and Lua
+    scripting via :py and :lua commands, enabling full shell execution despite
+    its restricted designation. When combined with os.execl, os.execute, or
+    socket.connect patterns, rview can be used to establish reverse shells or
+    execute arbitrary commands, particularly when run with SUID or sudo.
+references:
+    - https://gtfobins.github.io/gtfobins/rview/
+    - https://vimdoc.sourceforge.net/htmldoc/if_pyth.html
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.execution
+    - attack.t1059.006
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith:
+            - '/rview'
+            - '/rvim'
+    selection_scripting:
+        CommandLine|contains:
+            - ':py'
+            - ':lua'
+            - 'os.execl'
+            - 'os.execute'
+            - 'exec sh'
+            - 'pty.spawn'
+            - 'socket.connect'
+            - '/bin/sh'
+            - '/bin/bash'
+            - 'cap_setuid'
+            - 'sudo rview'
+    condition: all of selection_*
+falsepositives:
+    - Security researchers testing GTFOBins techniques in an isolated environment
+    - Unlikely in production environments
+level: high
