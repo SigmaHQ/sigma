@@ -1,0 +1,43 @@
+title: QoS ThrottleRate Policy Set via PowerShell CommandLine
+id: 09a2d760-9500-4088-9d9d-f63f88b2e0d7
+related:
+    - id: c556024c-7e38-4545-8b1b-c09eebf7fe79
+      type: similar
+status: experimental
+description: |
+    Detects PowerShell invoking New-NetQosPolicy or Set-NetQosPolicy with a ThrottleRateActionBitsPerSecond parameter to
+    potentially set abnormal bandwidth limits on targeted processes.
+    ThrottleRateActionBitsPerSecond is a QoS policy setting that can be used to limit the bandwidth of targeted processes.
+    Tools such as EDRChoker use this to throttle network bandwidth of targeted processes (e.g. EDR agents)
+    to near-zero, silencing telemetry without terminating the process.
+references:
+    - https://learn.microsoft.com/en-us/powershell/module/netqos/new-netqospolicy?view=windowsserver2025-ps
+    - https://github.com/TwoSevenOneT/EDRChoker/
+    - https://www.zerosalarium.com/2026/06/edrchoker-choking-telemetry-stream-block-edr.html
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-06-09
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_cli:
+        CommandLine|contains:
+            - 'New-NetQosPolicy'
+            - 'Set-NetQosPolicy'
+    selection_throttle_rate:
+        CommandLine|contains: 'ThrottleRateActionBitsPerSecond'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate QoS bandwidth policy management by administrators
+level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_powershell_qos_throttle_rate_modification/info.yml
