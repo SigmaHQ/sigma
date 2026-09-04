@@ -1,0 +1,39 @@
+title: Base64 Encoded URL In Web Request
+id: f6740cfe-7fe8-4892-9b92-61396dcd8bab
+status: experimental
+description: |
+    Detects a base64-encoded "http://" or "https://" string embedded within a
+    proxy request URI (e.g. a query parameter). This pattern is commonly used
+    by phishing kits and open-redirect / C2 staging pages to smuggle a
+    malicious destination URL past naive domain/URL blocklists, since the
+    payload is only readable after decoding. All three base64 byte-alignments
+    are covered for each scheme.
+references:
+    - https://attack.mitre.org/techniques/T1132/001/
+author: Khireddine Mohamed Lamine
+date: 2026-07-03
+related:
+    - id: d443095b-a221-4957-a2c4-cd1756c9b747
+      type: similar
+tags:
+    - attack.command-and-control
+    - attack.t1132.001
+logsource:
+    category: proxy
+detection:
+    selection:
+        c-uri|contains:
+            # http:// at the 3 base64 byte-alignments
+            - 'aHR0cDovL'
+            - 'h0dHA6Ly'
+            - 'odHRwOi8v'
+            # https:// at the 3 base64 byte-alignments
+            - 'aHR0cHM6Ly'
+            - 'h0dHBzOi8v'
+            - 'odHRwczovL'
+    condition: selection
+falsepositives:
+    - Legitimate services that pass base64-encoded redirect or callback URLs
+      as part of normal application logic (e.g. SSO/OAuth redirect_uri params,
+      internal URL-shortener or tracking-pixel services)
+level: medium
