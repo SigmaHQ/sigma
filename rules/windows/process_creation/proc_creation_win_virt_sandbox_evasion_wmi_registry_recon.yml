@@ -1,0 +1,61 @@
+title: Potential Virtualization/Sandbox Evasion Via WMI Or Registry Recon
+id: 15439227-665d-464e-8cc9-661a6eaf99f7
+status: experimental
+description: |
+    Detects processes querying well-known WMI classes or registry values used to fingerprint
+    virtual machines and sandboxes (BIOS/board manufacturer strings, thermal zone presence,
+    disk/video controller identifiers). This is commonly done by malware and loaders before
+    deciding whether to detonate their real payload, in order to avoid analysis environments.
+    The only existing Sigma coverage for this sub-technique targets PowerShell Script Block
+    Logging exclusively; this rule instead relies on Process Creation, which is far more
+    commonly enabled, and additionally covers reg.exe invocations.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/6132b92779873cb0d05bef07ba0a480d47eb1cc8/atomics/T1497.001/T1497.001.md
+author: Ruben Perez Otero
+date: 2026-08-26
+tags:
+    - attack.stealth
+    - attack.discovery
+    - attack.t1497.001
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_reg_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_reg_path:
+        CommandLine|contains: 'HARDWARE\DESCRIPTION\System'
+    selection_reg_value:
+        CommandLine|contains:
+            - 'SystemBiosVersion'
+            - 'VideoBiosVersion'
+    selection_ps_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_ps_cmdlet:
+        CommandLine|contains:
+            - 'Get-WmiObject'
+            - 'Get-CimInstance'
+            - 'gwmi'
+            - 'gcim'
+    selection_ps_class:
+        CommandLine|contains:
+            - 'Win32_ComputerSystem'
+            - 'Win32_BIOS'
+            - 'Win32_DiskDrive'
+            - 'Win32_VideoController'
+            - 'Win32_PnPEntity'
+            - 'MSAcpi_ThermalZoneTemperature'
+            - 'Win32_Fan'
+    condition: (all of selection_reg_*) or (all of selection_ps_*)
+falsepositives:
+    - Legitimate IT asset inventory, hardware/software audit, and RMM (Remote Monitoring and
+      Management) tooling routinely queries the same WMI classes and registry values as part
+      of normal hardware discovery. Baseline and, where possible, filter by known-good parent
+      processes or scheduled tasks in your environment.
+level: medium
