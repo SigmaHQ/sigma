@@ -1,0 +1,44 @@
+title: Tomcat Manager WAR File Deployment
+id: b8f4a1e2-6c3d-4e9f-8a1b-2c3d4e5f6a7b
+status: experimental
+description: |
+    Detects HTTP PUT or POST requests targeting Apache Tomcat Manager deployment
+    endpoints to deploy a malicious WAR and achieve RCE. The exploitation bypasses the
+    Manager's source-address restriction (i.e., forged 'X-Forwarded-For: 127.0.0.1'
+    header) and uploads the archive in the request body, not in the URI, with
+    deployment parameters such as 'path=/<app>&update=true'.
+references:
+    - https://github.com/0xReadingSteiner/Silent-Call/blob/f91488d674f17b4a3b16754b0dc49f07d61ef35e/poc.sh
+author: mromanode
+date: 2026-08-14
+tags:
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    category: proxy
+    definition: |
+        Requires web proxy logs (e.g., Squid, Blue Coat, Palo Alto, F5) or WAF logs that
+        capture the HTTP request method, full request URI, and user agent (for the
+        DevOps tool filter).
+detection:
+    selection_manager:
+        cs-uri|contains:
+            - '/manager/deploy'
+            - '/manager/text/deploy'
+            - '/manager/html/upload'
+    selection_method:
+        cs-method:
+            - 'PUT'
+            - 'POST'
+    filter_optional_devops_tools:
+        c-useragent|contains:
+            - 'Jenkins'
+            - 'Maven'
+            - 'Gradle'
+            - 'Ansible'
+    condition: all of selection_* and not 1 of filter_optional_*
+falsepositives:
+    - Legitimate administrative deployment of WAR files from authorized build servers (Jenkins, Maven, Gradle).
+    - Internal DevOps automation platforms deploying applications through Tomcat Manager.
+    - Manual administrative deployment of WAR files via the Tomcat Manager HTML or text interface.
+level: high
