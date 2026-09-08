@@ -1,0 +1,43 @@
+title: Suspicious Inbox Forwarding Rule Created Post-AiTM Session Hijack
+id: 7dbc984c-fc0d-4b24-828f-d9a530cd2d81
+status: experimental
+description: |
+    Detects creation or modification of an Exchange Online inbox rule that forwards
+    or redirects mail externally, or hides messages by moving or deleting them.
+    This is a common post-compromise action following AiTM (Adversary-in-the-Middle)
+    phishing kits such as Tycoon2FA, EvilProxy, or NakedPages, where a stolen session
+    cookie is used to bypass MFA and the attacker then hides security alerts or
+    exfiltrates mail.
+references:
+    - https://blog.sekoia.io/tycoon2fa-an-in-depth-analysis-of-the-innovative-phishing-kit/
+author: Enrique Rodríguez Romero
+date: 2026-09-07
+tags:
+    - attack.collection
+    - attack.t1114.003
+    - attack.credential-access
+    - attack.t1557
+logsource:
+    product: m365
+    service: audit
+detection:
+    selection_operation:
+        Operation:
+            - 'New-InboxRule'
+            - 'Set-InboxRule'
+    selection_suspicious_action:
+        Parameters|contains:
+            - 'ForwardTo'
+            - 'ForwardAsAttachmentTo'
+            - 'RedirectTo'
+            - 'DeleteMessage'
+    filter_internal_forward:
+        Parameters|contains|expand: '%internal_domains%'
+    condition: selection_operation and selection_suspicious_action and not filter_internal_forward
+falsepositives:
+    - Legitimate mailbox delegation or forwarding set up by IT for role changes such
+      as maternity leave or department transfers
+    - Requires the placeholder '%internal_domains%' to be defined with the
+      organization's own accepted domains via a pySigma pipeline config; without it,
+      internal/expected forwarding will also match
+level: high
