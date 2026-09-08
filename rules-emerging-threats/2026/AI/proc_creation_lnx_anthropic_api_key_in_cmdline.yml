@@ -1,0 +1,28 @@
+title: Anthropic API Key Pattern In Process Command Line - Linux
+id: e858a877-40df-48cf-a312-7ac00ee446aa
+status: experimental
+description: |
+    Detects long-lived Anthropic API key patterns (sk-ant-api03-...) in the command line of any process.
+    Keys passed as positional arguments are visible to any local user via /proc and ps, and routinely leak into shell history and CI logs.
+references:
+    - https://docs.anthropic.com/en/api/getting-started
+    - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+    - https://nvd.nist.gov/800-53/Rev5/control/IA-5
+    - https://attack.mitre.org/techniques/T1552/001/
+author: Punith Gowda (Network Intelligence)
+date: 2026-05-10
+tags:
+    - attack.credential-access
+    - attack.t1552.001
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        CommandLine|contains: 'sk-ant-api03-'
+    condition: selection
+falsepositives:
+    - Developer workstations running Anthropic SDK examples that hardcode keys for local testing
+    - Misconfigured CI jobs that expand secrets into argv before the runtime can scrub them
+level: high
