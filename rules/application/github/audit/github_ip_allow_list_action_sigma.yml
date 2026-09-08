@@ -1,0 +1,38 @@
+title: GitHub - IP Allow List Action
+id: 51e23374-70f2-46b6-a16c-b4d7bd2529d6
+status: experimental
+description: Detects modifications to GitHub IP allow list configurations, including enabling or disabling allow list enforcement, changes, and the creation, update, or removal of allow list entries. Unauthorized changes may weaken network based access controls and increase the risk of unauthorized access to GitHub resources.
+references:
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/audit-log-events-for-your-enterprise
+    - https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/audit-log-events-for-your-organization
+    - https://docs.github.com/en/enterprise-cloud@latest/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/managing-allowed-ip-addresses-for-your-organization
+author: Stamatis Chatzimangou (@_st0pp3r_)
+date: 2026-07-06
+tags:
+    - attack.defense-impairment
+    - attack.t1686
+    - attack.t1686.001
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection_enforcement:
+        action:
+            - 'ip_allow_list.disable'
+            - 'ip_allow_list.disable_for_installed_apps'
+            - 'ip_allow_list.disable_idp_ip_allowlist_for_web'
+            - 'ip_allow_list.disable_user_level_enforcement'
+            - 'ip_allow_list.enable'
+            - 'ip_allow_list.enable_for_installed_apps'
+            - 'ip_allow_list.enable_idp_ip_allowlist_for_web'
+            - 'ip_allow_list.enable_user_level_enforcement'
+    selection_entry:
+        action:
+            - 'ip_allow_list_entry.create'
+            - 'ip_allow_list_entry.destroy'
+            - 'ip_allow_list_entry.update'
+    condition: 1 of selection_*
+falsepositives:
+    - Administrators enabling or disabling IP allow list enforcement as part of planned changes.
+level: medium
