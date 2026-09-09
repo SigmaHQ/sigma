@@ -2,11 +2,12 @@ title: Authentication Method Registered From Outside Corporate Network
 id: 4a1e6f92-3c8d-4b7a-9e5f-2d61c8a94b30
 status: experimental
 description: |
-    Detects registration of a new authentication method (Authenticator app, phone
-    number, FIDO2 key) on a user account from an IP address outside known corporate
-    ranges. This is commonly observed after AiTM phishing kits such as Tycoon2FA
-    hijack a session token: the attacker registers a new MFA method to preserve
-    persistent access even after the victim resets their password.
+    Detects registration of a new authentication method (Authenticator app,
+    phone number, FIDO2 key) on a user account from an IP address outside
+    known corporate ranges. Commonly observed after AiTM (Adversary-in-the-Middle)
+    phishing kits such as Tycoon2FA hijack a session token: the attacker
+    registers a new MFA method to preserve persistent access even after the
+    victim resets their password.
 references:
     - https://blog.sekoia.io/tycoon2fa-an-in-depth-analysis-of-the-innovative-phishing-kit/
 author: Enrique Rodríguez Romero
@@ -19,17 +20,20 @@ logsource:
     service: auditlogs
 detection:
     selection:
-        Category: 'UserManagement'
-        ActivityDisplayName:
+        operationName:
             - 'Add auth method'
             - 'User registered security info'
             - 'Update user'
+        properties.result: 'success'
     filter_corp_ip:
-        IPAddress|cidr|expand: '%corporate_ip_ranges%'
+        callerIpAddress|expand: '%corporate_ip_ranges%'
     condition: selection and not filter_corp_ip
 falsepositives:
-    - Employees registering a new MFA device while traveling or working from home
-      outside documented corporate IP ranges
-    - Requires the placeholder '%corporate_ip_ranges%' to be defined with the
-      organization's own trusted CIDR ranges via a pySigma pipeline config
+    - Employees registering a new MFA device while traveling or working from
+      home outside documented corporate IP ranges
+    - Requires the placeholder '%corporate_ip_ranges%' to be resolved via a
+      pySigma pipeline configured to treat it as CIDR/network ranges when
+      converting to a target query language (e.g. using Sentinel's
+      ipv4_is_in_range() or equivalent) — the Sigma cidr value modifier cannot
+      be combined with expand
 level: medium
