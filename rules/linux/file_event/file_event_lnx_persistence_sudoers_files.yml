@@ -1,4 +1,4 @@
-title: Modification of Sudoers Files
+title: Persistence Via Sudoers Files
 id: ddb26b76-4447-4807-871f-1b035b2bfa5d
 status: test
 description: |
@@ -18,14 +18,13 @@ logsource:
     product: linux
     category: file_event
 detection:
-    selection_main:
-        TargetFilename: '/etc/sudoers'
-    selection_dropin:
-        TargetFilename|startswith: '/etc/sudoers.d/'
+    selection:
+        - TargetFilename: '/etc/sudoers'
+        - TargetFilename|startswith: '/etc/sudoers.d/'
     filter_main_dpkg:
         Image|endswith: '/usr/bin/dpkg'
         TargetFilename: '/etc/sudoers.d/README.dpkg-new'
-    condition: 1 of selection_* and not 1 of filter_main_*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Legitimate sudoers changes by administrators or configuration-management tools
 level: medium
