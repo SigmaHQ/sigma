@@ -193,7 +193,7 @@ cat findings-win7.json findings-win10.json findings-win11.json \
     findings-win2022-ad.json findings-win2022-0-20348-azure.json \
     > findings-all.json
 
-python3 "${SIGMA}"/tests/run_goodlog_regression.py \
+python3 "${SIGMA}"/tests/windows_goodlog_baseline_runner.py \
     --findings findings-all.json \
     --known-fps "${SIGMA}"/.github/workflows/known-FPs.csv \
     --rule-paths windows/ rules-emerging-threats/ rules-threat-hunting/ \
