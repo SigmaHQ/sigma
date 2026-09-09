@@ -1,0 +1,27 @@
+title: Potential .NET Startup Hook Persistence
+id: c69f1c1c-d571-41ea-aecc-1de968362750
+status: experimental
+description: |
+    Detects the persistent configuration of a .NET startup hook through the "DOTNET_STARTUP_HOOKS" environment variable.
+    An assembly configured in this variable is loaded and executed before the entry point of every affected .NET application.
+references:
+    - https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-environment-variables#dotnet_startup_hooks
+    - https://persistence-info.github.io/Data/dotnetstartuphooks.html
+author: bushidoSen
+date: 2026-07-13
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1574
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|endswith: '\DOTNET_STARTUP_HOOKS'
+    condition: selection
+falsepositives:
+    - Legitimate observability, profiling, or development tooling that configures a .NET startup hook persistently
+level: medium
