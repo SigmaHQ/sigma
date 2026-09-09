@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [[ -z $(command -v jq) ]]; then
-    >&2 echo "jq not found. Please install."
+if [[ -z $(command -v python3) ]]; then
+    >&2 echo "python3 not found. Please install."
     >&2 echo "Exiting"
     exit 1
 fi
@@ -188,26 +188,16 @@ echo "###############"
 echo "##  MATCHES  ##"
 echo "###############"
 echo
-echo "Windows 7 32-bit:"
-"${SIGMA}"/.github/workflows/matchgrep.sh findings-win7.json "${SIGMA}"/.github/workflows/known-FPs.csv
-echo
-echo "Windows 10:"
-"${SIGMA}"/.github/workflows/matchgrep.sh findings-win10.json "${SIGMA}"/.github/workflows/known-FPs.csv
-echo
-echo "Windows 11:"
-"${SIGMA}"/.github/workflows/matchgrep.sh findings-win11.json "${SIGMA}"/.github/workflows/known-FPs.csv
-echo
-echo "Windows 11 2023:"
-"${SIGMA}"/.github/workflows/matchgrep.sh findings-win11-2023.json "${SIGMA}"/.github/workflows/known-FPs.csv
-echo
-echo "Windows 2022:"
-"${SIGMA}"/.github/workflows/matchgrep.sh findings-win2022.json "${SIGMA}"/.github/workflows/known-FPs.csv
-echo
-echo "Windows 2022 AD:"
-"${SIGMA}"/.github/workflows/matchgrep.sh findings-win2022-ad.json "${SIGMA}"/.github/workflows/known-FPs.csv
-echo
-echo "Windows 2022.0.20348 Azure:"
-"${SIGMA}"/.github/workflows/matchgrep.sh findings-win2022-0-20348-azure.json "${SIGMA}"/.github/workflows/known-FPs.csv
+cat findings-win7.json findings-win10.json findings-win11.json \
+    findings-win11-2023.json findings-win2022.json \
+    findings-win2022-ad.json findings-win2022-0-20348-azure.json \
+    > findings-all.json
+
+python3 "${SIGMA}"/tests/run_goodlog_regression.py \
+    --findings findings-all.json \
+    --known-fps "${SIGMA}"/.github/workflows/known-FPs.csv \
+    --rule-paths windows/ rules-emerging-threats/ rules-threat-hunting/ \
+    --deprecated-paths "${SIGMA}"/deprecated/
 
 echo
 read -p  "Removing temporary directory ${TMP}. Press Enter to continue." -s
