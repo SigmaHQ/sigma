@@ -1,0 +1,31 @@
+title: 'Ubuntu Hotspot Activation via NetworkManager'
+id: 9b741eb3-8f1d-4f8e-8e28-4377d8e537c4
+status: experimental
+description: 'Detects when a user enables a WiFi hotspot on Ubuntu using NetworkManager, based on syslog entries.'
+author: 'Rahul Pandey'
+date: 2025-04-07
+references: []
+logsource:
+    product: linux
+    service: syslog
+    category: operating-system
+detection:
+    selection:
+        message|contains:
+            - 'connection-activate'
+            - 'name="Hotspot"'
+            - 'result="success"'
+    condition: selection
+fields:
+    - message
+    - uid
+    - pid
+    - hostname
+falsepositives:
+    - 'Users intentionally using hotspot for legitimate reasons'
+    - 'Admins testing hotspot configurations'
+level: medium
+tags:
+    - attack.collection
+    - attack.t1040
+
