@@ -1,0 +1,31 @@
+title: Microsoft 365 Anti-Phishing Rule Disabled
+id: 5063cb00-5d44-4d6d-ae79-aed940901a61
+status: experimental
+description: |
+  Detects the disabling of a Microsoft Defender for Office 365 anti-phishing
+  rule via the Disable-AntiPhishRule cmdlet. Adversaries with Exchange or
+  Security Administrator rights disable anti-phishing enforcement to allow
+  phishing or impersonation mail to reach mailboxes prior to delivery, often
+  re-enabling the rule afterward to conceal the change.
+references:
+    - https://github.com/vectra-ai-research/MAAD-AF
+    - https://learn.microsoft.com/en-us/powershell/module/exchange/disable-antiphishrule
+author: Tashnim Asgar (@lanceterminal)
+date: 2026-09-11
+tags:
+    - attack.ta0112
+    - attack.t1685
+logsource:
+    product: m365
+    service: exchange
+detection:
+    selection:
+        eventName: 'Disable-AntiPhishRule'
+    condition: selection
+falsepositives:
+    - Migration from custom policies to Preset Security Policies (Standard/Strict)
+    - Deliberate disabling of MDO policies when deploying a third-party email
+      security gateway
+    - CSP/GDAP partner activity during tenant onboarding (check ExternalAccess)
+    - Documented change windows and policy tuning
+level: high
