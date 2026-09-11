@@ -1,0 +1,34 @@
+title: Application Using Authentication Transfer Flow
+id: 0cfbe8ea-091b-4d94-bec3-ef7f35453e7a
+status: experimental
+description: |
+    Authentication transfer is a cross-device authentication flow that allows a user to transfer an authenticated session from a PC to a mobile device by scanning a QR code, without reentering credentials or completing MFA again.
+    Because only authentication claims are transferred, and because the flow bypasses non-Microsoft MDM solutions, it can be abused for token theft and replay to silently gain access from a non-approved device.
+    Microsoft's Zero Trust guidance recommends blocking this flow unless there is a documented business need, so its presence outside of expected cross-device scenarios warrants investigation.
+references:
+    - https://learn.microsoft.com/en-us/entra/identity/conditional-access/concept-authentication-transfer
+    - https://learn.microsoft.com/en-us/entra/identity/conditional-access/concept-authentication-flows
+    - https://learn.microsoft.com/en-us/entra/fundamentals/zero-trust-protect-identities#authentication-transfer-is-blocked
+author: Grégory Wychowaniec '@gregorywychowaniec-zt'
+date: 2026-07-10
+tags:
+    - attack.t1550
+    - attack.credential-access
+    - attack.t1078
+    - attack.lateral-movement
+    - attack.initial-access
+    - attack.privilege-escalation
+    - attack.persistence
+    - attack.stealth
+logsource:
+    product: azure
+    service: signinlogs
+detection:
+    selection:
+        properties.authenticationProtocol:
+            - 'Authentication transfer'
+            - 'authenticationTransfer'
+    condition: selection
+falsepositives:
+    - Users legitimately performing cross-device sign-in from PC to mobile with supported Microsoft apps (e.g. Outlook) where authentication transfer is intentionally allowed.
+level: medium
