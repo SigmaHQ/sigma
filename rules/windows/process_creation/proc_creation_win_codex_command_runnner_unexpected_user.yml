@@ -1,0 +1,32 @@
+title: OpenAI Codex Command Runner Execution by Unexpected User
+id: d8f3a1b2-7c4e-4f5a-9b8c-1e2d3f4a5b6c
+status: experimental
+description: |
+    Detects execution of the OpenAI Codex command runner binary (codex-command-runner-*.exe) under a user account other than the expected dedicated sandbox accounts (CodexSandboxOffline or CodexSandboxOnline).
+    Codex enforces its sandbox boundary by running the command runner exclusively as one of these two restricted local accounts.
+    Execution under any other user may indicate a sandbox escape, token impersonation, or deliberate misuse of the command runner outside its intended security context.
+references:
+    - https://jonny-johnson.medium.com/a-deep-dive-into-codex-windows-sandbox-a2489bf4ae91
+    - https://openai.com/index/building-codex-windows-sandbox/
+author: Jonathan Johnson, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-05-26
+tags:
+    - attack.execution
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1059
+    - attack.t1055
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|contains: '\codex-command-runner-'
+    filter_main_expected_users:
+        User:
+            - 'CodexSandboxOffline'
+            - 'CodexSandboxOnline'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high
