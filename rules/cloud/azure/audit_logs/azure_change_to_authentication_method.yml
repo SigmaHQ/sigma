@@ -6,7 +6,7 @@ references:
     - https://learn.microsoft.com/en-us/entra/architecture/security-operations-privileged-accounts
 author: AlertIQ
 date: 2021-10-10
-modified: 2022-12-25
+modified: 2026-07-16
 tags:
     - attack.privilege-escalation
     - attack.credential-access
@@ -22,7 +22,11 @@ detection:
         LoggedByService: 'Authentication Methods'
         Category: 'UserManagement'
         OperationName: 'User registered security info'
-    condition: selection
+    filter_service_maintenance:
+        properties.operationType: 'ServiceApi'
+        properties.resultReason: 'User registered security info'
+        properties.targetResources.modifiedProperties: null
+    condition: selection and not filter_service_maintenance
 falsepositives:
     - Unknown
 level: medium
