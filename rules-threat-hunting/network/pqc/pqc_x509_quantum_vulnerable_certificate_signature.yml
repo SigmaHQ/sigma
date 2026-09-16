@@ -1,0 +1,37 @@
+title: X.509 Certificate Signed With Quantum-Vulnerable Algorithm
+id: f2f6e5c5-9314-4866-8851-d3a5c5a5bd96
+status: experimental
+description: An observed X.509 certificate is signed with RSA or ECDSA (or a SHA-1-based
+  signature). Shor's algorithm breaks RSA/ECDSA signatures on a CRQC (Trust-Now-Forge-Later).
+  Inventory rule to build the certificate side of a cryptographic bill of materials.
+references:
+- https://csrc.nist.gov/pubs/ir/8547/ipd
+author: TAI Creative LLC
+date: '2026-07-16'
+tags:
+- attack.resource-development
+- attack.t1587
+- attack.t1552.004
+logsource:
+  product: zeek
+  service: x509
+detection:
+  selection:
+    certificate.sig_alg|contains:
+    - rsa
+    - ecdsa
+    - sha1With
+    - sha1WithRSA
+  filter_pqc:
+    certificate.sig_alg|contains:
+    - mldsa
+    - dilithium
+    - sphincs
+    - slhdsa
+    - falcon
+  condition: selection and not filter_pqc
+falsepositives:
+- Universal until PQC certificate issuance is adopted; inventory finding, not an intrusion
+  signal.
+level: medium
+license: DRL-1.1
