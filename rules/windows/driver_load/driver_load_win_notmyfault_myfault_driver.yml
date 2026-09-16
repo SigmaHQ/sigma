@@ -1,0 +1,25 @@
+title: Sysinternals NotMyFault Driver Load - Myfault.SYS
+id: f188f9e8-f540-44d9-bfcb-db932f631d45
+status: experimental
+description: |
+    Detects the load of "myfault.sys", the kernel driver dropped by the Sysinternals NotMyFault tool. The driver can be abused to trigger
+    a deliberate system crash (denial of service / anti-forensics) and is an example of a signed driver exposing kernel-level primitives.
+references:
+    - https://learn.microsoft.com/en-us/sysinternals/downloads/notmyfault
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.privilege-escalation
+    - attack.impact
+    - attack.t1068
+    - attack.t1561
+logsource:
+    category: driver_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\myfault.sys'
+    condition: selection
+falsepositives:
+    - Legitimate stress / crash-dump testing by administrators using NotMyFault
+level: medium
