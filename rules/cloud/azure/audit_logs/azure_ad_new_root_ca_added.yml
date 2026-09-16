@@ -5,8 +5,10 @@ description: Detects newly added root certificate authority to an AzureAD tenant
 references:
     - https://posts.specterops.io/passwordless-persistence-and-privilege-escalation-in-azure-98a01310be3f
     - https://goodworkaround.com/2022/02/15/digging-into-azure-ad-certificate-based-authentication/
+    - https://learn.microsoft.com/en-us/purview/audit-log-activities#directory-administration-activities
 author: Harjot Shah Singh, '@cyb3rjy0t'
 date: 2024-03-26
+modified: 2026-05-09
 tags:
     - attack.credential-access
     - attack.persistence
@@ -18,8 +20,8 @@ logsource:
     service: auditlogs
 detection:
     selection:
-        OperationName: 'Set Company Information'
-        TargetResources.modifiedProperties.newValue|contains: 'TrustedCAsForPasswordlessAuth'
+        operationName: 'Set Company Information'
+        properties.targetResources|contains: 'TrustedCAsForPasswordlessAuth'
     condition: selection
 falsepositives:
     - Unknown

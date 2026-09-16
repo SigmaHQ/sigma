@@ -3,9 +3,11 @@ id: 102e11e3-2db5-4c9e-bc26-357d42585d21
 status: test
 description: Detects when a user is removed from a privileged role. Bulk changes should be investigated.
 references:
-    - https://learn.microsoft.com/en-us/entra/architecture/security-operations-privileged-identity-management#azure-ad-roles-assignment
+    - https://learn.microsoft.com/en-us/entra/architecture/security-operations-privileged-identity-management#microsoft-entra-roles-assignment
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities#core-directory
 author: Mark Morowczynski '@markmorow', Yochana Henderson, '@Yochana-H'
 date: 2022-08-05
+modified: 2026-05-09
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -15,9 +17,8 @@ logsource:
     service: auditlogs
 detection:
     selection:
-        properties.message:
-            - Remove eligible member (permanent)
-            - Remove eligible member (eligible)
+        category: 'RoleManagement'
+        operationName: 'Remove eligible member from role'
     condition: selection
 falsepositives:
     - Legtimate administrator actions of removing members from a role
