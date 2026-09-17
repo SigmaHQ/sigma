@@ -1,0 +1,49 @@
+title: Potential SharePoint Exploitation Tool Activity via Suspicious User-Agent
+id: ab8d8f94-4737-4c7c-bbd8-c31f0b20a51c
+status: experimental
+description: |
+    Detects a successful POST request to sensitive SharePoint endpoints (/_trust/,
+    /_layouts/15/) where the user-agent matches a known scripting runtime or HTTP
+    library default. Exploitation tools written in PowerShell, Python, Go, Java, Ruby,
+    or curl typically ship with these default user-agents. This pattern is consistent
+    with automated exploitation or reconnaissance targeting SharePoint claim-based token
+    forgery, authentication bypass, and administrative page abuse.
+references:
+    - https://x.com/testanull/status/2079082982640668990
+    - https://learn.microsoft.com/en-us/sharepoint/dev/general-development/claims-based-identity-and-concepts-in-sharepoint
+    - https://www.rapid7.com/blog/post/ra-microsoft-sharepoint-jwt-token-authentication-bypass-cve-2026-55040/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-07-27
+tags:
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    category: webserver
+detection:
+    # 2026-07-27 06:51:00 ::1 POST /_trust/default.aspx - 80 - ::1 Mozilla/5.0+(Windows+NT;+Windows+NT+10.0;+en-US)+WindowsPowerShell/5.1.17763.9020 - 200 0 0 11212 1782 65
+    selection_endpoint:
+        cs-method: POST
+        cs-uri-stem|contains:
+            - '/_trust/'
+            - '/_layouts/15/'
+        sc-status|startswith: '20'
+    selection_useragent:
+        cs-user-agent|contains:
+            - 'WindowsPowerShell'   # PowerShell Invoke-WebRequest / Invoke-RestMethod
+            - 'python-requests'     # Python requests library
+            - 'Python-urllib'       # Python urllib
+            - 'python/'             # Generic Python HTTP clients
+            - 'Go-http-client'      # Go net/http default
+            - 'curl/'               # curl
+            - 'Wget/'               # Wget
+            - 'Java/'               # Java HttpURLConnection
+            - 'Apache-HttpClient'   # Apache HttpComponents (Java)
+            - 'libwww-perl'         # Perl LWP
+            - 'ruby'                # Ruby Net::HTTP
+            - 'axios/'              # Node.js axios
+            - 'node-fetch'          # Node.js node-fetch
+            - 'got/'                # Node.js got
+    condition: all of selection_*
+falsepositives:
+    - Legitimate administrative automation POSTing to SharePoint trust or layout endpoints (extremely rare; validate against known admin activity)
+level: high
