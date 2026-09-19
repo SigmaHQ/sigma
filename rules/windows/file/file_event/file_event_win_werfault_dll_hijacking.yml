@@ -6,7 +6,7 @@ references:
     - https://www.bleepingcomputer.com/news/security/hackers-are-now-hiding-malware-in-windows-event-logs/
 author: frack113
 date: 2022-05-09
-modified: 2025-12-03
+modified: 2026-05-18
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -27,7 +27,9 @@ detection:
             - 'C:\Windows\System32\'
             - 'C:\Windows\SysWOW64\'
             - 'C:\Windows\WinSxS\'
-            - 'C:\Windows\UUS\arm64\'
+            - 'C:\Windows\UUS\' # covers both C:\Windows\UUS\arm64\ and C:\Windows\UUS\packages\
+    filter_main_process:
+        Image|endswith: '\wuaucltcore.exe'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
