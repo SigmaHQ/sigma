@@ -7,7 +7,7 @@ references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, Aleksey Potapov, oscd.community (update)
 date: 2019-11-01
-modified: 2023-12-19
+modified: 2026-06-29
 tags:
     - attack.credential-access
     - car.2019-04-004
@@ -51,6 +51,7 @@ detection:
             - '\perfmon.exe'
             - '\procexp.exe'
             - '\procexp64.exe'
+            - '\procexp64a.exe'
             - '\svchost.exe'
             - '\taskmgr.exe'
             - '\thor.exe'        # THOR
@@ -76,7 +77,9 @@ detection:
             - ':\Windows\System32\msiexec.exe'
             - ':\Windows\CCM\CcmExec.exe'
     filter_main_sysmon:
-        ProcessName|endswith: ':\Windows\Sysmon64.exe'
+        ProcessName|endswith:
+            - ':\Windows\Sysmon64.exe'
+            - ':\Windows\Sysmon64a.exe'
         AccessList|contains: '%%4484'
     filter_main_aurora:
         ProcessName|contains: ':\Windows\Temp\asgard2-agent-sc\aurora\'
@@ -106,6 +109,7 @@ detection:
     filter_optional_procmon:
         ProcessName|endswith:
             - '\procmon64.exe'
+            - '\procmon64a.exe'
             - '\procmon.exe'
         AccessList|contains: '%%4484'
     condition: 1 of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
