@@ -1,0 +1,32 @@
+title: BrokenPipe - Steam LPE SYSTEM Child Outside Install Directory
+id: 895d3358-e983-44bf-a69f-0577449c177c
+status: experimental
+description: >
+  Detects steamservice.exe spawning a child process with SYSTEM integrity
+  from an image path outside the standard Steam install directory.
+references:
+  - https://github.com/KillaBoi/BrokenPipe
+author: Saksham Bhattarai
+date: 2026-09-19
+modified: 2026-09-19
+tags:
+  - attack.privilege_escalation
+  - attack.t1548
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_parent:
+    ParentImage|endswith: '\steamservice.exe'
+  selection_integrity:
+    IntegrityLevel: 'System'
+  filter_main_legit_paths:
+    Image|startswith:
+      - 'C:\Program Files (x86)\Steam\'
+      - 'C:\Program Files\Steam\'
+      - 'C:\Windows\System32\'
+  condition: selection_parent and selection_integrity and not filter_main_legit_paths
+falsepositives:
+  - Legitimate Steam updates with non-default install paths
+  - Custom Steam library locations outside Program Files
+level: high
