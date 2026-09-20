@@ -10,21 +10,25 @@ references:
 author: CheraghiMilad
 date: 2024-12-10
 tags:
-    - attack.defense-evasion
+    - attack.stealth
     - attack.t1014
 logsource:
     category: process_creation
     product: linux
 detection:
-    selection:
+    selection_binary:
         Image|endswith:
             - '/kmod'
-            - '/sudo'
+            - '/insmod'
+            - '/rmmod'
+            - '/modprobe'
+    selection_sudo:
+        Image|endswith: '/sudo'
         CommandLine|contains:
             - 'insmod'
             - 'rmmod'
             - 'modprobe'
-    condition: selection
+    condition: selection_binary or selection_sudo
 falsepositives:
     - Administrative tasks such as legitimate system administration involving device driver modules.
 level: medium
