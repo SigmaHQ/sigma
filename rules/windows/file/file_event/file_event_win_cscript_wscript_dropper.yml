@@ -4,12 +4,12 @@ related:
     - id: cea72823-df4d-4567-950c-0b579eaf0846
       type: derived
 status: test
-description: Detects a file ending in jse, vbe, js, vba, vbs written by cscript.exe or wscript.exe
+description: Detects a file ending in jse, vbe, js, vba, vbs, wsf, wsh written by cscript.exe or wscript.exe
 references:
     - WScript or CScript Dropper (cea72823-df4d-4567-950c-0b579eaf0846)
 author: Tim Shelton
 date: 2022-01-10
-modified: 2022-12-02
+modified: 2026-02-17
 tags:
     - attack.execution
     - attack.t1059.005
@@ -22,15 +22,25 @@ detection:
         Image|endswith:
             - '\wscript.exe'
             - '\cscript.exe'
-        TargetFilename|startswith:
-            - 'C:\Users\'
-            - 'C:\ProgramData'
+        TargetFilename|contains:
+            - ':\Perflogs\'
+            - ':\ProgramData\'
+            - ':\Temp\'
+            - ':\Tmp\'
+            - ':\Users\'
+            - ':\Windows\Temp\'
+            - '\AppData\Local\Temp'
+            - '\AppData\Roaming\Temp'
+            - '\Start Menu\Programs\Startup\'
+            - '\Temporary Internet'
         TargetFilename|endswith:
-            - '.jse'
-            - '.vbe'
             - '.js'
+            - '.jse'
             - '.vba'
+            - '.vbe'
             - '.vbs'
+            - '.wsf'
+            - '.wsh'
     condition: selection
 falsepositives:
     - Unknown
