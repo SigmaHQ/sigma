@@ -7,6 +7,7 @@ references:
     - https://github.com/elastic/detection-rules/blob/v8.6.0/rules/integrations/aws/initial_access_via_system_manager.toml
 author: jamesc-grafana
 date: 2024-07-11
+modified: 2025-12-08
 tags:
     - attack.privilege-escalation
     - attack.initial-access
@@ -16,11 +17,14 @@ logsource:
     product: aws
     service: cloudtrail
 detection:
-    selection:
+    selection_event:
         eventName: 'SendCommand'
         eventSource: 'ssm.amazonaws.com'
-        responseElements.command.status: 'Success'
-    condition: selection
+    selection_status_success:
+        errorCode: 'Success'
+    selection_status_null:
+        errorCode: null
+    condition: selection_event and 1 of selection_status_*
 falsepositives:
     - There are legitimate uses of SSM to send commands to EC2 instances
     - Legitimate users may have to use SSM to perform actions against machines in the Cloud to update or maintain them

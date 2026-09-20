@@ -7,10 +7,12 @@ Run using the command
 """
 
 import os
+import sys
 import unittest
 import yaml
 import re
 import string
+import copy
 
 # from attackcti import attack_client
 from colorama import init
@@ -62,13 +64,37 @@ class TestRules(unittest.TestCase):
         "rules-compliance",
     ]
 
-    # Helper functions
-    def yield_next_rule_file_path(self, path_to_rules: list) -> str:
-        for path_ in path_to_rules:
+    @classmethod
+    def setUpClass(cls):
+        cls._rule_file_paths = []
+        cls._yaml_cache: dict = {}
+        for path_ in cls.path_to_rules:
             for root, _, files in os.walk(path_):
                 for file in files:
                     if file.endswith(".yml"):
-                        yield os.path.join(root, file)
+                        cls._rule_file_paths.append(os.path.join(root, file))
+
+    # Helper functions
+    def yield_next_rule_file_path(self, path_to_rules: list) -> "collections.abc.Iterator[str]":
+        if path_to_rules == self.path_to_rules and hasattr(self, "_rule_file_paths"):
+            total = len(self._rule_file_paths)
+            last_pct = -1
+            tty = sys.stdout.isatty()
+            for i, file_path in enumerate(self._rule_file_paths, 1):
+                if tty:
+                    pct = i * 100 // total
+                    if pct != last_pct:
+                        print(f"\r  {pct:3d}% ({i}/{total})", end="", flush=True)
+                        last_pct = pct
+                yield file_path
+            if tty:
+                print()
+        else:
+            for path_ in path_to_rules:
+                for root, _, files in os.walk(path_):
+                    for file in files:
+                        if file.endswith(".yml"):
+                            yield os.path.join(root, file)
 
     def get_rule_part(self, file_path: str, part_name: str):
         yaml_dicts = self.get_rule_yaml(file_path)
@@ -78,15 +104,11 @@ class TestRules(unittest.TestCase):
 
         return None
 
-    def get_rule_yaml(self, file_path: str) -> dict:
-        data = []
-
-        with open(file_path, encoding="utf-8") as f:
-            yaml_parts = yaml.safe_load_all(f)
-            for part in yaml_parts:
-                data.append(part)
-
-        return data
+    def get_rule_yaml(self, file_path: str) -> list:
+        if file_path not in self._yaml_cache:
+            with open(file_path, encoding="utf-8") as f:
+                self._yaml_cache[file_path] = tuple(yaml.safe_load_all(f))
+        return [copy.deepcopy(part) for part in self._yaml_cache[file_path]]
 
     # Tests
     def test_legal_trademark_violations(self):
@@ -611,6 +633,8 @@ class TestRules(unittest.TestCase):
                                     pattern_prefix = "onelogin_"
                                 elif value == "github":
                                     pattern_prefix = "github_"
+                                elif value == "fortinet":
+                                    pattern_prefix = "fortinet_"
                             elif key == "category":
                                 if value == "process_creation":
                                     pattern_prefix = "proc_creation_"
@@ -720,13 +744,16 @@ class TestRules(unittest.TestCase):
                         pattern_prefix += os_infix
                     if pattern_prefix != "":
                         if not filename.startswith(pattern_prefix):
-                            print(
-                                Fore.YELLOW
-                                + "Rule {} has a file name that doesn't match our standard naming convention.".format(
-                                    file
-                                )
-                            )
-                            faulty_rules.append(file)
+                            for key, value in logsource.items():
+                                if key in ["category", "service", "product"]:
+                                    print(
+                                        Fore.YELLOW
+                                        + "Rule {} has inconsistency between filename '{}' and logsource ({}: '{}'):".format(
+                                            file, filename, key, value
+                                        )
+                                    )
+                            if file not in faulty_rules:
+                                faulty_rules.append(file)
             name_lst.append(filename)
 
         self.assertEqual(
@@ -1141,7 +1168,7 @@ class TestRules(unittest.TestCase):
         MAX_DEPTH = 3
 
         def create_escape_allow_list():
-            """
+            r"""
             Create a list of characters that are allowed to be escaped.
             1. Based on string.punctuation chars that would already be escaped by re.escape()
             2. Followed by special chars like '\n', '\t', '\[0-9]' etc.

@@ -10,6 +10,7 @@ references:
     - https://adsecurity.org/?p=3513
 author: '@kostastsale'
 date: 2022-01-21
+modified: 2025-10-19
 tags:
     - attack.credential-access
     - attack.t1558.003
@@ -21,10 +22,11 @@ detection:
         EventID: 4769
         Status: '0x0' # Translated as status from failure code field. Query only for successes
         TicketEncryptionType: '0x17' # RC4 ticket encryption type
-    filter_main_:
+    filter_main_krbtgt:
         ServiceName|endswith:
             - 'krbtgt' # Ignore requests for the krbtgt service
             - '$' # Ignore requests from service names that end with $ which are associated with genuine kerberos traffic
+    filter_main_machine_accounts:
         TargetUserName|contains: '$@' # Ignore requests from machines
     condition: selection and not 1 of filter_main_*
 falsepositives:
