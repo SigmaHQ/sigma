@@ -1,13 +1,14 @@
-title: MSI repair process completed
+title: MSI Repair Process Completed
 id: 6cfd7bbd-201f-4fc6-ab23-b485c6d38af1
-status: test
-description: Event signaling the completion of a repair for an application installed through an MSI file; might indicate abuse of this functionality to elevate privileges using the repair process of a vulnerable MSI file
+status: experimental
+description: Detects the completion of a repair for an application installed through an MSI file, which might indicate abuse of this functionality to elevate privileges using the repair process of a vulnerable MSI file
 references:
     - https://r.sec-consult.com/msi
     - https://msrc.microsoft.com/update-guide/en-US/advisory/CVE-2024-38014
 author: Herbert Bärschneider @SEC Consult
 date: 2024-07-12
 tags:
+    - attack.privilege-escalation
     - attack.t1068
     - cve.2024-38014
 logsource:
@@ -19,10 +20,8 @@ detection:
         EventID:
             - 11728 # Product Configuration completed successfully
     condition: selection
-fields:
-    - SecurityUserID
 falsepositives:
-    - legitimate use of MSI files to repair installed applications by users or administrators
+    - Legitimate use of MSI files to repair installed applications by users or administrators
 # level is low, as one needs further context to identify, if this is part of malicious activity; moreover, the event can be evaded by an attacker
 level: low
 
