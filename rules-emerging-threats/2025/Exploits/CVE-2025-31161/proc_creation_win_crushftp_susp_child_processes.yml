@@ -1,0 +1,45 @@
+title: Suspicious CrushFTP Child Process
+id: 459628e3-1b00-4e9b-9e5b-7da8961aea35
+status: experimental
+description: |
+    Detects suspicious child processes spawned by the CrushFTP service that may indicate exploitation of remote code execution vulnerabilities such as
+    CVE-2025-31161, where attackers can achieve RCE through crafted HTTP requests.
+    The detection focuses on commonly abused Windows executables (like powershell.exe, cmd.exe etc.) that attackers typically use post-exploitation to execute malicious commands.
+references:
+    - https://nvd.nist.gov/vuln/detail/CVE-2025-2825
+    - https://www.crushftp.com/crush11wiki/Wiki.jsp?page=Update
+    - https://outpost24.com/blog/crushftp-auth-bypass-vulnerability/
+    - https://attackerkb.com/topics/k0EgiL9Psz/cve-2025-2825/rapid7-analysis
+    - https://projectdiscovery.io/blog/crushftp-authentication-bypass
+author: Craig Sweeney, Matt Anderson, Jose Oregon, Tim Kasper, Faith Stratton, Samantha Shaw, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-04-10
+tags:
+    - attack.initial-access
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1059.003
+    - attack.t1190
+    - cve.2025-31161
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\crushftpservice.exe'
+    selection_child:
+        Image|endswith:
+            - '\bash.exe'
+            - '\cmd.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\powershell.exe'
+            - '\powershell_ise.exe'
+            - '\pwsh.exe'
+            - '\sh.exe'
+            - '\wscript.exe'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate CrushFTP administrative actions
+    - Software updates
+level: medium

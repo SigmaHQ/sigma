@@ -1,0 +1,47 @@
+title: Potential SAP NetViewer Webshell Command Execution
+id: 94e12f41-6cb3-45c5-97b1-c783a7bf2e72
+status: experimental
+description: |
+    Detects potential command execution via webshell in SAP NetViewer through JSP files with cmd parameter.
+    This rule is created to detect exploitation of vulnerabilities like CVE-2025-31324, which allows remote code execution via a webshell.
+references:
+    - https://blog.eclecticiq.com/china-nexus-nation-state-actors-exploit-sap-netweaver-cve-2025-31324-to-target-critical-infrastructures
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-05-14
+tags:
+    - attack.persistence
+    - attack.t1505.003
+    - attack.initial-access
+    - attack.t1190
+    - detection.emerging-threats
+    - cve.2025-31324
+logsource:
+    category: webserver
+detection:
+    selection_uri:
+        cs-uri-stem|contains|all:
+            - '/irj/'
+            - '.jsp'
+    selection_query:
+        - cs-uri-query|startswith:
+              - 'cmd='
+              - 'command='
+              - 'exec_cmd='
+              - 'exec='
+        - cs-uri-query|contains:
+              - '/dev/tcp'
+              - '/etc/passwd'
+              - '%2fdev%2ftcp' # URL encoded of /dev/tcp
+              - '%2fetc%2fpasswd' # URL encoded of /etc/passwd
+              - '=uname'
+              - '=whoami'
+              - 'ifconfig'
+              - 'ping'
+              - 'pwd'
+        - cs-uri-query|contains|all:
+              - 'echo'
+              - 'base64'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate applications using cmd parameter for non-malicious purposes
+level: high

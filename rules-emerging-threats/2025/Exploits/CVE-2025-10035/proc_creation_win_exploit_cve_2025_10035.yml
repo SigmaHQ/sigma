@@ -1,0 +1,78 @@
+title: Potential Exploitation of GoAnywhere MFT Vulnerability
+id: 6c76b3d0-afe4-4870-9443-ffe6773c5fef
+status: experimental
+description: |
+    Detects suspicious command execution by child processes of the GoAnywhere Managed File Transfer (MFT) application, which may indicate exploitation such as CVE-2025-10035.
+    This behavior is indicative of post-exploitation activity related to CVE-2025-10035, as observed in campaigns by the threat actor Storm-1175.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2025/10/06/investigating-active-exploitation-of-cve-2025-10035-goanywhere-managed-file-transfer-vulnerability/
+author: MSFT (idea), Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-10-07
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - attack.execution
+    - attack.t1059.001
+    - attack.persistence
+    - attack.t1133
+    - detection.emerging-threats
+    - cve.2025-10035
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    # Detects the GoAnywhere Tomcat parent process based on path and command line arguments
+    selection_parent:
+        ParentImage|contains: '\GoAnywhere\tomcat\'
+    selection_powershell_img:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\powershell_ise.exe'
+            - '\pwsh.exe'
+    selection_powershell_cmd:
+        - CommandLine|contains|all:
+              - 'IEX'
+              - 'enc'
+              - 'Hidden'
+              - 'bypass'
+        - CommandLine|re:
+              - 'net\s+user'
+              - 'net\s+group'
+              - 'query\s+session'
+        - CommandLine|contains:
+              - 'whoami'
+              - 'systeminfo'
+              - 'dsquery'
+              - 'localgroup administrators'
+              - 'nltest'
+              - 'samaccountname='
+              - 'adscredentials'
+              - 'o365accountconfiguration'
+              - '.DownloadString('
+              - '.DownloadFile('
+              - 'FromBase64String('
+              - 'System.IO.Compression'
+              - 'System.IO.MemoryStream'
+              - 'curl'
+    selection_child_cmd:
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains:
+            - 'powershell'
+            - 'whoami'
+            - 'net.exe'
+            - 'net1.exe'
+            - 'rundll32'
+            - 'quser'
+            - 'nltest'
+            - 'curl'
+    selection_child_others:
+        CommandLine|contains:
+            - 'bitsadmin'
+            - 'certutil'
+            - 'mshta'
+            - 'cscript'
+            - 'wscript'
+    condition: selection_parent and (all of selection_powershell_* or 1 of selection_child_*)
+falsepositives:
+    - Legitimate administrative scripts or built-in GoAnywhere functions could potentially trigger this rule. Tuning may be required based on normal activity in your environment.
+level: high

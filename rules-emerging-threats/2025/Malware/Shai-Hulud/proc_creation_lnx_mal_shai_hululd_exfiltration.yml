@@ -1,0 +1,28 @@
+title: Shai-Hulud NPM Package Malicious Exfiltration via Curl
+id: efd2eb09-b72e-4a61-8dc7-b1382a1e8983
+status: experimental
+description: Detects potential Shai Hulud NPM package attack attempting to exfiltrate data via curl to external webhook sites.
+references:
+    - https://www.getsafety.com/blog-posts/shai-hulud-npm-attack
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-09-24
+tags:
+    - attack.exfiltration
+    - attack.t1041
+    - attack.collection
+    - attack.t1005
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith: '/curl'
+        CommandLine|contains|all:
+            - 'curl'
+            - '-d'
+            - 'webhook.site/bb8ca5f6-4175-45d2-b042-fc9ebb8170b7'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
