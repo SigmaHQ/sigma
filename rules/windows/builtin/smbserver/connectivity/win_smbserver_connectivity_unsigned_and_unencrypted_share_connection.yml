@@ -1,0 +1,55 @@
+title: Unsigned or Unencrypted SMB Connection to Share Established
+id: 8d91f6e4-9f3b-4c21-ae41-2c5b7d9f7a12
+status: experimental
+description: |
+    Detects SMB server connections to shares without signing or encryption enabled.
+    This could indicate potential lateral movement activity using unsecured SMB shares.
+author: Mohamed Abdelghani
+date: 2025-10-19
+references:
+    - https://learn.microsoft.com/en-us/troubleshoot/windows-server/networking/overview-server-message-block-signing
+tags:
+    - attack.lateral-movement
+    - attack.t1021.002
+logsource:
+    product: windows
+    service: smbserver-connectivity
+detection:
+    selection_shares:
+        EventID: 4000
+        ShareName|contains:
+            - 'IPC$'
+            - 'ADMIN$'
+            - 'C$'
+    selection_status:
+        - SigningUsed: 'false'
+        - EncyptionUsed: 'false' # Note: typo in the original event field name
+    filter_main_local_ips:
+        - ClientAddress|cidr:
+              # IPv4
+              # - '10.0.0.0/8'
+              - '127.0.0.0/8'
+              - '169.254.0.0/16'
+              # - '172.16.0.0/12'
+              # - '192.168.0.0/16'
+              # IPv6
+              - '::1/128'  # IPv6 loopback
+              - 'fe80::/10'  # IPv6 link-local addresses
+              - 'fc00::/7'  # IPv6 private addresses
+        # The filters below cover the XML raw log
+        - ClientAddress|contains:
+              # IPv6
+              - '00000000000000000000000000000001' # ::1 - IPv6 loopback
+              - 'FE80000000000000' # fe80:: - IPv6 link-local addresses
+              - 'FC00000000000000' # fc00:: - IPv6 private addresses
+              # IPv4
+              # The "?" are meant to represent the port
+              # - '0200????C0A8' # 192.168.
+              # - '0200????AC' # 172.
+              # - '0200????0A' # 10.
+              - '0200????7F' # 127
+              - '0200????A9FE' # 169.254.
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Connections from local or private IP addresses to SMB shares without signing or encryption enabled for older systems or misconfigured environments. Apply additional tuning as needed.
+level: medium
