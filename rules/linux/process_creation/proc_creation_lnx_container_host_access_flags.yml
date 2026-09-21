@@ -1,8 +1,8 @@
-title: Container Started With Host Namespace Or Docker Socket Access
+title: Potential Container Escape Via Docker Socket Or Host Namespace Access
 id: 0efe4005-85b1-46f0-a83c-3c942cfe455a
 status: experimental
 description: |
-    Detects the start of a container that shares the host PID or network namespace, mounts the Docker socket or the host root filesystem, or is granted the SYS_ADMIN capability.
+    Detects the start of a container that shares the host PID namespace, mounts the Docker socket or the host root filesystem, or is granted the SYS_ADMIN capability.
     Each of these options removes a part of the isolation between the container and the host and is a well-known path to escape from a container to the host.
     An attacker with access to the Docker CLI or API can use these options to gain root privileges on the host.
     Some monitoring agents, reverse proxies and container management tools legitimately require these options. It is recommended to baseline those and filter them by image name.
@@ -35,10 +35,6 @@ detection:
         CommandLine|contains:
             - '--cap-add SYS_ADMIN'
             - '--cap-add=SYS_ADMIN'
-            - '--net host'
-            - '--net=host'
-            - '--network host'
-            - '--network=host'
             - '--pid host'
             - '--pid=host'
             - '-v /:/'
@@ -47,6 +43,6 @@ detection:
             - '/run/docker.sock:'
     condition: all of selection_*
 falsepositives:
-    - Monitoring agents, reverse proxies and container management tools that require access to the Docker socket or the host network
+    - Monitoring agents, reverse proxies and container management tools that require access to the Docker socket
     - Administrators debugging the host from a container
 level: medium
