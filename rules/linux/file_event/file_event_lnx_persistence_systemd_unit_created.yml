@@ -1,0 +1,64 @@
+title: Systemd Service Or Timer Unit File Created
+id: 62641464-0c1a-40b2-aeb0-fc61b5c2fec3
+related:
+    - id: 1bac86ba-41aa-4f62-9d6b-405eac99b485 # Systemd Service Creation (auditd)
+      type: similar
+    - id: 6c4e2f43-d94d-4ead-b64d-97e53fa2bd05 # New Cron File Created
+      type: similar
+status: experimental
+description: |
+    Detects the creation of systemd service or timer unit files in system-wide or per-user unit directories by a process other than a package manager or systemd itself.
+    Service and timer units are one of the most common ways to establish persistence on Linux, as they survive reboots and can run with root privileges.
+    Timer units are the systemd equivalent of cron jobs and are frequently overlooked by defenders that only monitor cron directories.
+    Note that administrators and configuration management tools legitimately create unit files. It is recommended to baseline the environment and review the content of newly created units.
+references:
+    - https://pberba.github.io/security/2022/01/30/linux-threat-hunting-for-persistence-systemd-timers-cron/
+    - https://www.elastic.co/security-labs/primer-on-persistence-mechanisms
+    - https://www.freedesktop.org/software/systemd/man/latest/systemd.timer.html
+author: Aaron Sawit
+date: 2026-09-21
+tags:
+    - attack.privilege-escalation
+    - attack.execution
+    - attack.persistence
+    - attack.t1543.002
+    - attack.t1053.006
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection_dir_system:
+        TargetFilename|startswith:
+            - '/etc/systemd/system/'
+            - '/lib/systemd/system/'
+            - '/run/systemd/system/'
+            - '/usr/lib/systemd/system/'
+            - '/usr/local/lib/systemd/system/'
+    selection_dir_user:
+        TargetFilename|contains:
+            - '/.config/systemd/user/'
+            - '/.local/share/systemd/user/'
+    selection_unit:
+        TargetFilename|endswith:
+            - '.service'
+            - '.timer'
+    filter_main_package_manager:
+        Image|endswith:
+            - '/apt'
+            - '/apt-get'
+            - '/dnf'
+            - '/dpkg'
+            - '/pacman'
+            - '/rpm'
+            - '/yum'
+            - '/zypper'
+    filter_main_systemd:
+        Image|endswith:
+            - '/systemctl'
+            - '/systemd'
+    condition: 1 of selection_dir_* and selection_unit and not 1 of filter_main_*
+falsepositives:
+    - Administrators creating unit files manually
+    - Configuration management and deployment tools such as Ansible, Puppet or cloud-init
+    - Software installed from a vendor script or a tarball instead of a package
+level: medium
