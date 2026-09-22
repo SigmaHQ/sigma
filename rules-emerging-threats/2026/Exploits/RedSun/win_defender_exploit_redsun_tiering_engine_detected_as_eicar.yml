@@ -1,0 +1,51 @@
+title: RedSun - TieringEngineService.exe Detected as EICAR Test File
+id: a7c3e5f2-8b1d-4e9a-b6c2-3d7f5e8a9b4c
+status: experimental
+description: |
+    Detects Windows Defender (EventID 1119 - Remediation Action Failed) flagging TieringEngineService.exe
+    dropped in a characteristic RS-{GUID} temporary directory, or the RedSun.exe process itself being present.
+    This covers the staging pattern used by RedSun, a Cloud Files API and opportunistic lock (oplock) based
+    AV bypass/privilege escalation tool.
+
+    RedSun works as follows:
+      1. Registers a Cloud Files sync root and creates a Cloud Files placeholder for TieringEngineService.exe under %TEMP%\RS-{GUID}\
+      2. The placeholder file carries EICAR test file content (Virus:DOS/EICAR_Test_File) to reliably trigger
+         a Defender scan and remediation attempt
+      3. Requests a batch oplock (FSCTL_REQUEST_BATCH_OPLOCK) on the placeholder file
+      4. When Defender attempts to scan/quarantine the file, the oplock triggers - holding the file open
+      5. During the oplock break window, RedSun swaps the mount point (junction) to redirect
+         \\?\C:\Windows\System32 to the attacker-controlled temp path
+      6. This races the AV/OS into executing the malicious TieringEngineService.exe with elevated privileges
+references:
+    - https://github.com/Nightmare-Eclipse/RedSun/blob/7456cc8cf066f5e5fc6cdf7d3272a466ebd6b2f6/RedSun.cpp#L605
+    - https://deadeclipse666.blogspot.com/2026/04/public-disclosure-response-for-cve-2026.html
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-17
+tags:
+    - attack.stealth
+    - attack.defense-impairment
+    - attack.t1036.005
+    - attack.t1685
+    - attack.privilege-escalation
+    - attack.t1055
+    - detection.emerging-threats
+logsource:
+    product: windows
+    service: windefend
+detection:
+    # EventID 1119: Microsoft Defender Antivirus has encountered an error trying to take action on malware or unwanted software
+    # Path field from event: file:_C:\Users\<user>\AppData\Local\Temp\<n>\RS-{GUID}\TieringEngineService.exe
+    # Threat name 'Virus:DOS/EICAR_Test_File' is expected - RedSun uses EICAR content to reliably trigger a Defender scan/remediation
+    selection_eid:
+        EventID: 1119
+        SourceName: 'Real-Time Protection'
+    selection_susp_path:
+        Path|endswith: '\TieringEngineService.exe'
+        ThreatName|endswith: 'EICAR_Test_File'
+    selection_susp_process:
+        ProcessName|endswith: '\RedSun.exe'
+    condition: selection_eid and 1 of selection_susp_*
+falsepositives:
+    - Unlikely
+level: critical
+regression_tests_path: regression_data/rules-emerging-threats/2026/Exploits/RedSun/win_defender_exploit_redsun_tiering_engine_detected_as_eicar/info.yml
