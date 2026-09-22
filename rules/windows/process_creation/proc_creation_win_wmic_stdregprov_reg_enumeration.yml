@@ -1,0 +1,48 @@
+title: Registry Enumeration via WMI Stdregprov
+id: a0e417e2-2fa1-40da-b6d2-e094cd5e1191
+related:
+    - id: c453ab7a-1f5c-4716-a3b4-dea8135fb43a # Registry Manipulation via WMI Stdregprov
+      type: similar
+status: experimental
+description: |
+    Detects the usage of wmic.exe to enumerate or read Windows registry via the WMI StdRegProv class read methods (EnumKey, EnumValues, GetStringValue, etc.).
+    While registry reads are common, attackers may use this technique to perform reconnaissance and discover sensitive configuration values, credentials, or installed software.
+    The use of WMI as an alternative to standard tools like reg.exe can indicate an attempt to evade detection focused on traditional registry query commands.
+references:
+    - https://trustedsec.com/blog/command-line-underdog-wmic-in-action
+    - https://trustedsec.com/blog/wmi-for-script-kiddies
+    - https://learn.microsoft.com/en-us/previous-versions/windows/desktop/regprov/stdregprov
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-07-30
+modified: 2026-06-19
+tags:
+    - attack.execution
+    - attack.t1047
+    - attack.discovery
+    - attack.t1012
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:   # Example command simulated:  WMIC  /NameSpace:\\root\default Class StdRegProv Call EnumKey hDefKey=&H80000002 sSubKeyName="Software\Microsoft\Windows\CurrentVersion\Uninstall"
+        - Image|endswith: '\wmic.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_cli:
+        CommandLine|contains|all:
+            - 'stdregprov'
+            - 'call'
+        CommandLine|contains:
+            - 'CheckAccess'
+            - 'EnumKey'
+            - 'EnumValues'
+            - 'GetBinaryValue'
+            - 'GetDWORDValue'
+            - 'GetExpandedStringValue'
+            - 'GetMultiStringValue'
+            - 'GetQWORDValue'
+            - 'GetSecurityDescriptor'
+            - 'GetStringValue'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate administrative activity
+level: medium
