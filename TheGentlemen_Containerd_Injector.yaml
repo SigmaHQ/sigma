@@ -1,0 +1,51 @@
+title: Masqueraded Containerd Systemd Hijacking and Shadow X11 Persistence
+id: 4f7d3a2b-9655-4c2a-9e16-1601bc9555cf
+status: experimental
+description: Detects a malicious binary masquerading as containerd/dockerd using D-Bus to manipulate systemd, creating virtual X11 display locks, and utilizing Tor fallback channels.
+author: CyberCold
+date: 2026/09/21
+references:
+    - 'Internal Incident Report: Operational BlueTrace (INC-2026-09-16-01)'
+logsource:
+    product: linux
+    service: auditd
+detection:
+    # Component 1: Detecting suspicious process naming outside typical OCI deployment paths
+    selection_process:
+        Image|endswith:
+            - '/containerd'
+            - '/dockerd'
+    filter_legitimate_paths:
+        Image|startswith:
+            - '/usr/bin/'
+            - '/usr/local/bin/'
+            - '/run/containerd/'
+    
+    # Component 2: Detecting the creation of hidden runtime workspace indicators in volatile memory
+    selection_file_creation:
+        EventID: 1  # Process/File creation variants depending on SIEM backend mapping
+        TargetFilename|contains:
+            - '/tmp/.X1024-lock'
+            - '/tmp/.X1025-lock'
+
+    # Component 3: Detecting Tor fallback traffic signatures in commands or proxy configurations
+    selection_network_tor:
+        CommandLine|contains:
+            - 'listen.onion'
+            - 'socks5://'
+
+    # Component 4: Detecting anomalous direct inter-process systemctl modification commands
+    selection_remediation_activity:
+        CommandLine|contains:
+            - 'systemctl stop containerd'
+            - 'systemctl disable containerd'
+            - 'systemctl stop docker.service'
+
+    condition: (selection_process and not filter_legitimate_paths) or selection_file_creation or selection_network_tor or selection_remediation_activity
+fields:
+    - Image
+    - CommandLine
+    - TargetFilename
+falsepositives:
+    - Highly customized administrative maintenance scripts altering local cluster runtimes or legitimate local onion-routing research environments.
+level: critical
