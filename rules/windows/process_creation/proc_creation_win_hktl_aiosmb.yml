@@ -1,0 +1,60 @@
+title: HackTool - AIOSMB Suite Execution
+id: 0c40942c-fcdd-4692-8079-d2a21a9b1cfb
+related:
+    - id: 6e5d4c3b-2a1f-0e9d-8c7b-6a5f4e3d2c1b
+      type: similar
+status: experimental
+description: |
+    Detects execution of aiosmb command-line tools (asmbclient, asmbshareenum, asmbscanner,
+    asmbgetfile) used for asynchronous SMB enumeration, interactive file access, share and
+    host scanning, and lateral movement against Windows targets.
+references:
+    - https://github.com/skelsec/aiosmb
+    - https://github.com/n00py/Outpacket
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-21
+tags:
+    - attack.discovery
+    - attack.lateral-movement
+    - attack.t1021.002
+    - attack.t1087.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_name:
+        CommandLine|contains:
+            - 'asmbclient'
+            - 'asmbshareenum'
+            - 'asmbscanner'
+            - 'asmbgetfile'
+            - 'asmbcertreq'
+    selection_cli:
+        CommandLine|contains:
+            # NTLM auth variants
+            - 'smb+ntlm-password://'
+            - 'smb+ntlm-nt://'
+            - 'smb+sspi-ntlm://'
+            # Kerberos auth variants (smb and smb2)
+            - 'smb+kerberos-password://'
+            - 'smb+kerberos-nt://'
+            - 'smb2+kerberos-pfx://'
+            - 'smb2+kerberos-pem://'
+            - 'smb2+kerberos-certstore://'
+            - 'smb+sspi-kerberos://'
+            # Kerberos with ccache / AES / RC4 (Outpacket URL patterns)
+            - 'smb+kerberos+ccache://'
+            - 'smb+kerberos+aes://'
+            - 'smb+kerberos+rc4://'
+            - 'smb+kerberos+pfx://'
+            # NegoEx auth variants (Azure P2P / modern auth)
+            - 'smb+negoex-pfx://'
+            - 'smb+negoex-certstore://'
+            # QUIC transport (Azure Files)
+            - 'smb+quic+ntlm-password://'
+            - 'smb+quic+ntlm-nt://'
+            - 'smb+quic+kerberos-password://'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high
