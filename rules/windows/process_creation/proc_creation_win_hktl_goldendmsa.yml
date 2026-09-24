@@ -1,0 +1,38 @@
+title: HackTool - GoldenDMSA Execution
+id: c41ec561-872d-469b-847c-1653ad19b45d
+status: experimental
+description: Detects execution of GoldenDMSA hacktool used for Directory Service Account manipulation.
+references:
+    - https://github.com/Semperis/GoldenDMSA
+    - https://ipurple.team/2025/09/02/golden-dmsa/
+    - https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/
+    - https://thehackernews.com/2025/07/critical-golden-dmsa-attack-in-windows.html
+    - https://hacktricks.wiki/en/windows-hardening/active-directory-methodology/golden-dmsa-gmsa.html
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-09-11
+modified: 2026-09-20
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098
+    - attack.credential-access
+    - attack.t1110
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\GoldenDMSA.exe'
+    selection_cli:
+        CommandLine|contains:
+            - 'wordlist'
+            - 'bruteforce'
+        CommandLine|contains|all:
+            - ' -s '
+            - 'S-1-5-21-'
+            - ' -d '
+            - ' -k '
+    condition: 1 of selection_*
+falsepositives:
+    - Unknown
+level: high
