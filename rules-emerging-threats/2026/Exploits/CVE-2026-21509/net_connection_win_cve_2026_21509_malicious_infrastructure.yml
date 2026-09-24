@@ -1,0 +1,53 @@
+title: CVE-2026-21509 - Network Connection to Malicious Infrastructure
+id: c9d62f3e-4e5a-4f6b-9c8d-3a7e8f9b1c2d
+status: experimental
+description: |
+    Detects network connections to known APT28 infrastructure used in CVE-2026-21509 exploitation campaigns.
+    Includes WebDAV connections, Filen.io C2 endpoints, and suspicious external resource connections from Office processes.
+references:
+    - https://www.zscaler.com/blogs/security-research/apt28-leverages-cve-2026-21509-operation-neusploit
+    - https://thehackernews.com/2026/02/apt28-uses-microsoft-office-cve-2026.html
+author: Jamal Uddin Shaikh
+date: 2026/02/10
+tags:
+    - attack.command_and_control
+    - attack.t1071.001
+    - attack.t1102
+    - cve.2026.21509
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection_office_outbound:
+        Image|endswith:
+            - '\WINWORD.EXE'
+            - '\EXCEL.EXE'
+            - '\POWERPNT.EXE'
+            - '\OUTLOOK.EXE'
+        Initiated: 'true'
+        DestinationPort:
+            - 80
+            - 443
+            - 445
+    selection_webdav_protocol:
+        DestinationPort: 445
+        Image|endswith:
+            - '\WINWORD.EXE'
+            - '\EXCEL.EXE'
+    selection_c2_domains:
+        DestinationHostname|contains:
+            - 'filen.io'
+            - 'api.filen.io'
+    selection_suspicious_rdp:
+        Image|endswith:
+            - '\rundll32.exe'
+            - '\regsvr32.exe'
+        DestinationPort:
+            - 80
+            - 443
+    condition: (selection_office_outbound and selection_webdav_protocol) or selection_c2_domains or selection_suspicious_rdp
+falsepositives:
+    - Legitimate Office online features and cloud storage integration
+    - Corporate SharePoint and WebDAV services
+    - Legitimate use of filen.io cloud storage service
+level: high
