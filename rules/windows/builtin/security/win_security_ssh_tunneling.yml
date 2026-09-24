@@ -1,0 +1,42 @@
+title: SSH Tunneling via SSH Client on Windows
+id: 5d0f9e4a-1b6c-4f3e-a8d7-9e0f1a2b3c4d
+status: experimental
+description: Detects the use of SSH clients on Windows (PuTTY, OpenSSH) to create suspicious SSH tunnels.
+references:
+    - https://naveengogu.medium.com/ssh-tunneling-port-forward-explained-8ddb8dc1511e
+author: Louise Lalanne
+date: 2025-11-08
+tags:
+    - attack.command_and_control
+    - attack.t1572
+    - attack.t1090.001
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_putty:
+        Image|endswith:
+            - '\putty.exe'
+            - '\plink.exe'
+        CommandLine|contains:
+            - '-L '
+            - '-R '
+            - '-D '
+            - '-P '
+    selection_openssh:
+        Image|endswith: '\ssh.exe'
+        CommandLine|contains:
+            - '-L '
+            - '-R '
+            - '-D '
+    condition: selection_putty or selection_openssh
+falsepositives:
+    - Developers using SSH tunneling for development
+    - Administrators accessing remote systems
+    - Legitimate applications that use SSH tunneling
+level: medium
+fields:
+    - User
+    - CommandLine
+    - ParentImage
+    - ParentCommandLine
