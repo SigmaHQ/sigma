@@ -1,0 +1,65 @@
+title: Potential Browser Cache Smuggling Payload Extraction
+id: 93e79eb5-2aca-4d1d-895d-0f529127e088
+status: experimental
+description: |
+    Detects a process reading, searching, or extracting content directly out of a web browser's on-disk cache directory (Chromium "Cache_Data", Firefox "cache2\entries", or the legacy/WebView2/Outlook "INetCache").
+    In the "cache smuggling" / "Living off the Browser" technique, a phishing page (commonly a ClickFix or FileFix lure) serves an executable payload disguised with an "image/jpeg" Content-Type so the browser silently caches it with no download prompt and no Mark-of-the-Web. The victim is then social-engineered into pasting a benign-looking command that carves the payload out of the cache file (often between two marker strings via regex), writes it to a writable/executable location, and runs it.
+    Because no second network request is made, network/proxy controls and download/MotW-based detections are evaded. This rule targets the local extraction step rather than the (invisible) delivery step.
+references:
+    - https://expel.com/blog/cache-smuggling-when-a-picture-isnt-a-thousand-words/
+    - https://malwaretech.com/2025/10/exif-smuggling.html
+    - https://www.cybermaxx.com/resources/cache-smuggling-the-interesting-download-cradle-provided-by-your-internet-browser/
+    - https://sensepost.com/blog/2023/browsers-cache-smuggling/
+author: Chris Wright (https://github.com/Tetryl12)
+date: 2026-06-22
+tags:
+    - attack.stealth
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1204.004
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cache_path:
+        CommandLine|contains:
+            - '\Cache_Data'        # Chromium family: Chrome, Edge, Brave, Opera, Vivaldi
+            - '\cache2\entries'    # Firefox
+            - '\Windows\INetCache' # IE / legacy WebView2 / Outlook image pre-cache
+    selection_read_extract:
+        CommandLine|contains:
+            # enumeration / read of cache content
+            - 'Get-ChildItem'
+            - 'Get-Content'
+            - '[IO.File]::ReadAllBytes'
+            - '[System.IO.File]::ReadAllBytes'
+            - 'ReadAllText'
+            - 'Select-String'
+            - 'findstr'
+            # carving the payload out (regex between markers)
+            - '-match'
+            - '[regex]'
+            - '.Matches('
+            # staging / decoding / unpacking the carved payload
+            - 'Copy-Item'
+            - 'Move-Item'
+            - 'Expand-Archive'
+            - 'FromBase64String'
+            - 'certutil'
+            - 'tar '
+            - 'expand '
+    filter_optional_cleaners:
+        # cache cleaners only delete; they do not carve content out and re-execute it
+        Image|endswith:
+            - '\ccleaner.exe'
+            - '\ccleaner64.exe'
+            - '\bleachbit.exe'
+            - '\bleachbit_console.exe'
+            - '\cleanmgr.exe'
+    condition: all of selection_* and not 1 of filter_*
+falsepositives:
+    - Browser cache maintenance, backup, or DLP/AV tools that read cache contents. Tune via the Image / ParentImage of approved tooling.
+    - Forensic or IR tooling (e.g. cache parsers) run by analysts. Filter on known investigator hosts/accounts.
+    - Developers debugging browser cache behavior with PowerShell.
+level: medium
