@@ -1,0 +1,50 @@
+title: Potential Suspicious Browser Extension Force Install
+    via Policy on Windows
+id: 6f14defd-2f56-441f-907c-957731b58aa2
+status: experimental
+description: |
+    Detects the creation of browser extension force-install
+    policy entries in the Windows registry. The
+    ExtensionInstallForcelist policy silently installs
+    extensions that users cannot disable or remove.
+    ExtensionSettings allows configuring force-installed
+    extensions with auto-granted permissions. Adversaries
+    may abuse these to persist malicious browser extensions
+    across reboots without user interaction.
+references:
+    - https://chromeenterprise.google/policies/#ExtensionInstallForcelist
+    - https://chromeenterprise.google/policies/#ExtensionSettings
+    - https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies#extensioninstallforcelist
+    - https://support.google.com/chrome/a/answer/9037717
+    - https://github.com/praetorian-inc/ChromeAlone
+    - https://blog.google/threat-analysis-group/isp-level-threat-actors/
+author: PersonalRules
+date: 2026-04-23
+tags:
+    - attack.persistence
+    - attack.t1176.001
+    - attack.defense-evasion
+    - attack.t1112
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_chrome:
+        TargetObject|contains:
+            - '\Policies\Google\Chrome\ExtensionInstallForcelist\'
+            - '\Policies\Google\Chrome\ExtensionSettings'
+    selection_edge:
+        TargetObject|contains:
+            - '\Policies\Microsoft\Edge\ExtensionInstallForcelist\'
+            - '\Policies\Microsoft\Edge\ExtensionSettings'
+    selection_chromium:
+        TargetObject|contains:
+            - '\Policies\Chromium\ExtensionInstallForcelist\'
+            - '\Policies\Chromium\ExtensionSettings'
+    condition: 1 of selection_*
+falsepositives:
+    - Enterprise IT administrators deploying browser
+      extensions via Group Policy
+    - MDM tools managing browser extensions in corporate
+      environments
+level: medium
