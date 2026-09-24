@@ -6,10 +6,13 @@ description: |
     A threat actor can create a new AD Health ADFS service and create a fake server instance to spoof AD FS signing logs. There is no need to compromise an on-prem AD FS server.
     This can be done programmatically via HTTP requests to Azure.
 references:
-    - https://o365blog.com/post/hybridhealthagent/
+    - https://web.archive.org/web/20220619212736/https://o365blog.com/post/hybridhealthagent/
+    - https://aadinternals.com/talks/HelSec%20August%202021.pdf
+    - https://learn.microsoft.com/en-us/azure/role-based-access-control/permissions/identity#microsoftadhybridhealthservice
+    - https://www.inversecos.com/2023/01/detecting-fake-events-in-azure-sign-in.html
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research), MSTIC
 date: 2021-08-26
-modified: 2023-10-11
+modified: 2026-05-05
 tags:
     - attack.defense-impairment
     - attack.t1578
@@ -18,10 +21,9 @@ logsource:
     service: activitylogs
 detection:
     selection:
-        CategoryValue: 'Administrative'
-        ResourceProviderValue: 'Microsoft.ADHybridHealthService'
-        ResourceId|contains: 'AdFederationService'
-        OperationNameValue: 'Microsoft.ADHybridHealthService/services/servicemembers/action'
+        category: 'Administrative'
+        resourceId|contains: 'AdFederationService'
+        operationName: 'MICROSOFT.ADHYBRIDHEALTHSERVICE/SERVICES/SERVICEMEMBERS/ACTION'
     condition: selection
 falsepositives:
     - Legitimate AD FS servers added to an AAD Health AD FS service instance
