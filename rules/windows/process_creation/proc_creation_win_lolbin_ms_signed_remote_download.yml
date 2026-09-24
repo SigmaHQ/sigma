@@ -1,0 +1,40 @@
+title: Remote File Download Via Signed Microsoft LOLBin
+id: 318e685d-c51b-4488-8f12-80e355542510
+status: experimental
+description: |
+    Detects several signed Microsoft binaries (xsd.exe, msoxmled.exe, ECMangen.exe, VSLaunchBrowser.exe, dtutil.exe, WinProj.exe) being
+    used to download or copy a file from a remote URL or UNC path - a Living-Off-The-Land ingress tool transfer technique.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/xsd/
+    - https://lolbas-project.github.io/lolbas/Binaries/Msoxmled/
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/ECMangen/
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/VsLaunchBrowser/
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Dtutil/
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Winproj/
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.command-and-control
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith:
+            - '\xsd.exe'
+            - '\msoxmled.exe'
+            - '\ECMangen.exe'
+            - '\VSLaunchBrowser.exe'
+            - '\dtutil.exe'
+            - '\winproj.exe'
+    selection_remote:
+        CommandLine|contains:
+            - 'http://'
+            - 'https://'
+            - 'ftp://'
+            - '\\\\'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of these tools with UNC paths in enterprise environments (tune the UNC indicator if noisy)
+level: high
