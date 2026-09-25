@@ -1,0 +1,48 @@
+title: Remote Registry Service Started
+id: 9f3b4e1a-2c7d-4f8b-a1e5-3d6c9b0f2e4a
+status: experimental
+description: |
+    Detects the Remote Registry service entering the running state via Windows System
+    Event 7036, emitted by the Service Control Manager into the Windows System channel.
+
+    On Windows Server 2025 the Remote Registry service is set to Automatic start with a
+    named-pipe trigger on the winreg pipe, so it stays stopped until a remote registry
+    request opens that pipe. Tools such as impacket secretsdump and nxc/netexec open the
+    winreg pipe over SMB, which starts the service and lets them read the SAM hive to
+    recover local account password hashes. The service returns to the stopped state
+    about a second later, so the 7036 running event is short-lived.
+
+    Verified on Windows Server 2025 Core against nxc --sam: the alert fired within
+    seconds of dump completion, and the System log showed a paired 7036 stopped event
+    one second after the running event, confirming the service reverted.
+
+    Blind spot: the 7036 running event appears only on a transition into the running
+    state, so a host where Remote Registry is already running stays silent for this rule.
+
+    param1 and param2 are localized strings, so this rule applies to English-language
+    Windows installations.
+references:
+    - https://github.com/fortra/impacket/blob/570f283331612662a945f85b8f2216796956a9cb/impacket/examples/secretsdump.py
+    - https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server
+author: sebafvs
+date: 2026-07-30
+tags:
+    - attack.credential-access
+    - attack.t1003.002
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        Provider_Name: 'Service Control Manager'
+        EventID: 7036
+        param1: 'Remote Registry'
+        param2: 'running'
+    condition: selection
+falsepositives:
+    - Administrators manually starting Remote Registry for legitimate remote management
+    - Group Policy or MDM enabling Remote Registry across the fleet
+    - Remote management tools (SCCM, PDQ Deploy, Ansible) that use the Remote Registry protocol
+    - Backup software (Veeam, Acronis) reading registry hives remotely
+    - Any management activity that triggers the service's demand-start on Server editions
+level: medium
