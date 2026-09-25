@@ -1,0 +1,63 @@
+title: Command Execution via Git Ext Transport - Linux
+id: 734fdfff-634f-495f-8dd0-523a6c06f3cf
+related:
+    - id: ecf26065-2948-4e4d-b63a-7f1f14656912
+      type: similar
+    - id: 4eed6400-61a7-459a-a65e-88562b863b8e
+      type: similar
+status: experimental
+description: |
+    Detects Git's "ext::" remote helper transport, which runs the command named in the remote URL and wires its stdin and stdout to the Git protocol stream.
+    Git classifies "ext" as a known-dangerous protocol and ships it with a default policy of "never", so the helper runs only after protocol.ext.allow or GIT_ALLOW_PROTOCOL loosens that policy, frequently on the attacker's own command line.
+    The URL reaches Git from the command line, from a repository-local config, or from a .gitmodules entry during recursive submodule initialization, so the scheme does not always appear in the invoking command.
+references:
+    - https://git-scm.com/docs/git-remote-ext
+    - https://git-scm.com/docs/git-config
+    - https://security.snyk.io/vuln/SNYK-PYTHON-GITPYTHON-3113858
+    - https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-3112221
+    - https://www.vulncheck.com/advisories/hermes-webui-rce-via-git-configuration-injection
+author: David Burkett (@signalblur)
+date: 2026-08-11
+tags:
+    - attack.execution
+    - attack.t1059
+    - attack.t1059.004
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_helper:
+        Image|endswith: '/git'
+        CommandLine|contains: ' remote-ext '
+    filter_helper_docs:
+        CommandLine|contains: ' remote-ext --help'
+    selection_url_main:
+        Image|endswith: '/git'
+        CommandLine|contains: 'ext::'
+    selection_url_verb:
+        CommandLine|contains:
+            - ' clone '
+            - ' fetch '
+            - ' pull '
+            - ' push '
+            - ' remote '
+            - ' ls-remote '
+            - ' submodule'
+            - ' archive '
+            - ' config '
+    filter_url_docs:
+        CommandLine|contains:
+            - ' help '
+            - '--help'
+    filter_url_message:
+        CommandLine|contains:
+            - ' commit '
+            - ' tag '
+            - ' -m '
+    selection_child:
+        ParentImage|endswith: '/git'
+        ParentCommandLine|contains: ' remote-ext '
+    condition: (selection_helper and not filter_helper_docs) or (all of selection_url_* and not 1 of filter_url_*) or selection_child
+falsepositives:
+    - Deliberate use of the ext transport to customize a connection, such as an "ext::ssh -i /path/to/key user@host %S repo" remote. This requires an administrator to override the default protocol policy first and is worth confirming regardless.
+level: high
