@@ -1,0 +1,61 @@
+title: LOLBIN Or Encoded PowerShell Spawned By Node.js Package Manager
+id: 166bdb44-b051-46ef-8fe2-d9c9d18361c8
+status: experimental
+description: |
+    Detects a Node.js runtime or JavaScript package manager (node.exe / bun.exe, the executors behind npm, pnpm and yarn) spawning a download/execution LOLBIN or an obfuscated PowerShell command, either directly or through a "cmd /c" lifecycle-script shell.
+    This behaviour is characteristic of install-time "lifecycle hook" (preinstall/postinstall) abuse used in modern npm supply-chain compromises (e.g. Shai-Hulud, the @tanstack "Mini Shai-Hulud" and the axios "plain-crypto-js" campaigns), where a trojanised dependency executes attacker code the moment it is installed on a developer or CI host.
+    Unlike campaign-specific indicator rules, this is a generic behavioural hunt intended to surface the next compromise before its IOCs are published.
+references:
+    - https://socket.dev/blog/tanstack-npm-packages-compromised-mini-shai-hulud-supply-chain-attack
+    - https://www.huntress.com/blog/supply-chain-compromise-axios-npm-package
+    - https://docs.npmjs.com/cli/v10/using-npm/scripts
+author: Nicolò Thei, NikoCosmico01
+date: 2026-07-12
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1059.007
+    - attack.t1195.002
+    - detection.threat-hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_lolbin_direct:
+        ParentImage|endswith:
+            - '\node.exe'
+            - '\bun.exe'
+        Image|endswith:
+            - '\bitsadmin.exe'
+            - '\certutil.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\regsvr32.exe'
+            - '\wscript.exe'
+    selection_shell_payload:
+        ParentImage|endswith:
+            - '\node.exe'
+            - '\bun.exe'
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        CommandLine|contains:
+            - 'bitsadmin'
+            - 'certutil'
+            - 'DownloadFile'
+            - 'DownloadString'
+            - 'FromBase64String'
+            - 'Invoke-WebRequest'
+            - 'iwr '
+            - 'mshta'
+            - 'regsvr32'
+            - 'Start-BitsTransfer'
+            - ' -enc'
+            - ' -windowstyle hidden'
+            - ' -w hidden'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate package "preinstall"/"postinstall" scripts that fetch prebuilt native binaries or invoke the Windows Script Host (some node-gyp / prebuild-install flows). Baseline per project and allowlist known-good packages.
+    - Developer or CI setup tooling that intentionally shells out to PowerShell for provisioning tasks.
+level: medium
