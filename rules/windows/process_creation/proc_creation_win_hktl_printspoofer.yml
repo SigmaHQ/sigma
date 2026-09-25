@@ -1,0 +1,39 @@
+title: HackTool - PrintSpoofer Execution
+id: 8d280471-b4a1-4105-8417-c6edc0c3bf9b
+status: experimental
+description: |
+    Detects the execution of PrintSpoofer, a privilege escalation tool by @itm4n that abuses
+    the Windows Print Spooler service and named pipe impersonation to escalate from
+    LOCAL/NETWORK SERVICE to SYSTEM using the SeImpersonatePrivilege token privilege.
+    The tool is widely used in red team engagements and post-exploitation scenarios,
+    particularly on IIS or SQL Server service accounts that carry SeImpersonatePrivilege
+    by default. It is effective on Windows 10 and Windows Server 2016/2019.
+references:
+    - https://github.com/itm4n/PrintSpoofer
+    - https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/
+    - https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation/roguepotato-and-printspoofer
+author: Ashish Pulivarthy (ashish-cybersec)
+date: 2026-07-10
+tags:
+    - attack.privilege-escalation
+    - attack.t1134.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+            - '\PrintSpoofer.exe'
+            - '\PrintSpoofer32.exe'
+            - '\PrintSpoofer64.exe'
+        - OriginalFileName: 'PrintSpoofer.exe'
+    selection_cli_flags:
+        CommandLine|contains:
+            - ' -i -c '
+            - ' -d '
+    selection_cli_pipe:
+        CommandLine|contains: 'pipe\spoolss'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely. PrintSpoofer has no legitimate administrative use in production environments.
+level: high
