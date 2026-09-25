@@ -1,0 +1,35 @@
+title: SafeLine WAF Blocked OS Command Injection Attempt
+id: 4ffed822-d13f-4542-b838-752537ea4a60
+status: experimental
+description: |
+    Detects OS command injection attempts blocked by the Chaitin SafeLine WAF
+    (e.g. ";cat /etc/passwd" smuggled in a query parameter). SafeLine emits
+    syslog (RFC5424, msgid safeline_event) with a JSON payload where attack_type
+    is the English snake_case label "command_injection" and rule_id carries the
+    firing module (e.g. m_cmd_injection). A blocked command injection probe
+    against a public application is a strong pre-exploitation signal: treat
+    every hit as a potential targeted intrusion attempt, not background noise.
+    Verified against live SafeLine 9.4.1 syslog output.
+references:
+    - https://github.com/chaitin/SafeLine
+    - https://owasp.org/www-community/attacks/Command_Injection
+author: DevCop95
+date: 2026-09-23
+tags:
+    - attack.execution
+    - attack.initial-access
+    - attack.t1059
+    - attack.t1190
+logsource:
+    product: safeline
+    category: webserver
+detection:
+    selection:
+        attack_type: 'command_injection'
+        action: 'deny'
+    condition: selection
+falsepositives:
+    - Authorized penetration tests and red team exercises
+    - Network troubleshooting tools that submit shell-like strings (e.g. ping looking-glass front ends)
+    - Developers testing monitoring endpoints with synthetic payloads
+level: high
