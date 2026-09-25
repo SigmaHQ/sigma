@@ -1,0 +1,35 @@
+title: Runtime Read-Write Host-Folder Sharing Via Windows Sandbox CLI
+id: c8faeb88-b4de-4242-ba6c-57f7a75e114a
+status: experimental
+description: |
+    Detects use of the wsb.exe share subcommand with --allow-write, which dynamically maps a host folder into a running Windows Sandbox with sandbox-to-host write permissions.
+references:
+    - https://learn.microsoft.com/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-cli#share
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Wsb/
+author: Konrad 'unrooted' Klawikowski
+date: 2026-07-22
+tags:
+    - attack.lateral-movement
+    - attack.exfiltration
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_image:
+        - Image|endswith: '\wsb.exe'
+        - OriginalFileName: 'wsb.exe'
+    selection_args:
+        CommandLine|contains|all:
+            - ' share '
+            - '--allow-write'
+    condition: all of selection_*
+fields:
+    - CommandLine
+    - ParentImage
+    - ParentCommandLine
+    - User
+falsepositives:
+    - Interactive Sandbox users adding folders to a running sandbox via the wsb.exe CLI as documented Microsoft workflow
+    - Automation that intentionally grants write-back access to a sandbox for output collection
+level: medium
