@@ -1,0 +1,28 @@
+title: Potential OpenSSH Daemon Exploitation Attempt - Client Crash Penalty
+id: ff3aa76d-69ef-441a-b67e-0342925d43a3
+status: experimental
+description: |
+    Detects the OpenSSH daemon applying a "caused crash" PerSourcePenalties penalty against a client address whose behaviour crashed the sshd pre-auth session process.
+    A pre-authentication crash of sshd triggered by client behaviour is a strong indicator of an exploitation attempt against the SSH daemon, such as memory corruption or race condition exploits (e.g. CVE-2024-6387 "regreSSHion").
+    The PerSourcePenalties feature was introduced in OpenSSH 9.8 and is enabled by default. This rule matches the penalty creation, its activation, and subsequent refused connections from the penalised address.
+references:
+    - https://www.openssh.com/txt/release-9.8
+    - https://man.openbsd.org/sshd_config#PerSourcePenalties
+    - https://github.com/openssh/openssh-portable/blob/8e65f996e535d395968870b20478b4e167d10aca/srclimit.c
+author: Jose Argento
+date: 2026-07-10
+tags:
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    product: linux
+    service: sshd
+    definition: 'Requirements: OpenSSH 9.8 or later with PerSourcePenalties enabled (default)'
+detection:
+    keywords:
+        - 'penalty: caused crash'
+    condition: keywords
+falsepositives:
+    - Legitimate but buggy SSH client implementations that trigger a crash in the sshd pre-auth session process
+    - Crashes caused by sshd bugs unrelated to malicious client behaviour
+level: high
