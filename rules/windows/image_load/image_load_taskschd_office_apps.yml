@@ -1,0 +1,36 @@
+title: Microsoft Office Loading Task Scheduler DLL via VBA Macro
+id: 8d1e674c-5c03-4be1-949c-4b85a472dc16
+status: experimental
+description: |
+    Detects a Microsoft Office application (e.g. WINWORD.EXE) loading the VBA
+    engine alongside taskschd.dll, which indicates a macro is programmatically
+    interacting with the Windows Task Scheduler (via Schedule.Service COM
+    object) — commonly used for persistence (T1053.005).
+references:
+    - https://github.com/saksham-17/detection-lab/blob/main/T1053.005-scheduled-task/tests/test5-task-scheduler-via-VBA/report.md
+    - https://www.atomicredteam.io/docs/atomics/T1053.005#atomic-test-5-task-scheduler-via-vba
+    - https://attack.mitre.org/techniques/T1053/005/
+author: Saksham Bhattarai
+date: 2026-09-25
+tags:
+    - attack.persistence
+    - attack.t1053.005
+    - attack.execution
+    - attack.t1204.002
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection_office:
+        Image|endswith:
+            - '\WINWORD.EXE'
+            - '\EXCEL.EXE'
+            - '\POWERPNT.EXE'
+            - '\OUTLOOK.EXE'
+            - '\MSACCESS.EXE'
+    selection_taskschd:
+        ImageLoaded|endswith: '\taskschd.dll'
+    condition: selection_office and selection_taskschd
+falsepositives:
+    - Legitimate add-ins or automation scripts that use Office applications to manage scheduled tasks (rare in most environments)
+level: high
