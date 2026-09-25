@@ -1,0 +1,79 @@
+title: Suspicious Double Extension Executable Launched From User Writable Path
+id: fc5cd64c-4e5f-46f3-b402-557f3128c842
+status: experimental
+description: |
+    Detects execution of a binary whose filename ends in a document, archive, or source code
+    extension followed by .exe, from a user-writable location such as Temp, Downloads, or
+    C:\Users\Public. The observed cluster ships as composer.php.exe and composer.dat.exe,
+    imitating a Composer artefact so a developer double-clicking it believes they are opening
+    a PHP or data file.
+references:
+    - https://bazaar.abuse.ch/sample/d97ea10d1dbfe2a69e0d2387e8985635b20628495918abd54c4b052c0acf05b1/
+    - https://tria.ge/260817-ktkv8swgra
+related:
+    - id: 27cf3735-02a9-4c63-91fc-2a03e651f8cf
+      type: similar
+    - id: 677086ae-fcc3-4202-93b0-61932ab8ad36
+      type: similar
+author: David Clayton - CTI @ thetechcollective
+date: 2026-08-17
+tags:
+    - attack.stealth
+    - attack.t1036.007
+    - attack.execution
+    - attack.t1204.002
+    - stp.4
+logsource:
+    category: process_creation
+    product: windows
+    definition: 'Requires process creation logging, from Sysmon EventID 1, Windows Security 4688, or EDR process telemetry'
+detection:
+    selection_user_writable:
+        Image|contains:
+            - '\AppData\Local\Temp\'
+            - '\AppData\Roaming\'
+            - '\Users\Public\'
+            - '\Downloads\'
+            - '\Windows\Temp\'
+    selection_double_extension:
+        Image|endswith:
+            - '.php.exe'
+            - '.dat.exe'
+            - '.pdf.exe'
+            - '.doc.exe'
+            - '.docx.exe'
+            - '.xls.exe'
+            - '.xlsx.exe'
+            - '.ppt.exe'
+            - '.pptx.exe'
+            - '.rtf.exe'
+            - '.txt.exe'
+            - '.csv.exe'
+            - '.json.exe'
+            - '.xml.exe'
+            - '.log.exe'
+            - '.jpg.exe'
+            - '.jpeg.exe'
+            - '.png.exe'
+            - '.gif.exe'
+            - '.svg.exe'
+            - '.zip.exe'
+            - '.rar.exe'
+            - '.7z.exe'
+            - '.iso.exe'
+            - '.js.exe'
+            - '.py.exe'
+            - '.ps1.exe'
+            - '.lock.exe'
+            - '.cfg.exe'
+            - '.ini.exe'
+    condition: all of selection_*
+fields:
+    - Image
+    - CommandLine
+    - ParentImage
+    - User
+falsepositives:
+    - Self-extracting archives and installers that legitimately embed a data extension in the filename, for example a vendor package named with an internal build identifier.
+    - Developer build output where a toolchain names artefacts after their source file, which is plausible on a build agent or engineering workstation.
+level: high

@@ -1,0 +1,55 @@
+title: Suspicious Microsoft Defender Exclusion Added Via WMIC
+id: 27cf3735-02a9-4c63-91fc-2a03e651f8cf
+status: experimental
+description: |
+    Detects WMIC being used to add or modify a Microsoft Defender exclusion by calling the
+    MSFT_MpPreference class in the root\Microsoft\Windows\Defender namespace. Administrators
+    and vendor installers overwhelmingly use the Add-MpPreference PowerShell cmdlet for this,
+    so the WMIC path is a strong signal of an automated payload carving out a safe staging
+    directory before writing to it.
+references:
+    - https://bazaar.abuse.ch/sample/d97ea10d1dbfe2a69e0d2387e8985635b20628495918abd54c4b052c0acf05b1/
+    - https://tria.ge/260817-ktkv8swgra
+related:
+    - id: fc5cd64c-4e5f-46f3-b402-557f3128c842
+      type: similar
+    - id: 677086ae-fcc3-4202-93b0-61932ab8ad36
+      type: similar
+author: David Clayton - CTI @ thetechcollective
+date: 2026-08-17
+tags:
+    - attack.stealth
+    - attack.t1564.012
+    - attack.defense-impairment
+    - attack.t1685
+    - attack.execution
+    - attack.t1047
+    - stp.4
+logsource:
+    category: process_creation
+    product: windows
+    definition: 'Requires process creation logging with command line capture, from Sysmon EventID 1, Windows Security 4688 with command line auditing enabled, or EDR process telemetry'
+detection:
+    selection_wmic:
+        - Image|endswith: '\wmic.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_defender_class:
+        CommandLine|contains: 'MSFT_MpPreference'
+    selection_exclusion_property:
+        CommandLine|contains:
+            - 'ExclusionPath'
+            - 'ExclusionProcess'
+            - 'ExclusionExtension'
+            - 'ExclusionIpAddress'
+    condition: all of selection_*
+fields:
+    - CommandLine
+    - ParentImage
+    - ParentCommandLine
+    - User
+    - IntegrityLevel
+falsepositives:
+    - Endpoint deployment or hardening scripts that apply vendor-recommended antivirus exclusions for database, backup, or virtualisation software. These normally run from a known deployment agent parent process and reference a Program Files path rather than a user-writable one.
+    - Legacy in-house automation that predates the Defender PowerShell module and still shells out to WMIC.
+    - Security product installers that register their own binaries as exclusions during setup.
+level: high
