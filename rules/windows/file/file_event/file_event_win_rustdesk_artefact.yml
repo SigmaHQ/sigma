@@ -2,17 +2,18 @@ title: Rustdesk Temporary Artefact
 id: e586d468-6212-48ce-84e2-764e421bb4cd
 status: experimental
 description: |
-    An adversary may use legitimate desktop support and remote access software, such as Rustdesk,Team Viewer, Go2Assist, LogMein, etc, to establish an interactive command and control channel to target systems within networks.
+    Detects the creation of the RustDesk executable in the `%AppData%\Local\rustdesk` directory.
+    Adversaries may abuse legitimate desktop support and remote access software, such as RustDesk, TeamViewer, Go2Assist or LogMeIn, to establish an interactive command and control channel to target systems within networks.
     These services are commonly used as legitimate technical support software, and may be allowed by application control within a target environment.
-    Remote access tools like VNC, Ammyy, and Teamviewer are used frequently when compared with other legitimate software commonly used by adversaries. (Citation: Symantec Living off the Land)
 references:
-    - https://github.com/redcanaryco/atomic-red-team/blob/65885baef0fef779e6f4852a92dfb88cfd42dac6/atomics/T1219/T1219.md#atomic-test-12---rustdesk-files-detected-test-on-windows
-    - https://securityaffairs.com/149770/malware/akira-ransomware-cisco-vpn.html
+    - https://securityarsenal.com/blog/operation-poisson-havoc-c2-and-rustdesk-fileless-campaign-otx-pulse-analysis
+    - https://asec.ahnlab.com/en/84729/
+    - https://rustdesk.com/blog/rustdesk-and-remote-access-scams/
 author: frack113
-date: 2025-03-27
+date: 2026-09-25
 tags:
     - attack.command-and-control
-    - attack.t1219
+    - attack.t1219.002
 logsource:
     category: file_event
     product: windows
@@ -24,3 +25,8 @@ falsepositives:
     - Legitimate use
 level: medium
 regression_tests_path: regression_data/rules/windows/file/file_event/file_event_win_rustdesk_artefact/info.yml
+simulation:
+    - type: atomic-red-team
+      name: RustDesk Files Detected Test on Windows
+      technique: T1219
+      atomic_guid: f1641ba9-919a-4323-b74f-33372333bf0e
