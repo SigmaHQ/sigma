@@ -1,0 +1,45 @@
+title: IDS Signature And High EVE Corroboration
+id: f254c044-f25a-4cb9-9bbb-40e9dd0f163f
+status: experimental
+description: |
+    Detects dual-signal corroboration where a classic IDS/Snort signature event
+    (Generator ID not SnortML GID 411) co-occurs with a high Encrypted Visibility Engine
+    (EVE) threat confidence score (>= 80) on the same enriched/correlated firewall event.
+    Signature + ML corroboration is a stronger remediation candidate than ML-only paths
+    (SnortML GID 411 or EVE-only). Requires correlated IntrusionEvent + ConnectionEvent
+    fields (or equivalent enrichment joining on ConnectionID) in the SIEM pipeline.
+references:
+    - https://www.cisco.com/c/en/us/td/docs/security/firepower/741/api/FQE/secure_firewall_estreamer_fqe_guide_740.pdf
+    - https://github.com/Cisco-Talos/EvidenceForge/pull/389
+    - https://github.com/splunk/attack_data/pull/1206
+    - https://github.com/AAH20/aegis-decision-fabric
+    - https://a2zsoc.com/consultation
+author: Ahmed Hassan (A2Z SOC)
+date: 2026-08-16
+tags:
+    - attack.command-and-control
+    - attack.t1071
+    - attack.exfiltration
+    - attack.t1041
+    - attack.t1573
+logsource:
+    category: firewall
+detection:
+    selection_sig_gid:
+        GeneratorID|gt: 0
+    selection_sig_gid_alt:
+        gid|gt: 0
+    selection_eve:
+        EVE_ThreatConfidencePct|gte: 80
+    selection_eve_alt:
+        eve_threat_confidence_pct|gte: 80
+    filter_snortml:
+        GeneratorID: 411
+    filter_snortml_alt:
+        gid: 411
+    condition: (1 of selection_sig*) and (1 of selection_eve*) and not 1 of filter_snortml*
+falsepositives:
+    - Hosts that coincidentally share correlated ConnectionIDs during enrichment windows
+    - Noisy classic signatures alongside elevated EVE scores on busy egress gateways
+    - Lab and red-team traffic designed to trip both inspectors
+level: high
