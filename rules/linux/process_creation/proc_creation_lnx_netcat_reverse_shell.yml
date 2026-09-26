@@ -1,7 +1,8 @@
 title: Potential Netcat Reverse Shell Execution
 id: 7f734ed0-4f47-46c0-837f-6ee62505abd9
 status: test
-description: Detects execution of netcat with the "-e" flag followed by common shells. This could be a sign of a potential reverse shell setup.
+description: |
+    Detects execution of netcat with the "-e" or "-c" flags followed by common shells, which are commonly used to spawn reverse shells.
 references:
     - https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
     - https://www.revshells.com/
@@ -10,6 +11,7 @@ references:
     - https://man7.org/linux/man-pages/man1/ncat.1.html
 author: '@d4ns4n_, Nasreddine Bencherchali (Nextron Systems)'
 date: 2023-04-07
+modified: 2026-09-24
 tags:
     - attack.execution
     - attack.t1059
@@ -19,8 +21,13 @@ logsource:
 detection:
     selection_nc:
         Image|endswith:
+            - '/nc.openbsd'
+            - '/nc.traditional'
             - '/nc'
             - '/ncat'
+            - '/netcat.openbsd'
+            - '/netcat.traditional'
+            - '/netcat'
     selection_flags:
         CommandLine|contains:
             - ' -c '
