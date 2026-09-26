@@ -1,0 +1,30 @@
+title: Add Authorized Applications to Microsoft Defender Firewall via Registry
+id: 6648f900-4a7d-47e3-bad6-952b313a1c0e
+status: experimental
+description: Detects the creation or re-enabling of a per-application exception in the Microsoft Defender Firewall via registry writes to the AuthorizedApplications\List keys under FirewallPolicy, which grants the targeted executable network access and can be abused by malware to bypass network restrictions.
+references:
+    - https://www.virustotal.com/gui/file/da209017000b9812e8bc5f4e8db6499430ee2aadc72ef896964cffdfd896f143/behavior
+    - https://app.any.run/tasks/8d4113a8-5403-4367-a79f-4ce4978d9bdb
+    - https://www.trendmicro.com/vinfo/us/threat-encyclopedia/malware/trojan.win32.zbot.e
+    - https://www.tenable.com/audits/items/APT1.audit
+    - https://www.greatis.com/appdata/d/q/qykernel.exe.htm
+    - https://www.scanspyware.net/spyware-sub/spyware-removal/MarketScore-RelevantKnowledge
+author: frack113
+date: 2026-09-25
+tags:
+    - attack.defense-impairment
+    - attack.t1686.003
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains|all:
+            - '\Services\SharedAccess\Parameters\FirewallPolicy\'
+            - '\AuthorizedApplications\List'
+        Details|contains: ':Enabled:'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_defender_firewall_add_exception/info.yml
