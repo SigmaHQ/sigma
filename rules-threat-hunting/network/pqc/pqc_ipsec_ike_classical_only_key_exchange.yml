@@ -1,0 +1,36 @@
+title: IPsec/IKE Classical-Only Key Exchange
+id: 633008a9-1063-4b8d-b443-3962479d5178
+status: experimental
+description: An IKE proposal used a classical-only Diffie-Hellman group (14, 19, 20,
+  21) with no post-quantum additional key exchange (RFC 9370). VPN traffic negotiated
+  this way is a harvest-now-decrypt-later exposure for site-to-site and remote-access
+  tunnels.
+references:
+- https://csrc.nist.gov/pubs/ir/8547/ipd
+- https://www.rfc-editor.org/rfc/rfc9370
+author: TAI Creative LLC
+date: '2026-07-16'
+tags:
+- attack.collection
+- attack.t1040
+- attack.command-and-control
+- attack.t1573
+logsource:
+  category: firewall
+detection:
+  selection:
+    ike_dh_group:
+    - 14
+    - 19
+    - 20
+    - 21
+  filter_pqc:
+    ike_additional_ke|contains:
+    - mlkem
+    - kyber
+    - pqc
+  condition: selection and not filter_pqc
+falsepositives:
+- VPN concentrators not yet supporting RFC 9370 PQC IKE (expected).
+level: medium
+license: DRL-1.1

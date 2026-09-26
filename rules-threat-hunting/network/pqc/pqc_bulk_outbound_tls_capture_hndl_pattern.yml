@@ -1,0 +1,32 @@
+title: Bulk Outbound TLS Session Egress (Possible HNDL Harvesting)
+id: 16498c07-a831-4b71-bccb-2673454f4b7d
+status: experimental
+description: A single external destination received an unusually large volume of distinct
+  TLS sessions/bytes over a short window - a pattern consistent with bulk ciphertext
+  collection for harvest-now-decrypt-later. Best used as a correlation/threshold rule
+  tuned to the environment; the static form here flags very large single-destination
+  TLS egress.
+references:
+- https://www.cisa.gov/quantum
+author: TAI Creative LLC
+date: '2026-07-16'
+tags:
+- attack.collection
+- attack.t1040
+- attack.exfiltration
+- attack.t1030
+logsource:
+  product: zeek
+  service: conn
+detection:
+  selection:
+    service: ssl
+    conn_state: SF
+  large_transfer:
+    orig_bytes|gte: 1073741824
+  condition: selection and large_transfer
+falsepositives:
+- Legitimate large TLS transfers (backups, replication, CDN origin pulls). Tune threshold
+  and destination allowlist per environment.
+level: low
+license: DRL-1.1
