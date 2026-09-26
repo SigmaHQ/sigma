@@ -1,0 +1,37 @@
+title: Claude Code Session Token Or Bearer Header In Command Line - Linux
+id: 1b9306f4-61af-4d4d-af4d-60229dd391c1
+status: experimental
+description: |
+    Detects credential leakage where a Claude or generic LLM bearer token appears in the visible command line of a process.
+    Looks for sk-ant-... session strings and 'Authorization: Bearer sk-' style headers passed via curl, wget, or direct API invocation. Anything in argv is readable by any local user via /proc and is preserved in shell history and audit logs.
+references:
+    - https://docs.anthropic.com/en/api/getting-started
+    - https://attack.mitre.org/techniques/T1552/001/
+    - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+    - https://cwe.mitre.org/data/definitions/214.html
+author: Punith Gowda (Network Intelligence)
+date: 2026-05-10
+tags:
+    - attack.credential-access
+    - attack.t1552.001
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_tools:
+        Image|endswith:
+            - '/curl'
+            - '/wget'
+            - '/http'
+            - '/httpie'
+    selection_token:
+        CommandLine|contains:
+            - 'Authorization: Bearer sk-'
+            - 'x-api-key: sk-ant-'
+            - 'x-api-key:sk-ant-'
+    condition: selection_tools and selection_token
+falsepositives:
+    - Internal red-team or pentest tooling that intentionally passes tokens via curl for replay testing
+    - Smoke-test scripts in CI that should be migrated to read from a secret manager rather than argv
+level: high

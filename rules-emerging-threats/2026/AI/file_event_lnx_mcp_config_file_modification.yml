@@ -1,0 +1,42 @@
+title: Modification Of MCP Or Claude Configuration File - Linux
+id: 89216c0a-8aca-43c1-a74b-b99adf8a2b56
+status: experimental
+description: |
+    Detects writes to Claude Code or Claude Desktop configuration files where MCP server definitions live.
+    Files include .claude.json, ~/.claude/settings.json, ~/.config/Claude/claude_desktop_config.json, and standalone mcp.json files.
+    An attacker who can write a new MCP server entry into these files gains arbitrary tool execution the next time the agent loads, which is a stealthy persistence and command-and-control vector.
+references:
+    - https://modelcontextprotocol.io/docs/concepts/architecture
+    - https://docs.anthropic.com/en/docs/claude-code/settings
+    - https://attack.mitre.org/techniques/T1546/
+    - https://owasp.org/www-project-mcp-top-10/
+author: Punith Gowda (Network Intelligence)
+date: 2026-05-10
+tags:
+    - attack.persistence
+    - attack.t1546
+    - detection.emerging-threats
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection_path:
+        TargetFilename|endswith:
+            - '/.claude.json'
+            - '/.claude/settings.json'
+            - '/.claude/settings.local.json'
+            - '/.config/Claude/claude_desktop_config.json'
+            - '/mcp.json'
+            - '/.cursor/mcp.json'
+            - '/.continue/config.json'
+    filter_main_legit_writers:
+        Image|endswith:
+            - '/claude'
+            - '/cursor'
+            - '/node'
+    condition: selection_path and not filter_main_legit_writers
+falsepositives:
+    - Claude Code itself (runs as a node process) writing settings; covered by the filter but worth tuning per fleet (path of node binary varies)
+    - Configuration management tooling (Ansible, Chef, Puppet) deploying organisation-approved MCP server entries
+    - Backup or sync agents (rclone, restic, Dropbox client) restoring user dotfiles
+level: high
