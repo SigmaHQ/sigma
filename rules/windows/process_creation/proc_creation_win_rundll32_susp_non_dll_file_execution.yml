@@ -1,0 +1,47 @@
+title: Rundll32 Execution of DLL Masquerading as Non-Executable File Type
+id: 3e6b8f1a-2d5c-4a9e-b1f4-7c8d0a2e5f6b
+status: experimental
+description: |
+    Detects rundll32.exe being invoked either:
+      (a) against a file with a non-DLL/non-executable extension (e.g. .jpg, .png, .pdf,
+          .txt, .ini, .html, .js) followed by an exported function call — a common evasion
+          where a malicious DLL is renamed to a benign extension to bypass extension-based
+          filtering, or
+      (b) from a user-writable staging directory (Temp, AppData, ProgramData, Public,
+          Downloads) — a broader signal since legitimate rundll32 targets are almost
+          always shipped under Program Files/System32, not dropped into user-writable
+          paths at runtime.
+    Excludes cases where the parent process is msiexec.exe, since MSI custom actions
+    legitimately spawn rundll32 against .tmp/.dat staging files during installation.
+references:
+    - https://attack.mitre.org/techniques/T1218/011/
+author: Pavan Pothamsetti (PpT2211)
+date: 2026-08-28
+tags:
+    - attack.defense-evasion
+    - attack.execution
+    - attack.t1218.011
+    - attack.t1036.008
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\rundll32.exe'
+    selection_ext_masquerade:
+        CommandLine|re: '(?i)rundll32(\.exe)?\s.*\.(jpg|png|gif|ico|pdf|docx|ppt|txt|inf|dat|tmp|ini|html|htm|js)"?,'
+    selection_staging_path:
+        CommandLine|contains:
+            - '\AppData\Local\Temp\'
+            - '\AppData\Roaming\'
+            - '\ProgramData\'
+            - '\Users\Public\'
+            - '\Downloads\'
+    filter_parent_msiexec:
+        ParentImage|endswith: '\msiexec.exe'
+    condition: selection_img and (selection_ext_masquerade or selection_staging_path) and not filter_parent_msiexec
+falsepositives:
+    - Other legitimate installers/updaters (e.g. Squirrel-based apps, some ClickOnce deployments) that stage payloads with non-standard extensions before invoking rundll32 — extend filter_parent_msiexec if you identify these in your environment
+    - Some legitimate software (browser components, printer/scanner utilities) do call rundll32 against DLLs in AppData under normal operation — worth a short baselining pass before setting this to production/high
+    - Rare legitimate help/media viewer integrations that pass non-.dll files to rundll32
+level: high
