@@ -1,0 +1,48 @@
+title: DC Machine Account TGT Request from Non-DC Source IP
+id: 9c5d2b84-1f7e-4a3c-d6b8-e04f9a17c523
+status: experimental
+description: |
+    Detects a Kerberos TGT request (Event 4768) for a known Domain Controller machine account
+    originating from an IP address that is not a known Domain Controller. DC machine accounts
+    should only request TGTs from their own IP. Any TGT request for a DC account from a
+    workstation or non-DC host is anomalous and indicates one of the following:
+
+      - PKINIT abuse (CVE-2026-54121 / Certighost): attacker authenticating as a DC via a
+        forged certificate from their workstation
+      - Overpass-the-Hash: attacker converting a stolen DC machine account NTLM hash into a
+        Kerberos TGT
+      - Pass-the-Hash (RC4): attacker using the DC machine account hash directly with Kerberos
+references:
+    - https://github.com/aniqfakhrul/CVE-2026-54121
+    - https://gist.github.com/H0j3n/a5ef2609b5f2944ac2390a191a534c26
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-07-29
+tags:
+    - attack.credential-access
+    - attack.lateral-movement
+    - attack.t1649
+    - attack.t1550.003
+    - attack.t1558.001
+    - cve.2026-54121
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4768
+        Status: '0x0'
+        TargetUserName|endswith: '$'
+        TargetUserName|expand: '%dc_machine_accounts%'
+    filter_main_dc_source:
+        IpAddress|expand: '%dc_ip_addresses%'
+    filter_main_loopback:
+        - IpAddress:
+              - '127.0.0.1'
+              - '::1'
+              - '::ffff:127.0.0.1'
+              - '-'
+        - IpAddress|startswith: 'fe80:'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unlikely if %dc_machine_accounts% and %dc_ip_addresses% are correctly populated.
+level: high
