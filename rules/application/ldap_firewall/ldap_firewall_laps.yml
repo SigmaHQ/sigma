@@ -1,0 +1,27 @@
+title: LAPS Password Harvesting
+id: 144cad53-25b8-43f1-8ec8-a0ef42335476
+status: experimental
+description: Detects attempts to access LAPS computer passwords
+references:
+    - https://github.com/zeronetworks/ldapfw
+    - https://zeronetworks.com/blog/ldap-firewall-level-up-your-dc-security/
+author: Dekel Paz, Sagie Dulce
+date: 2023/10/30
+modified: 2023/10/30
+tags:
+    - attack.privilege_escalation
+    - attack.t1078
+    - attack.t1078.003
+logsource:
+    product: ldap_firewall
+    category: application
+    definition: 'Requirements: install and apply the LDAP Firewall to all Domain Controllers in audit mode'
+detection:
+    selection:
+        EventLog: LDAPFW
+        EventID: 263
+        DN|contains: ms-Mcs-AdmPwd
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
