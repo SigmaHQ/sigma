@@ -1,0 +1,32 @@
+title: Potential Local Credential Testing via dscl -authonly
+id: 7f3a1c2e-9b4d-4e2a-8c6f-1d5e7a9b3c4f
+status: experimental
+description: |
+    Detects execution of the macOS "dscl" (Directory Service command line) utility
+    with the "-authonly" flag, which validates local user credentials without
+    creating a full authenticated session. Repeated or unexpected use of this
+    flag can indicate credential validation/brute-force attempts against local
+    accounts, outside of normal administrative activity.
+references:
+    - https://ss64.com/mac/dscl.html
+    - https://www.jamf.com/blog/crashstealer-macos-infostealer-analysis/
+author: Pavan Pothamsetti (PpT2211)
+date: 2026-08-23
+tags:
+    - attack.credential-access
+    - attack.t1110.001
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection:
+        Image|endswith: '/dscl'
+        CommandLine|contains: '-authonly'
+    filter_main_privileged:
+        User: 'root'
+    condition: selection and not filter_main_privileged
+falsepositives:
+    - Legitimate administrative credential checks or password-reset tooling using dscl
+    - Automated MDM/config-management scripts validating local account credentials
+    - IT helpdesk scripts run as root during account troubleshooting
+level: medium
