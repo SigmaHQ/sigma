@@ -1,17 +1,26 @@
-title: Suspicious Use of BrowserCore.exe for PRT Extraction
+title: Potential Use of BrowserCore.exe for PRT Extraction
 id: e862850e-cf85-48eb-b47b-db55d5c3d2d6
 status: experimental
-description: Detects suspicious execution of BrowserCore.exe potentially used to extract Primary Refresh Tokens (PRTs) for Azure AD SSO abuse.
+description: |
+    Detects suspicious execution of BrowserCore.exe potentially used to extract Primary Refresh Tokens (PRTs) for Azure AD SSO abuse.
+    Legitimate executions are typically spawned by a browser (like Chrome or Edge) via cmd.exe using named pipes for inter-process communication.
+    An attacker can execute BrowserCore.exe directly to request a Primary Refresh Token (PRT) cookie as part of an Azure AD SSO abuse attack.
 references:
     - https://dirkjanm.io/abusing-azure-ad-sso-with-the-primary-refresh-token/
+    - https://falconforce.nl/falconfriday-stealing-and-detecting-azure-prt-cookies-0xff18/
+    - https://specterops.io/blog/2020/07/14/requesting-azure-ad-request-tokens-on-azure-ad-joined-machines-for-browser-sso/
+    - https://aadinternals.com/post/prt/
+    - https://detection.fyi/elastic/detection-rules/windows/credential_access_entraid_prt_via_browsercore/
+    - https://github.com/dirkjanm/ROADtoken/tree/48f75b691a4f7fa9ab7606ec592531c5952f52ed
+    - https://github.com/kozmer/aad-bofs/tree/6f03d71fd8f6633c7266fa24bc196efe900e5f31/request_aad_prt
+    - https://github.com/leechristensen/RequestAADRefreshToken/tree/5b8d5390ea190242b5fafb6f24b28b83b8b1b57c
+    - https://learn.microsoft.com/en-us/entra/identity/devices/concept-primary-refresh-token
 author: Eugen Tropmann
-date: 2025-10-02
+date: 2026-09-27
 tags:
     - attack.credential-access
-    - attack.defense-evasion
-    - attack.lateral-movement
-    - attack.t1003
-    - attack.t1550.003
+    - attack.t1539
+    - attack.t1555.003
 logsource:
     category: process_creation
     product: windows
