@@ -1,4 +1,4 @@
-title: Hacktool - Defendnot Security Center AV Registry Modification
+title: Potential HackTool - Defendnot Security Center AV Registry Modification
 id: 9991c683-05aa-47b7-a865-df14dc4b9dc4
 status: experimental
 description: |
@@ -8,11 +8,9 @@ description: |
 references:
     - https://www.huntress.com/blog/defendnot-detecting-malicious-security-product-bypass-techniques
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
-date: 2025-06-05
-modified: 2026-09-20
+date: 2026-09-27
 tags:
     - attack.defense-impairment
-    - attack.stealth
     - attack.t1685
 logsource:
     category: registry_set
@@ -24,7 +22,25 @@ detection:
             - '\ProductEXE'
             - '\DisplayName'
             - '\ReportingExe'
-    condition: selection
+    filter_optional_antivirus:
+        Image: 'C:\Windows\System32\svchost.exe'
+        Details|contains:
+            - 'Avira'
+            - 'Windows Defender'
+            - 'Microsoft Defender'
+            - 'Sophos'
+            - 'Kaspersky'
+            - 'ESET'
+            - 'Bitdefender'
+            - 'Trend Micro'
+            - 'McAfee'
+            - 'Symantec'
+            - 'CrowdStrike'
+            - 'SentinelOne'
+            - 'Carbon Black'
+            - 'Elastic'
+            - 'Cortex'
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
-    - Legitimate modification by antivirus softwares
+    - Unlikely
 level: medium
