@@ -1,0 +1,63 @@
+title: Suspicious Process Spawned via NetScaler RC Startup Script
+id: 652eda7b-cd81-46b0-87a4-13b02ed4ece0
+related:
+    - id: 53a4c14b-d127-4a72-94a8-9b82d69e1e0e
+      type: similar
+status: experimental
+description: |
+    Detects a suspicious shell, interpreter or network tool spawned by a process
+    executing /flash/nsconfig/rc.netscaler at boot on Citrix NetScaler appliances.
+    Threat actors establish persistence by appending reverse shell stagers to
+    rc.netscaler; on the next reboot the startup shell interprets the file and the
+    malicious entry runs as a child process. Any shell or network utility parented
+    to a rc.netscaler interpreter is a strong indicator of a backdoor implanted for
+    boot persistence.
+references:
+    - https://sh3llc0d3.com/blog/inside-the-netscaler-zero-day-siege-chained-pre-auth-rces-weaponized-in-the-wild-watchtowr-disclosure/
+    - https://github.com/NCSC-NL/citrix-2025/blob/a1b0b5f011a0332dbcee9cc834c66b8f181a34f0/live-host-bash-check/TLPCLEAR_check_script_cve-2025-6543-v1.8.sh
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-09-28
+tags:
+    - attack.persistence
+    - attack.t1037.004
+    - attack.execution
+    - attack.t1059
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_parent_cli:
+        ParentCommandLine|contains: '/flash/nsconfig/rc.netscaler'
+    selection_susp_img:
+        Image|endswith:
+            - '/bash'
+            - '/curl'
+            - '/dash'
+            - '/nc'
+            - '/ncat'
+            - '/perl'
+            - '/python'
+            - '/python3'
+            - '/sh'
+            - '/socat'
+            - '/wget'
+    selection_susp_cli:
+        CommandLine|contains:
+            - '/dev/tcp'
+            - '/dev/udp'
+            - '| bash'
+            - '| sh'
+            - 'base64 -d'
+            - 'nc '
+            - 'ncat'
+            - 'netcat'
+            - 'perl'
+            - 'python'
+            - 'socat'
+            - 'socket'
+            - 'subprocess'
+            - 'wget'
+    condition: selection_parent_cli and 1 of selection_susp_*
+falsepositives:
+    - Legitimate commands explicitly referencing rc.netscaler during boot (very uncommon)
+level: high
