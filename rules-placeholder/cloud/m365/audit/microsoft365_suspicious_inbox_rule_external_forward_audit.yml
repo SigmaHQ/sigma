@@ -1,0 +1,58 @@
+title: Mail Forwarding To External Domain Configured - Possible AiTM Session Hijack
+id: 7dbc984c-fc0d-4b24-828f-d9a530cd2d81
+related:
+    - id: c726e007-2cd0-4a55-abfb-79730fbedee5
+      type: derived
+status: experimental
+description: |
+    Detects an inbox rule or mailbox setting that forwards or redirects mail to an
+    address outside the organization's own domains.
+    This is a common post-compromise action after AiTM (Adversary-in-the-Middle)
+    phishing kits such as Tycoon2FA, EvilProxy or NakedPages steal a session cookie
+    to bypass MFA: the attacker sets up external forwarding to keep receiving the
+    victim's mail even after the session is revoked.
+references:
+    - https://blog.sekoia.io/tycoon2fa-an-in-depth-analysis-of-the-innovative-phishing-kit/
+    - https://redcanary.com/blog/email-forwarding-rules/
+author: Enrique Rodríguez Romero
+date: 2026-09-07
+modified: 2026-09-30
+tags:
+    - attack.collection
+    - attack.t1114.003
+logsource:
+    product: m365
+    service: audit
+    definition: "Requirements: The 'OperationProperties' and 'Parameters' fields are a list of dict. A correct mapping to the 'Value' field inside is recommended to avoid greedy search"
+detection:
+    selection_inboxrule:
+        Operation:
+            - 'New-InboxRule'
+            - 'Set-InboxRule'
+        Parameters|contains:
+            - 'ForwardTo'  # Also matches ForwardAsAttachmentTo
+            - 'RedirectTo'
+    selection_setmailbox:
+        Operation: 'Set-Mailbox'
+        Parameters|contains:
+            - 'ForwardingSmtpAddress'
+            - 'ForwardingAddress'
+    selection_outlook_client:
+        # Rules created from the Outlook client instead of Exchange PowerShell
+        Operation: 'UpdateInboxRules'
+        OperationProperties|contains:
+            - 'Forward'
+            - 'Redirect'
+    # Note: Without a mapping to the forwarding recipient field, any internal domain in the parameters
+    #       (e.g. an extra internal recipient or a sender condition) excludes the event
+    filter_main_internal_parameters:
+        Parameters|contains|expand: '%internal_domains%'
+    filter_main_internal_operationproperties:
+        OperationProperties|contains|expand: '%internal_domains%'
+    condition: 1 of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Legitimate forwarding set up by IT to an external partner or personal address,
+      for example during leave or role changes
+    - Requires the placeholder '%internal_domains%' to be defined with the
+      organization's own accepted domains via a pySigma pipeline config
+level: high
