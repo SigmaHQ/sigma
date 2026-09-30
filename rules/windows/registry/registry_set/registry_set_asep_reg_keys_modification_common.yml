@@ -12,7 +12,7 @@ references:
     - https://persistence-info.github.io/Data/userinitmprlogonscript.html # UserInitMprLogonScript
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split), wagga (name)
 date: 2019-10-25
-modified: 2025-06-16
+modified: 2025-10-22
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -21,7 +21,7 @@ logsource:
     category: registry_set
     product: windows
 detection:
-    main_selection:
+    selection:
         TargetObject|contains:
             - '\SOFTWARE\Wow6432Node\Microsoft\Windows CE Services\AutoStart'
             - '\Software\Wow6432Node\Microsoft\Command Processor\Autorun'
@@ -41,9 +41,13 @@ detection:
             - '\SOFTWARE\Microsoft\Internet Explorer\Desktop\Components'
             - '\Software\Classes\Clsid\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\Inprocserver32'
             - '\Control Panel\Desktop\Scrnsave.exe'
-    filter_empty:
+    filter_main_empty:
         Details: '(Empty)'
-    filter_msoffice:
+    filter_main_null:
+        Details: null
+    filter_main_poqexec:
+        Image: 'C:\Windows\System32\poqexec.exe'
+    filter_optional_msoffice:
         - TargetObject|contains:
               - '\Office\ClickToRun\REGISTRY\MACHINE\Software\Classes\PROTOCOLS\Handler\'
               - '\ClickToRunStore\HKMU\SOFTWARE\Classes\PROTOCOLS\Handler\'
@@ -53,23 +57,22 @@ detection:
               - '{42089D2D-912D-4018-9087-2B87803E93FB}'
               - '{5504BE45-A83B-4808-900A-3A5C36E7F77A}'
               - '{807583E5-5146-11D5-A672-00B0D022E945}'
-    filter_chrome:
+    filter_optional_chrome:
         TargetObject|contains: '\SOFTWARE\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}'
-    filter_edge:
+    filter_optional_edge:
         TargetObject|contains: '\SOFTWARE\Microsoft\Active Setup\Installed Components\{9459C573-B17A-45AE-9F64-1857B5D58CEE}'
-    filter_IE:
+    filter_optional_IE:
         TargetObject|contains: '\Software\Microsoft\Active Setup\Installed Components\{89820200-ECBD-11cf-8B85-00AA005B4383}'
-    filter_image:
+    filter_optional_integrator:
         Image:
-            - 'C:\Windows\System32\poqexec.exe'
             - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
             - 'C:\Program Files\Microsoft Office\root\integration\integrator.exe'
-    filter_office:
+    filter_optional_office:
         Image|startswith:
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
         Image|endswith: '\OfficeClickToRun.exe'
-    condition: main_selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate software automatically (mostly, during installation) sets up autorun keys for legitimate reason
     - Legitimate administrator sets up autorun keys for legitimate reason

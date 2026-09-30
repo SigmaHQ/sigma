@@ -17,13 +17,17 @@ references:
     - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-eventlog?view=powershell-5.1
     - http://www.solomonson.com/posts/2010-07-09-reading-eventviewer-command-line/
     - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/wevtutil
+    - https://ptsecurity.com/research/pt-esc-threat-intelligence/striking-panda-attacks-apt31-today
+    - https://www.cybertriage.com/artifact/terminalservices_remoteconnectionmanager_log/
+    - https://ponderthebits.com/2018/02/windows-rdp-related-event-logs-identification-tracking-and-investigation/
 author: Nasreddine Bencherchali (Nextron Systems), X__Junior (Nextron Systems)
 date: 2022-09-09
-modified: 2024-08-15
+modified: 2025-12-02
 tags:
     - attack.credential-access
     - attack.discovery
     - attack.t1552
+    - attack.t1087
 logsource:
     category: process_creation
     product: windows
@@ -67,22 +71,47 @@ detection:
             # This covers EID 4624 and 4628 from Security Log
             - '-InstanceId 462?'
             - '.eventid -eq 462?'
+            - '.ID -eq 462?'
             - 'EventCode=?462?'
             - 'EventIdentifier=?462?'
             - 'System[EventID=462?]'
             # This covers EID 4778 from Security Log
             - '-InstanceId 4778'
             - '.eventid -eq 4778'
-            - 'System[EventID=4778]'
+            - '.ID -eq 4778'
             - 'EventCode=?4778?'
             - 'EventIdentifier=?4778?'
+            - 'System[EventID=4778]'
             # This covers EID 25 from Microsoft-Windows-TerminalServices-LocalSessionManager/Operational log
             - '-InstanceId 25'
             - '.eventid -eq 25'
-            - 'System[EventID=25]'
+            - '.ID -eq 25'
             - 'EventCode=?25?'
             - 'EventIdentifier=?25?'
+            - 'System[EventID=25]'
+            # This covers EID 1149 from Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational log
+            - '-InstanceId 1149'
+            - '.eventid -eq 1149'
+            - '.ID -eq 1149'
+            - 'EventCode=?1149?'
+            - 'EventIdentifier=?1149?'
+            - 'System[EventID=1149]'
+            # This covers EID 21 from Microsoft-Windows-TerminalServices-LocalSessionManager/Operational log
+            - '-InstanceId 21'
+            - '.eventid -eq 21'
+            - '.ID -eq 21'
+            - 'EventCode=?21?'
+            - 'EventIdentifier=?21?'
+            - 'System[EventID=21]'
+            # This covers EID 22 from Microsoft-Windows-TerminalServices-LocalSessionManager/Operational log
+            - '-InstanceId 22'
+            - '.eventid -eq 22'
+            - '.ID -eq 22'
+            - 'EventCode=?22?'
+            - 'EventIdentifier=?22?'
+            - 'System[EventID=22]'
     condition: 1 of selection_logs_* and (selection_wmi or all of selection_wevtutil_* or all of selection_wmic_* or selection_cmdlet)
 falsepositives:
     - Legitimate usage of the utility by administrators to query the event log
 level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_susp_eventlog_content_recon/info.yml
