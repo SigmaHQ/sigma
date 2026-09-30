@@ -1,0 +1,38 @@
+title: SSH Tunneling via SSH Client on Windows
+id: 5d0f9e4a-1b6c-4f3e-a8d7-9e0f1a2b3c4d
+status: experimental
+description: |
+    Detects the use of SSH clients on Windows (PuTTY, OpenSSH) to create SSH tunnels, a technique
+    commonly abused to relay traffic into a network, expose internal services to a remote host, or
+    pivot into an otherwise unreachable segment.
+references:
+    - https://www.elastic.co/guide/en/security/current/prebuilt-rule-8-19-29-potential-ssh-reverse-port-forwarding.html
+    - https://man.openbsd.org/ssh.1#-L
+author: Louise Lalanne
+date: 2026-09-30
+tags:
+    - attack.command-and-control
+    - attack.t1572
+    - attack.t1090.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_putty:
+        Image|endswith:
+            - '\putty.exe'
+            - '\plink.exe'
+        CommandLine|contains:
+            - ' -L'
+            - ' -R'
+            - ' -D'
+    selection_openssh:
+        Image|endswith: '\ssh.exe'
+        CommandLine|contains:
+            - ' -L'
+            - ' -R'
+            - ' -D'
+    condition: selection_putty or selection_openssh
+falsepositives:
+    - Legitimate SSH tunneling by system administrators or developers
+level: medium
