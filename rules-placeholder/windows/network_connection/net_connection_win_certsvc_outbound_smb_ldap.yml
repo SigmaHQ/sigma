@@ -1,0 +1,49 @@
+title: Certificate Services Outbound SMB or LDAP Connection
+id: 2a9e4f17-6c3b-4d8a-e1f0-b57c2d94a631
+related:
+    - id: c4a1f389-2e6b-4d9a-8f0c-b73e5a12d947
+      type: similar
+status: experimental
+description: |
+    Detects the Windows Certificate Services process (certsrv.exe) initiating an outbound
+    network connection on port 445 (SMB) or 389 (LDAP) to a non-DC host. This behaviour is
+    inherently suspicious: under normal operation the CA resolves subject identities via local
+    RPC against the domain and never initiates outbound SMB or LDAP connections to arbitrary
+    hosts. Any such connection indicates the CA is being coerced into performing a remote
+    identity lookup against an attacker-controlled host.
+
+    The most direct known trigger is the CA chase fallback (EDITF_ENABLECHASECLIENTDC) where
+    a requester-supplied 'cdc' attribute causes the CA to open SMB and LDAP to a specified
+    address. CVE-2026-54121 (Certighost) exploits this path to redirect the CA to rogue LSA
+    and LDAP services that return a DC's identity, resulting in a forged DC certificate.
+    This rule is not limited to Certighost — any future vulnerability or misconfiguration
+    that causes certsrv.exe to make outbound SMB or LDAP connections is covered.
+references:
+    - https://github.com/aniqfakhrul/CVE-2026-54121
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-07-29
+tags:
+    - attack.privilege-escalation
+    - attack.credential-access
+    - attack.t1649
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\certsrv.exe'
+        Initiated: 'true'
+        DestinationPort:
+            - 389
+            - 445
+    filter_main_loopback:
+        DestinationIp:
+            - '127.0.0.1'
+            - '::1'
+            - '0:0:0:0:0:0:0:1'
+    filter_main_known_legit_ips:
+        DestinationIp|expand: '%legit_ips%' # Including known legitimate IPs for the CA server (e.g. other DCs, LDAP servers, etc.)
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unlikely
+level: high
