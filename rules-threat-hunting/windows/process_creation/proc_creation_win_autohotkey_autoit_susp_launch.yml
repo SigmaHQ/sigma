@@ -1,0 +1,53 @@
+title: AutoHotkey Or AutoIt Interpreter Launched From Shell Or User Writable Location
+id: e159e9de-5f90-40d0-a5e3-4035b13c011d
+status: experimental
+description: |
+    Detects the execution of the AutoHotkey or AutoIt3 script interpreters when they are spawned by a command or script interpreter, or when the interpreter or its script resides in a user writable location.
+    Malware families such as DarkGate, Lumma Stealer or XLoader drop a legitimate AutoIt or AutoHotkey interpreter together with a malicious script and launch it from a shell, a scripting host or a temporary folder.
+references:
+    - https://www.autohotkey.com/docs/v2/Scripts.htm
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1059.010/T1059.010.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.execution
+    - attack.t1059.010
+    - detection.threat-hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|contains: '\AutoHotkey'
+          Image|endswith: '.exe'
+        - Image|endswith:
+              - '\AutoIt3.exe'
+              - '\AutoIt3_x64.exe'
+        - OriginalFileName:
+              - 'AutoHotkey.exe'
+              - 'AutoIt3.exe'
+    selection_context:
+        - ParentImage|endswith:
+              - '\cmd.exe'
+              - '\cscript.exe'
+              - '\mshta.exe'
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\regsvr32.exe'
+              - '\rundll32.exe'
+              - '\wscript.exe'
+        - CommandLine|contains:
+              - '\AppData\Local\Temp\'
+              - '\Downloads\'
+              - '\Users\Public\'
+              - ':\ProgramData\'
+              - ':\Temp\'
+    condition: all of selection_*
+falsepositives:
+    - Power users and administrators running AutoHotkey or AutoIt automation scripts from a shell or from portable installations in their profile
+level: low
+simulation:
+    - type: atomic-red-team
+      name: AutoHotKey script execution
+      technique: T1059.010
+      atomic_guid: 7b5d350e-f758-43cc-a761-8e3f6b052a03
