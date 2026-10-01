@@ -1,0 +1,35 @@
+title: Registry Value Set With Invisible Zero-Width Unicode Characters In Key Or Value Name
+id: 4482284b-1a59-4a63-9097-86a535220126
+status: experimental
+description: |
+    Detects a registry value being set where the key or value name contains an invisible zero-width Unicode character (U+200B, U+200C, U+200D, U+2060 or U+FEFF).
+    Adversaries use such characters to create keys, values or environment variables (e.g. "PATH" followed by U+200C under "HKCU\Environment") that look identical to legitimate ones, hiding configuration data or persistence entries from administrators performing manual audits.
+    As zero-width characters can legitimately appear in registry paths that embed user controlled file or folder names, this rule is intended for threat hunting.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1027.018/T1027.018.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.stealth
+    - attack.t1027.018
+    - detection.threat-hunting
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains:
+            - '​' # U+200B Zero Width Space
+            - '‌' # U+200C Zero Width Non-Joiner
+            - '‍' # U+200D Zero Width Joiner
+            - '⁠' # U+2060 Word Joiner
+            - '﻿' # U+FEFF Zero Width No-Break Space (BOM)
+    condition: selection
+falsepositives:
+    - Registry keys that embed user controlled file or folder names (e.g. MRU, shell bags or application usage tracking) where those names contain zero-width characters or emoji sequences
+level: low
+simulation:
+    - type: atomic-red-team
+      name: Invisible Unicode in Environment Variables
+      technique: T1027.018
+      atomic_guid: 125b1b41-bcef-42c3-acaa-a44303e3ffc1
