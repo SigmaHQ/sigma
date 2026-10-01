@@ -1,0 +1,63 @@
+title: RC Script Modification Via CLI - Linux
+id: f8985252-c66b-4e7d-838b-097fb8ad080d
+status: experimental
+description: |
+    Detects command line utilities writing to, replacing or making executable the "rc.local" or "rc.common" boot scripts, which are executed with root privileges at system startup.
+    Shell redirections such as "echo ... >> /etc/rc.local" do not spawn a dedicated process; these are covered when they are executed through a shell command line (e.g. "sh -c").
+    Adversaries modify RC scripts to establish persistence on Linux systems.
+references:
+    - https://www.elastic.co/security-labs/sequel-on-persistence-mechanisms
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1037.004/T1037.004.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1037.004
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_target:
+        CommandLine|contains:
+            - '/etc/rc.common'
+            - '/etc/rc.d/rc.local'
+            - '/etc/rc.local'
+    selection_writer:
+        Image|endswith:
+            - '/cp'
+            - '/dd'
+            - '/install'
+            - '/ln'
+            - '/mv'
+            - '/sed'
+            - '/tee'
+    selection_chmod_img:
+        Image|endswith: '/chmod'
+    selection_chmod_cli:
+        CommandLine|contains:
+            - '+x'
+            - ' 7'
+    selection_shell_img:
+        Image|endswith:
+            - '/bash'
+            - '/dash'
+            - '/sh'
+            - '/zsh'
+    selection_shell_cli:
+        CommandLine|contains:
+            - '>/etc/rc.'
+            - '> /etc/rc.'
+    condition: selection_target and (selection_writer or all of selection_chmod_* or all of selection_shell_*)
+falsepositives:
+    - Administrators or configuration management tools maintaining legacy boot scripts
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: rc.common
+      technique: T1037.004
+      atomic_guid: c33f3d80-5f04-419b-a13a-854d1cbdbf3a
+    - type: atomic-red-team
+      name: rc.local
+      technique: T1037.004
+      atomic_guid: 126f71af-e1c9-405c-94ef-26a47b16c102
