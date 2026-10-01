@@ -1,0 +1,29 @@
+title: HackTool - MimiPenguin Execution
+id: 1d06b5e3-0a42-4430-a506-5b43d8424ccd
+status: experimental
+description: |
+    Detects the execution of MimiPenguin, a tool that dumps clear text login passwords from the memory of processes such as gdm-password, gnome-keyring-daemon, lightdm, vsftpd, sshd and apache2 by reading "/proc/<pid>/mem".
+references:
+    - https://github.com/huntergregal/mimipenguin
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1003.007/T1003.007.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.credential-access
+    - attack.t1003.007
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        - Image|endswith: '/mimipenguin'
+        - CommandLine|contains: 'mimipenguin'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
+simulation:
+    - type: atomic-red-team
+      name: Capture Passwords with MimiPenguin
+      technique: T1003.007
+      atomic_guid: a27418de-bdce-4ebd-b655-38f04842bf0c
