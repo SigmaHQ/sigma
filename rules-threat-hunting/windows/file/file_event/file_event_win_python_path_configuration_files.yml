@@ -10,12 +10,14 @@ description: |
     Detects creation of a Python path configuration file (.pth) in Python library folders, which can be maliciously abused for code execution and persistence.
     Modules referenced by these files are run at every Python startup (v3.5+), regardless of whether the module is imported by the calling script.
     Default paths are '\lib\site-packages\*.pth' (Windows) and '/lib/pythonX.Y/site-packages/*.pth' (Unix and macOS).
+    On Windows, this covers virtual environments regardless of their folder name (e.g. 'venv', '.venv', 'env', conda or Poetry environments) as well as the per-user site-packages directory '%APPDATA%\Python\PythonXY\site-packages'.
 references:
     - https://www.volexity.com/blog/2024/04/12/zero-day-exploitation-of-unauthenticated-remote-code-execution-vulnerability-in-globalprotect-cve-2024-3400/
     - https://www.virustotal.com/gui/file/3de2a4392b8715bad070b2ae12243f166ead37830f7c6d24e778985927f9caac
     - https://docs.python.org/3/library/site.html
 author: Andreas Braathen (mnemonic.io), Nasreddine Bencherchali (Nextron Systems)
 date: 2024-04-25
+modified: 2026-10-01
 tags:
     - attack.execution
     - attack.t1059.006
@@ -25,7 +27,9 @@ logsource:
     category: file_event
 detection:
     selection:
-        TargetFilename|re: '(?i)\\(venv|python(.+)?)\\lib\\site-packages\\' # Covers both Virtual envs and default paths
+        # .pth files are only processed when located directly in a site-packages directory
+        # Covers default installs, virtual environments of any name and the per-user site-packages directory (which has no 'lib' parent)
+        TargetFilename|re: '(?i)\\site-packages\\[^\\]+\.pth$'
         TargetFilename|endswith: '.pth'
     filter_main_python:
         Image|endswith: '\python.exe'
