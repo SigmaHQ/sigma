@@ -1,0 +1,36 @@
+title: Print Processor DLL Registered Via Registry
+id: 2bb55c17-b769-4ae7-9f74-908ec7e510cf
+status: experimental
+description: |
+    Detects the registration of a print processor DLL other than the default "winprint.dll" via the "Driver" value of a print processor key.
+    Print processors are DLLs loaded by the print spooler service (spoolsv.exe) running as SYSTEM at service start.
+    Adversaries such as Earth Lusca or the Winnti Group (PipeMon) registered malicious print processors to gain persistence and privilege escalation.
+references:
+    - https://www.welivesecurity.com/2020/05/21/no-game-over-winnti-group/
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1547.012/T1547.012.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1547.012
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains|all:
+            - '\Control\Print\Environments\'
+            - '\Print Processors\'
+        TargetObject|endswith: '\Driver'
+    filter_main_winprint:
+        Details: 'winprint.dll'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Installation of printer drivers that ship a vendor specific print processor. Such installations are performed by the spooler service (spoolsv.exe) and should be baselined per environment.
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Print Processors
+      technique: T1547.012
+      atomic_guid: f7d38f47-c61b-47cc-a59d-fc0368f47ed0
