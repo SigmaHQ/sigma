@@ -1,0 +1,37 @@
+title: File Created With Invisible Zero-Width Unicode Characters In Name
+id: a2fa0333-f235-46c0-819c-82c22cf662ea
+status: experimental
+description: |
+    Detects the creation of a file whose path contains an invisible zero-width Unicode character (U+200B, U+200C, U+200D, U+2060 or U+FEFF).
+    Adversaries insert such characters into file names so that a malicious file looks identical to a legitimate one in Explorer and during manual triage.
+    As zero-width characters can legitimately appear in file names copied from web pages or in emoji sequences, this rule is intended for threat hunting.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1027.018/T1027.018.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.stealth
+    - attack.t1027.018
+    - attack.t1036
+    - detection.threat-hunting
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains:
+            - '​' # U+200B Zero Width Space
+            - '‌' # U+200C Zero Width Non-Joiner
+            - '‍' # U+200D Zero Width Joiner
+            - '⁠' # U+2060 Word Joiner
+            - '﻿' # U+FEFF Zero Width No-Break Space (BOM)
+    condition: selection
+falsepositives:
+    - File names copied from web pages or documents that contain zero-width characters
+    - File names containing emoji sequences, which use the zero-width joiner (U+200D) to combine emoji
+level: low
+simulation:
+    - type: atomic-red-team
+      name: File Masquerading with Zero-Width Space
+      technique: T1027.018
+      atomic_guid: 5917f0fd-c6d4-4af8-b89d-f3db06349c49
