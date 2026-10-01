@@ -1,0 +1,51 @@
+title: Data Upload Via Wget HTTP POST - Linux
+id: 670b89cb-bd2b-460e-b0ed-cf55d6bc110a
+related:
+    - id: cb39d16b-b3b6-4a7a-8222-1cf24b686ffc # Auditd
+      type: similar
+    - id: 00b90cc1-17ec-402c-96ad-3a8117d7a582 # Curl
+      type: similar
+status: experimental
+description: |
+    Detects "wget" sending a local file or inline data in an HTTP request body via "--post-file", "--post-data", "--body-file", "--body-data" or a POST/PUT method.
+    Adversaries use wget, which is available on most Linux systems, to exfiltrate data over HTTP(S) when curl is not available.
+references:
+    - https://www.gnu.org/software/wget/manual/wget.html#HTTP-Options
+    - https://gtfobins.github.io/gtfobins/wget/
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1048.002/T1048.002.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.exfiltration
+    - attack.t1048
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith: '/wget'
+    selection_cli:
+        CommandLine|contains:
+            - '--body-data'
+            - '--body-file'
+            - '--method=POST'
+            - '--method=PUT'
+            - '--post-data'
+            - '--post-file'
+    filter_optional_localhost:
+        CommandLine|contains:
+            - '://127.0.0.1'
+            - '://localhost'
+    condition: all of selection_* and not 1 of filter_optional_*
+falsepositives:
+    - Scripts created by developers and administrators calling web APIs with wget
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Exfiltrate data in a file over HTTPS using wget
+      technique: T1048.002
+      atomic_guid: 7ccdfcfa-6707-46bc-b812-007ab6ff951c
+    - type: atomic-red-team
+      name: Exfiltrate data as text over HTTPS using wget
+      technique: T1048.002
+      atomic_guid: 8bec51da-7a6d-4346-b941-51eca448c4b0
