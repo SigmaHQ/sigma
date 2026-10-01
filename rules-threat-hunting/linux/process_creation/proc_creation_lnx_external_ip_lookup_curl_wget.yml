@@ -1,0 +1,52 @@
+title: External IP Address Or Geolocation Lookup Via CLI - Linux
+id: 3531f74f-ae8a-4192-ada2-e64c873d4fe6
+related:
+    - id: ec82e2a5-81ea-4211-a1f8-37a0286df2c2 # Windows DNS
+      type: similar
+status: experimental
+description: |
+    Detects "curl" or "wget" querying a public external IP address or IP geolocation lookup service.
+    Malware and post-exploitation scripts commonly look up the public IP address and geolocation of a compromised host to profile the victim, decide whether to proceed (e.g. geofencing) or report back to the operator.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1614/T1614.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.discovery
+    - attack.t1614
+    - attack.t1016
+    - detection.threat-hunting
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith:
+            - '/curl'
+            - '/wget'
+    selection_domain:
+        CommandLine|contains:
+            - 'api.ipify.org'
+            - 'checkip.amazonaws.com'
+            - 'checkip.dyndns.org'
+            - 'icanhazip.com'
+            - 'ident.me'
+            - 'ifconfig.co'
+            - 'ifconfig.io'
+            - 'ifconfig.me'
+            - 'ip-api.com'
+            - 'ipapi.co'
+            - 'ipecho.net'
+            - 'ipinfo.io'
+            - 'ipwho.is'
+            - 'myexternalip.com'
+            - 'wtfismyip.com'
+    condition: all of selection_*
+falsepositives:
+    - Administrators, dynamic DNS updaters or monitoring scripts checking the public IP address
+level: low
+simulation:
+    - type: atomic-red-team
+      name: Get geolocation info through IP-Lookup services using curl freebsd, linux or macos
+      technique: T1614
+      atomic_guid: 552b4db3-8850-412c-abce-ab5cc8a86604
