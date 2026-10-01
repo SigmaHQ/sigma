@@ -1,0 +1,52 @@
+title: Potential Data Exfiltration To Chat Service Webhook Via PowerShell
+id: b33b51f2-4dcf-4542-b0c5-21b22b4b1898
+status: experimental
+description: |
+    Detects PowerShell script blocks that send data to a Discord, Slack or Microsoft Teams incoming webhook URL or to the Telegram Bot API using a web request cmdlet or .NET web client.
+    Infostealers and adversaries abuse these webhooks as an easy, authenticated-by-URL exfiltration channel to reputable domains that are rarely blocked.
+references:
+    - https://discord.com/developers/docs/resources/webhook
+    - https://api.slack.com/messaging/webhooks
+    - https://core.telegram.org/bots/api
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1567.004/T1567.004.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.exfiltration
+    - attack.t1567.004
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_url:
+        ScriptBlockText|contains:
+            - 'api.telegram.org/bot' # Telegram Bot API
+            - 'discord.com/api/webhooks/' # Also covers canary/ptb sub domains
+            - 'discordapp.com/api/webhooks/'
+            - 'hooks.slack.com/services/'
+            - '.webhook.office.com/webhookb2/' # Microsoft Teams incoming webhook
+    selection_request:
+        ScriptBlockText|contains:
+            - 'Invoke-RestMethod'
+            - 'Invoke-WebRequest'
+            - 'irm '
+            - 'iwr '
+            - 'Net.WebClient'
+            - 'Net.Http.HttpClient'
+            - 'UploadFile'
+            - 'UploadString'
+            - 'UploadValues'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate automation, monitoring or CI/CD scripts that post notifications to Slack, Microsoft Teams, Discord or Telegram channels
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Exfiltrate staged data to a Discord webhook (PowerShell)
+      technique: T1567.004
+      atomic_guid: f0057c81-24dc-4a2e-b658-5809c242180b
+    - type: atomic-red-team
+      name: Exfiltrate staged data to a Microsoft Teams webhook (PowerShell)
+      technique: T1567.004
+      atomic_guid: 35ad6590-2207-4b14-bf8f-9899470d7156
