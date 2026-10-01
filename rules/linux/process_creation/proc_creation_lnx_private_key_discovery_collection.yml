@@ -1,0 +1,93 @@
+title: Private Key Material Discovery Or Collection Via CLI - Linux
+id: 98576949-8bd9-4d9b-8555-b0e55571b0e3
+status: experimental
+description: |
+    Detects command line utilities searching for, copying or archiving private key material such as SSH private keys, GnuPG keyrings, WireGuard configurations or TLS private key files.
+    Also detects dumping the private key of a WireGuard interface via "wg showconf" or "wg show <interface> private-key".
+    Adversaries collect private keys to authenticate to other systems, decrypt data or impersonate services.
+references:
+    - https://www.man7.org/linux/man-pages/man8/wg.8.html
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1552.004/T1552.004.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.credential-access
+    - attack.t1552.004
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_tools_img:
+        Image|endswith:
+            - '/base64'
+            - '/cat'
+            - '/cp'
+            - '/find'
+            - '/locate'
+            - '/plocate'
+            - '/rsync'
+            - '/scp'
+            - '/tar'
+            - '/zip'
+    selection_tools_cli:
+        CommandLine|contains:
+            - '.gnupg'
+            - '/etc/wireguard'
+            - 'id_dsa'
+            - 'id_ecdsa'
+            - 'id_ed25519'
+            - 'id_rsa'
+    selection_find_img:
+        Image|endswith:
+            - '/find'
+            - '/locate'
+            - '/plocate'
+    selection_find_cli:
+        CommandLine|contains:
+            - '.key'
+            - '.p12'
+            - '.pem'
+            - '.pfx'
+            - '.ppk'
+    selection_wg_img:
+        Image|endswith: '/wg'
+    selection_wg_cli:
+        CommandLine|contains:
+            - ' private-key'
+            - ' showconf'
+    filter_main_public_key:
+        CommandLine|endswith: '.pub'
+    condition: (all of selection_tools_* or all of selection_find_* or all of selection_wg_*) and not 1 of filter_main_*
+falsepositives:
+    - Backup jobs or configuration management copying user home directories or key material
+    - Administrators locating or saving WireGuard configurations (e.g. "wg-quick save")
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Discover Private SSH Keys
+      technique: T1552.004
+      atomic_guid: 46959285-906d-40fa-9437-5a439accd878
+    - type: atomic-red-team
+      name: Copy Private SSH Keys with CP
+      technique: T1552.004
+      atomic_guid: 7c247dc7-5128-4643-907b-73a76d9135c3
+    - type: atomic-red-team
+      name: Copy Private SSH Keys with rsync
+      technique: T1552.004
+      atomic_guid: 864bb0b2-6bb5-489a-b43b-a77b3a16d68a
+    - type: atomic-red-team
+      name: Copy the users GnuPG directory with rsync
+      technique: T1552.004
+      atomic_guid: 2a5a0601-f5fb-4e2e-aa09-73282ae6afca
+    - type: atomic-red-team
+      name: Enumerate WireGuard interface credentials with wg showconf
+      technique: T1552.004
+      atomic_guid: e7568442-1b7d-4380-a933-b269d1326b6c
+    - type: atomic-red-team
+      name: Find WireGuard configuration files
+      technique: T1552.004
+      atomic_guid: 42c55554-3dcb-4df6-8fbb-c8ccacc478d4
+    - type: atomic-red-team
+      name: Find TLS private key files
+      technique: T1552.004
+      atomic_guid: 5e417277-0ae7-4ad5-a3e8-0fa27c122b29
