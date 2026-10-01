@@ -1,0 +1,39 @@
+title: VBA Code Injected Into Word Normal Template Via PowerShell
+id: ca5b7931-99b4-40b3-8c25-f85888c7c437
+status: experimental
+description: |
+    Detects PowerShell script blocks that open the Word global template "Normal.dotm" and programmatically add VBA code to its project through the VBA extensibility object model (e.g. "VBProject.VBComponents.Add()" and "CodeModule.AddFromString()").
+    Code placed in "Normal.dotm" is loaded every time Word starts, which adversaries such as MuddyWater abuse for persistence.
+references:
+    - https://learn.microsoft.com/en-us/office/vba/api/word.document.vbproject
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1137.001/T1137.001.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.persistence
+    - attack.t1137.001
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_template:
+        ScriptBlockText|contains: 'Normal.dotm'
+    selection_vbproject:
+        ScriptBlockText|contains:
+            - 'VBProject'
+            - 'VBComponents'
+    selection_add_code:
+        ScriptBlockText|contains:
+            - 'AddFromString'
+            - 'AddFromFile'
+            - 'InsertLines'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate scripts that deploy corporate macros into users' Normal.dotm templates
+level: high
+simulation:
+    - type: atomic-red-team
+      name: Injecting a Macro into the Word Normal.dotm Template for Persistence via PowerShell
+      technique: T1137.001
+      atomic_guid: 940db09e-80b6-4dd0-8d4d-7764f89b47a8
