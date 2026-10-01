@@ -1,0 +1,40 @@
+title: Python Usercustomize Or Sitecustomize Startup Hook Created - Windows
+id: c8983560-7fda-44ac-9a3b-1b553156a219
+related:
+    - id: e3652ba3-0ad8-4010-a957-b7ba369e7bac # .pth files
+      type: similar
+status: experimental
+description: |
+    Detects the creation of a "usercustomize.py" or "sitecustomize.py" file.
+    When present on the module search path (e.g. in the per-user or global "site-packages" folder), these modules are imported automatically by the "site" module at every Python interpreter startup.
+    Adversaries abuse this behaviour to execute arbitrary code each time Python is started, as a persistence mechanism.
+references:
+    - https://docs.python.org/3/library/site.html
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1546.018/T1546.018.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1546.018
+    - detection.threat-hunting
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '\sitecustomize.py'
+            - '\usercustomize.py'
+    filter_optional_pydevd:
+        # Debugger bundled with the VS Code Python extension (debugpy) and PyCharm
+        TargetFilename|contains: '\pydev_sitecustomize\sitecustomize.py'
+    condition: selection and not 1 of filter_optional_*
+falsepositives:
+    - Python distributions, IDEs (other than the filtered pydevd debugger), debuggers and virtual environment tooling that ship or generate a "sitecustomize.py" file
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Python Startup Hook - usercustomize.py (Windows)
+      technique: T1546.018
+      atomic_guid: 05cc7a2c-ce32-46f2-a358-f27f76718c39
