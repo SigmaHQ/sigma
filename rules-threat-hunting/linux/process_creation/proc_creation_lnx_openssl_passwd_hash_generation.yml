@@ -1,0 +1,40 @@
+title: Password Hash Generation Via OpenSSL Passwd
+id: 94bbe45e-78ed-4636-a38d-e31ebb6eb8b4
+status: experimental
+description: |
+    Detects the generation of a crypt(3) password hash with "openssl passwd".
+    Adversaries pre-compute password hashes to create a backdoor account or to set a known password on an existing or system account (e.g. via "useradd -p", "usermod -p" or by writing directly to "/etc/shadow").
+    This is also used legitimately by administrators and provisioning scripts, hence this rule is intended for threat hunting.
+references:
+    - https://www.openssl.org/docs/manmaster/man1/openssl-passwd.html
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1078.003/T1078.003.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.persistence
+    - attack.t1136.001
+    - detection.threat-hunting
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '/openssl'
+        CommandLine|contains: ' passwd'
+    condition: selection
+falsepositives:
+    - Administrators and provisioning or configuration management scripts generating password hashes
+level: low
+simulation:
+    - type: atomic-red-team
+      name: Create local account (Linux)
+      technique: T1078.003
+      atomic_guid: 02a91c34-8a5b-4bed-87af-501103eb5357
+    - type: atomic-red-team
+      name: Reactivate a locked/expired account (Linux)
+      technique: T1078.003
+      atomic_guid: d2b95631-62d7-45a3-aaef-0972cea97931
+    - type: atomic-red-team
+      name: Login as nobody (Linux)
+      technique: T1078.003
+      atomic_guid: 3d2cd093-ee05-41bd-a802-59ee5c301b85
