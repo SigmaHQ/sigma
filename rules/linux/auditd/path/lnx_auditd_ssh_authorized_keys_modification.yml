@@ -1,0 +1,42 @@
+title: SSH Authorized Keys File Modification - Auditd
+id: 3a22c29b-3bca-4486-b687-1a27933d3458
+status: experimental
+description: |
+    Detects writes to SSH "authorized_keys" files.
+    Adversaries add their own public key to the "authorized_keys" file of a user to maintain persistent SSH access to the host.
+    This rule requires auditd write watches on the relevant files or directories, for example "-w /root/.ssh/ -p wa -k ssh_keys" and "-w /home/<user>/.ssh/ -p wa -k ssh_keys".
+    Do not configure read access watches on these files, as sshd reads them on every key-based login.
+references:
+    - https://www.man7.org/linux/man-pages/man8/sshd.8.html
+    - https://www.elastic.co/security-labs/continuation-on-persistence-mechanisms
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1098.004/T1098.004.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098.004
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection_absolute:
+        type: 'PATH'
+        name|endswith:
+            - '/authorized_keys'
+            - '/authorized_keys2'
+    selection_relative:
+        type: 'PATH'
+        name:
+            - 'authorized_keys'
+            - 'authorized_keys2'
+    condition: 1 of selection_*
+falsepositives:
+    - Users or administrators adding keys (e.g. with "ssh-copy-id")
+    - Cloud-init, cloud guest agents or configuration management tools provisioning SSH keys
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Modify SSH Authorized Keys
+      technique: T1098.004
+      atomic_guid: 342cc723-127c-4d3a-8292-9c0c6b4ecadc
