@@ -1,0 +1,50 @@
+title: Outlook Inbox Rule With Forward Or Delete Action Created Via PowerShell COM
+id: 6ce549c5-dd81-495e-8e60-96c6de4d6eef
+related:
+    - id: 2837e152-93c8-43d2-85ba-c3cd3c2ae614
+      type: similar
+status: experimental
+description: |
+    Detects PowerShell script blocks that create a client-side Outlook rule through the Outlook COM object model ("GetRules()" followed by "Rules.Create()") and configure a forward, redirect or delete action.
+    Adversaries create such rules to persistently exfiltrate mail by auto-forwarding it, or to hide security notifications and replies from the victim by deleting them.
+references:
+    - https://learn.microsoft.com/en-us/office/vba/api/outlook.rules.create
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1137.005/T1137.005.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.persistence
+    - attack.t1137.005
+    - attack.stealth
+    - attack.t1564.008
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_rules:
+        ScriptBlockText|contains|all:
+            - '.GetRules('
+            - '.Create('
+    selection_action:
+        ScriptBlockText|contains:
+            - '.Actions.Delete' # Also covers DeletePermanently
+            - '.Actions.Forward' # Also covers ForwardAsAttachment
+            - '.Actions.Redirect'
+    condition: all of selection_*
+falsepositives:
+    - Administrative scripts that deploy client-side Outlook rules to users
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Outlook Rule - Subject Trigger with DeletePermanently Action via COM Object
+      technique: T1137.005
+      atomic_guid: ffadc988-b682-4a68-bd7e-4803666be637
+    - type: atomic-red-team
+      name: Outlook Rule - Sender Address Trigger with DeletePermanently Action via COM Object
+      technique: T1137.005
+      atomic_guid: bddfd8d4-7687-4971-b611-50a537ab3ab4
+    - type: atomic-red-team
+      name: Outlook Rule - Auto-Forward Emails to External Address via COM Object
+      technique: T1137.005
+      atomic_guid: b0bd3d76-a57c-4699-83f4-8cd798dd09bd
