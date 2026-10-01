@@ -1,0 +1,53 @@
+title: Shell Interpreting File With Image Or Document Extension - Linux
+id: 7846d33a-8664-4825-b5e3-f8bd0b09fb54
+status: experimental
+description: |
+    Detects a Unix shell executing a script file that has an image, document or media extension, such as "sh /tmp/image.png".
+    Adversaries disguise shell scripts as harmless file types to evade casual inspection and file type based controls.
+references:
+    - https://www.uptycs.com/blog/threat-research-report-team/evasive-techniques-used-by-malicious-linux-shell-scripts
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1036.008/T1036.008.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.stealth
+    - attack.t1036.008
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith:
+            - '/ash'
+            - '/bash'
+            - '/dash'
+            - '/ksh'
+            - '/sh'
+            - '/zsh'
+    selection_ext:
+        CommandLine|endswith:
+            - '.bmp'
+            - '.doc'
+            - '.docx'
+            - '.gif'
+            - '.ico'
+            - '.jpeg'
+            - '.jpg'
+            - '.mp3'
+            - '.mp4'
+            - '.pdf'
+            - '.png'
+            - '.svg'
+            - '.xls'
+            - '.xlsx'
+    filter_main_inline_command:
+        CommandLine|contains: ' -c '
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Unlikely
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Linux File Type Masquerading via Extension Change
+      technique: T1036.008
+      atomic_guid: 1214f818-673b-4494-9fbd-99af0e185866
