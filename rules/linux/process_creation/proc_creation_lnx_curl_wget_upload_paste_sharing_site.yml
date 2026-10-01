@@ -1,0 +1,74 @@
+title: Data Uploaded To Paste Or File Sharing Site Via Curl Or Wget - Linux
+id: 6fc05f2b-0d85-47c3-ac09-7c1bc5b9a784
+related:
+    - id: e328cc73-f92a-42fb-b3fa-7c2cffda981a # Windows
+      type: similar
+status: experimental
+description: |
+    Detects "curl" or "wget" uploading data or a file to a paste or anonymous file sharing service.
+    Adversaries use these services as a dead drop for command and control (posting command output and fetching new commands) and to exfiltrate data.
+references:
+    - https://paste.rs/web
+    - https://0x0.st/
+    - https://www.trendmicro.com/en_us/research/22/i/how-malicious-actors-abuse-native-linux-tools-in-their-attacks.html
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1102.002/T1102.002.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.command-and-control
+    - attack.exfiltration
+    - attack.t1102.002
+    - attack.t1567.003
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith:
+            - '/curl'
+            - '/wget'
+    selection_domain:
+        CommandLine|contains:
+            - '0x0.st'
+            - 'bashupload.com'
+            - 'dpaste.com'
+            - 'dpaste.org'
+            - 'file.io'
+            - 'filebin.net'
+            - 'hastebin.com'
+            - '//ix.io'
+            - 'paste.c-net.org'
+            - 'paste.ee'
+            - 'paste.rs'
+            - 'pastebin.com'
+            - 'sprunge.us'
+            - 'temp.sh'
+            - 'termbin.com'
+            - 'transfer.sh'
+            - 'x0.at'
+    selection_data_flags:
+        - CommandLine|contains:
+              - ' --data'
+              - ' --form'
+              - ' --upload-file'
+              - ' --post-data'
+              - ' --post-file'
+              - ' --body-data'
+              - ' --body-file'
+              - ' -X POST'
+              - ' --request POST'
+              - ' -X PUT'
+        - CommandLine|re: '\s-[FTd]\s'
+    condition: all of selection_*
+falsepositives:
+    - Developers or administrators sharing logs or snippets via paste services
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Bidirectional C2 Simulation via paste.rs (sh)
+      technique: T1102.002
+      atomic_guid: ec9ab81c-8053-4957-8c66-0218381ab564
+    - type: atomic-red-team
+      name: Exfiltrate data HTTPS using curl freebsd,linux or macos
+      technique: T1048.002
+      atomic_guid: 4a4f31e2-46ea-4c26-ad89-f09ad1d5fe01
