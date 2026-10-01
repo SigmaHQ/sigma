@@ -1,0 +1,46 @@
+title: Python Startup Hook Customize File Created - Linux
+id: 58ccd8d4-d435-408b-9ae7-c7aa1911bd7f
+related:
+    - id: fb96c26c-9f85-4ae7-af0d-ed1ed1f1f5ce # Linux .pth files
+      type: similar
+status: experimental
+description: |
+    Detects the creation of a "sitecustomize.py" or "usercustomize.py" file.
+    The Python "site" module automatically imports these files at interpreter startup, so code placed in them runs every time Python starts for the user or system-wide, which adversaries abuse for persistence and code execution.
+references:
+    - https://docs.python.org/3/library/site.html
+    - https://dfir.ch/posts/publish_python_pth_extension/
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1546.018/T1546.018.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1546.018
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '/sitecustomize.py'
+            - '/usercustomize.py'
+    filter_main_package_managers:
+        Image|endswith:
+            - '/apk'
+            - '/apt'
+            - '/apt-get'
+            - '/dnf'
+            - '/dpkg'
+            - '/rpm'
+            - '/yum'
+            - '/zypper'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Python packages or environment managers legitimately shipping a "sitecustomize.py" (e.g. coverage or profiling tooling)
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Python Startup Hook - usercustomize.py (Linux / MacOS)
+      technique: T1546.018
+      atomic_guid: 6e78084a-a433-4702-a838-cc7b765d87e8
