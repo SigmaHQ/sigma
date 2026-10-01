@@ -1,0 +1,33 @@
+title: HackTool - LDAPDomainDump Execution - Linux
+id: 49565197-3f24-4a57-a158-cb095f555ece
+status: experimental
+description: |
+    Detects the execution of "ldapdomaindump", an Active Directory information dumper via LDAP that collects users, groups, computers, trusts and policies into HTML, JSON and grepable files.
+    It is commonly used by adversaries and penetration testers for domain reconnaissance.
+references:
+    - https://github.com/dirkjanm/ldapdomaindump
+    - https://www.thehacker.recipes/ad/recon/ldap
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1087.002/T1087.002.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.discovery
+    - attack.t1087.002
+    - attack.t1069.002
+    - attack.t1018
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        - Image|endswith: '/ldapdomaindump'
+        - CommandLine|contains: 'ldapdomaindump'
+    condition: selection
+falsepositives:
+    - Legitimate Active Directory security audits
+level: high
+simulation:
+    - type: atomic-red-team
+      name: Account Enumeration with LDAPDomainDump
+      technique: T1087.002
+      atomic_guid: a54d497e-8dbe-4558-9895-44944baa395f
