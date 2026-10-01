@@ -1,0 +1,66 @@
+title: Login Shell Or Password Set For System Account - Linux
+id: 1bf28413-c131-4ce7-b0ff-9d8e8cbbe8c1
+status: experimental
+description: |
+    Detects "chsh" or "usermod" assigning an interactive login shell or a password to a built-in system or service account such as "nobody", "daemon", "bin" or "www-data".
+    These accounts normally have a non-interactive shell (e.g. "/usr/sbin/nologin") and no password; adversaries reactivate them as inconspicuous backdoor accounts.
+references:
+    - https://www.man7.org/linux/man-pages/man8/usermod.8.html
+    - https://www.man7.org/linux/man-pages/man1/chsh.1.html
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1078.003/T1078.003.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.initial-access
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1078.003
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith:
+            - '/chsh'
+            - '/usermod'
+    selection_change:
+        CommandLine|contains:
+            - ' -p '
+            - ' --password '
+            - ' -s /bin/'
+            - ' -s /usr/bin/'
+            - ' --shell /bin/'
+            - ' --shell /usr/bin/'
+    selection_account:
+        CommandLine|endswith:
+            - ' backup'
+            - ' bin'
+            - ' daemon'
+            - ' games'
+            - ' gnats'
+            - ' irc'
+            - ' list'
+            - ' lp'
+            - ' mail'
+            - ' man'
+            - ' news'
+            - ' nobody'
+            - ' proxy'
+            - ' sync'
+            - ' sys'
+            - ' uucp'
+            - ' www-data'
+    filter_main_nologin:
+        CommandLine|contains:
+            - '/false'
+            - '/nologin'
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Unlikely
+level: high
+simulation:
+    - type: atomic-red-team
+      name: Login as nobody (Linux)
+      technique: T1078.003
+      atomic_guid: 3d2cd093-ee05-41bd-a802-59ee5c301b85
