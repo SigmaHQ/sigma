@@ -1,0 +1,56 @@
+title: PAM Configuration Tampering Via CLI
+id: ea689632-0342-49cb-9b7a-1c9c984efbc2
+status: experimental
+description: |
+    Detects command line utilities modifying Pluggable Authentication Modules (PAM) configuration files in "/etc/pam.d/" or "/etc/pam.conf", or inserting a well-known authentication bypass rule such as "pam_succeed_if.so uid >= 0".
+    Adversaries tamper with the PAM stack to accept any password, to load a malicious PAM module or to capture credentials in clear text.
+references:
+    - https://x-c3ll.github.io/posts/PAM-backdoor-DNS/
+    - https://www.group-ib.com/blog/pluggable-authentication-module/
+    - https://linux.die.net/man/8/pam_succeed_if
+    - https://www.elastic.co/security-labs/approaching-the-summit-on-persistence
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1556.003/T1556.003.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.credential-access
+    - attack.defense-impairment
+    - attack.persistence
+    - attack.t1556.003
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_pam_path:
+        CommandLine|contains:
+            - '/etc/pam.conf'
+            - '/etc/pam.d/'
+    selection_sed_img:
+        Image|endswith: '/sed'
+    selection_sed_cli:
+        CommandLine|contains:
+            - ' -i'
+            - ' --in-place'
+    selection_tee:
+        Image|endswith: '/tee'
+    selection_bypass_rule:
+        CommandLine|contains: 'pam_succeed_if.so uid >= 0'
+    filter_optional_pam_tools:
+        ParentImage|endswith:
+            - '/authconfig'
+            - '/authselect'
+            - '/pam-auth-update'
+    condition: ((selection_pam_path and (all of selection_sed_* or selection_tee)) or selection_bypass_rule) and not 1 of filter_optional_*
+falsepositives:
+    - Administrators or configuration management tools editing PAM configuration
+    - Package installation scripts adjusting PAM configuration
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Malicious PAM rule
+      technique: T1556.003
+      atomic_guid: 4b9dde80-ae22-44b1-a82a-644bf009eb9c
+    - type: atomic-red-team
+      name: Malicious PAM module
+      technique: T1556.003
+      atomic_guid: 65208808-3125-4a2e-8389-a0a00e9ab326
