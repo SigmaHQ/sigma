@@ -1,0 +1,43 @@
+title: Driver Signature Enforcement Weakened Via Bcdedit.EXE
+id: 7f3dbed6-2952-43d0-9d64-0b7c407f109b
+status: experimental
+description: |
+    Detects usage of "bcdedit.exe" to enable test signing mode or to disable kernel code integrity checks ("testsigning", "nointegritychecks", "DISABLE_INTEGRITY_CHECKS").
+    Both settings allow unsigned or self-signed kernel drivers to be loaded after the next reboot and have been abused by malware such as BlackEnergy to load rootkit drivers.
+references:
+    - https://learn.microsoft.com/en-us/windows-hardware/drivers/install/the-testsigning-boot-configuration-option
+    - https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/bcdedit--set
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1553.006/T1553.006.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.defense-impairment
+    - attack.t1553.006
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\bcdedit.exe'
+        - OriginalFileName: 'bcdedit.exe'
+    selection_set:
+        CommandLine|windash|contains: '/set'
+    selection_option:
+        - CommandLine|contains: 'DISABLE_INTEGRITY_CHECKS'
+        - CommandLine|contains:
+              - 'testsigning'
+              - 'nointegritychecks'
+          CommandLine|endswith:
+              - ' on'
+              - ' yes'
+              - ' true'
+              - ' 1'
+    condition: all of selection_*
+falsepositives:
+    - Driver developers and hardware/driver test labs (e.g. HLK) enabling test signing on development machines
+level: high
+simulation:
+    - type: atomic-red-team
+      name: Code Signing Policy Modification
+      technique: T1553.006
+      atomic_guid: bb6b51e1-ab92-45b5-aeea-e410d06405f8
