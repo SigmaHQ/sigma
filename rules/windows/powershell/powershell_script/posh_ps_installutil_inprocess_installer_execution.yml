@@ -1,0 +1,40 @@
+title: In-Process InstallUtil Installer Execution Via PowerShell
+id: 5436ade2-8452-495f-8cfc-c1ed2ccc2adf
+status: experimental
+description: |
+    Detects PowerShell script blocks that invoke the .NET "ManagedInstallerClass.InstallHelper" or "AssemblyInstaller.CheckIfInstallable" methods.
+    These are the methods "InstallUtil.exe" wraps. Calling them directly runs the installer class code of an arbitrary assembly inside the PowerShell process, achieving the same proxy execution as "InstallUtil.exe" without ever launching that binary, and thereby bypassing detections focused on the "InstallUtil.exe" process.
+references:
+    - https://learn.microsoft.com/en-us/dotnet/api/system.configuration.install.managedinstallerclass.installhelper
+    - https://learn.microsoft.com/en-us/dotnet/api/system.configuration.install.assemblyinstaller.checkifinstallable
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1218.004/T1218.004.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.stealth
+    - attack.t1218.004
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        - ScriptBlockText|contains|all:
+              - 'ManagedInstallerClass'
+              - 'InstallHelper'
+        - ScriptBlockText|contains|all:
+              - 'AssemblyInstaller'
+              - 'CheckIfInstallable'
+    condition: selection
+falsepositives:
+    - Administrative or deployment scripts that install .NET based Windows services via "ManagedInstallerClass.InstallHelper" instead of "InstallUtil.exe"
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: CheckIfInstallable method call
+      technique: T1218.004
+      atomic_guid: ffd9c807-d402-47d2-879d-f915cf2a3a94
+    - type: atomic-red-team
+      name: InstallHelper method call
+      technique: T1218.004
+      atomic_guid: d43a5bde-ae28-4c55-a850-3f4c80573503
