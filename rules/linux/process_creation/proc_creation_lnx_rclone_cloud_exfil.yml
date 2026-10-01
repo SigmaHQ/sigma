@@ -1,0 +1,54 @@
+title: Data Transfer To Cloud Storage Via Rclone - Linux
+id: 1c91352f-d1b7-497d-bc3b-755806fde33e
+related:
+    - id: e37db05d-d1f9-49c8-b464-cee1a4b11638 # Windows
+      type: similar
+status: experimental
+description: |
+    Detects "rclone" copying, syncing or moving data with command line options commonly seen in data theft operations, such as an explicit configuration file, disabled certificate checks, tuned parallel transfers or well-known cloud storage providers abused for exfiltration.
+    Ransomware affiliates and other threat actors routinely use rclone to exfiltrate data to cloud storage before encryption.
+references:
+    - https://rclone.org/commands/rclone_copy/
+    - https://www.nccgroup.com/us/research-blog/detecting-rclone-an-effective-tool-for-exfiltration/
+    - https://redcanary.com/blog/threat-detection/rclone-mega-extortion/
+    - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1567.002/T1567.002.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.exfiltration
+    - attack.t1567.002
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith: '/rclone'
+    selection_action:
+        CommandLine|contains:
+            - ' copy '
+            - ' copyto '
+            - ' move '
+            - ' moveto '
+            - ' sync '
+    selection_options:
+        CommandLine|contains:
+            - ' --config'
+            - '--auto-confirm'
+            - '--ignore-existing'
+            - '--max-age'
+            - '--max-size'
+            - '--multi-thread-streams'
+            - '--no-check-certificate'
+            - '--transfers'
+            - 'mega:'
+            - 'pcloud:'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate backup jobs using rclone (filter on known scheduled jobs and remotes)
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Exfiltrate data with rclone to cloud Storage - AWS S3
+      technique: T1567.002
+      atomic_guid: a4b74723-5cee-4300-91c3-5e34166909b4
