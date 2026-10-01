@@ -1,0 +1,49 @@
+title: Compilation Into Or Execution From Temporary Location Of Freshly Built Binary
+id: 83b223c7-74b2-4f69-8176-778628a0ff7b
+status: experimental
+description: |
+    Detects the execution of a binary with the compiler default output name "a.out", or a C/C++/Go compiler invoked on sources or with an output located in a world-writable directory such as "/tmp", "/var/tmp" or "/dev/shm".
+    Adversaries deliver source code (e.g. local privilege escalation exploits or implants) and compile it on the target to evade static detection of delivered binaries.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1027.004/T1027.004.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.stealth
+    - attack.t1027.004
+    - detection.threat-hunting
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_aout:
+        Image|endswith: '/a.out'
+    selection_compiler_img:
+        Image|endswith:
+            - '/c++'
+            - '/cc'
+            - '/clang'
+            - '/clang++'
+            - '/g++'
+            - '/gcc'
+            - '/go'
+            - '/tcc'
+    selection_compiler_cli:
+        CommandLine|contains:
+            - ' /dev/shm/'
+            - ' /tmp/'
+            - ' /var/tmp/'
+    condition: selection_aout or all of selection_compiler_*
+falsepositives:
+    - Developers compiling and testing code in temporary directories
+    - Build systems and package builds using temporary directories
+level: low
+simulation:
+    - type: atomic-red-team
+      name: C compile
+      technique: T1027.004
+      atomic_guid: d0377aa6-850a-42b2-95f0-de558d80be57
+    - type: atomic-red-team
+      name: CC compile
+      technique: T1027.004
+      atomic_guid: da97bb11-d6d0-4fc1-b445-e443d1346efe
