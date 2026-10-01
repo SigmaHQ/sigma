@@ -1,0 +1,31 @@
+title: Execution Of File With Document Or Media Double Extension - Linux
+id: a743d2fc-4bfe-4ee5-9687-01939308a23b
+status: experimental
+description: |
+    Detects the execution of a binary or script whose name uses a document, image or media extension followed by an executable or script extension, such as "report.pdf.sh" or "invoice.docx.elf".
+    Adversaries use double extensions to trick users into running a malicious file that appears to be a harmless document.
+references:
+    - https://www.uptycs.com/blog/threat-research-report-team/evasive-techniques-used-by-malicious-linux-shell-scripts
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1036.007/T1036.007.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.stealth
+    - attack.t1036.007
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_image:
+        Image|re: '(?i)\.(pdf|docx?|xlsx?|pptx?|odt|rtf|txt|csv|jpe?g|png|gif|bmp|mp3|mp4|avi|mkv)\.(sh|bash|elf|bin|run|out|py|pl)$'
+    selection_cmdline:
+        CommandLine|re: '(?i)\.(pdf|docx?|xlsx?|pptx?|odt|rtf|txt|csv|jpe?g|png|gif|bmp|mp3|mp4|avi|mkv)\.(sh|bash|elf|bin|run|out|py|pl)(\s|$)'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Linux File Extension Masquerading
+      technique: T1036.007
+      atomic_guid: 26cde240-0112-4806-8c97-bdde43dab298
