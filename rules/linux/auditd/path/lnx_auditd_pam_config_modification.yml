@@ -1,0 +1,51 @@
+title: PAM Configuration Or Module Modification - Auditd
+id: a47ac179-3e03-479b-8a78-697f82a4d38c
+status: experimental
+description: |
+    Detects writes to Pluggable Authentication Modules (PAM) configuration files or to PAM module directories.
+    Adversaries tamper with the PAM stack to accept any password, to load a malicious PAM module or to capture credentials in clear text.
+    This rule requires auditd file watches on the PAM configuration and module locations, for example "-w /etc/pam.d/ -p wa -k pam", "-w /etc/pam.conf -p wa -k pam" and "-w /lib/x86_64-linux-gnu/security/ -p wa -k pam".
+references:
+    - https://x-c3ll.github.io/posts/PAM-backdoor-DNS/
+    - https://www.group-ib.com/blog/pluggable-authentication-module/
+    - https://github.com/Neo23x0/auditd/blob/master/audit.rules
+    - https://www.elastic.co/security-labs/approaching-the-summit-on-persistence
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1556.003/T1556.003.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.credential-access
+    - attack.defense-impairment
+    - attack.persistence
+    - attack.t1556.003
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection_config:
+        type: 'PATH'
+        name|startswith:
+            - '/etc/pam.conf'
+            - '/etc/pam.d/'
+    selection_module:
+        type: 'PATH'
+        name|contains:
+            - '/lib/security/'
+            - '/lib64/security/'
+            - '/lib/x86_64-linux-gnu/security/'
+            - '/lib/aarch64-linux-gnu/security/'
+        name|endswith: '.so'
+    condition: 1 of selection_*
+falsepositives:
+    - Package updates of PAM or of packages shipping PAM configuration
+    - Administrators or configuration management tools editing PAM configuration
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Malicious PAM rule
+      technique: T1556.003
+      atomic_guid: 4b9dde80-ae22-44b1-a82a-644bf009eb9c
+    - type: atomic-red-team
+      name: Malicious PAM module
+      technique: T1556.003
+      atomic_guid: 65208808-3125-4a2e-8389-a0a00e9ab326
