@@ -1,0 +1,33 @@
+title: Data Upload To Pastebin API Via PowerShell
+id: b855eb61-ae13-4093-bafc-d17f5ff13d00
+status: experimental
+description: |
+    Detects PowerShell script blocks that create a paste through the Pastebin API ("api_post.php" endpoint or the "api_paste_code" parameter).
+    Adversaries use text storage sites such as Pastebin to exfiltrate collected data or credentials over HTTPS to a reputable domain that is often allowed through egress filtering.
+references:
+    - https://pastebin.com/doc_api
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1567.003/T1567.003.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.exfiltration
+    - attack.t1567.003
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        - ScriptBlockText|contains: 'pastebin.com/api/api_post.php'
+        - ScriptBlockText|contains|all:
+              - 'api_dev_key'
+              - 'api_paste_code'
+    condition: selection
+falsepositives:
+    - Legitimate scripts that publish content to Pastebin
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Exfiltrate data with HTTP POST to text storage sites - pastebin.com (Windows)
+      technique: T1567.003
+      atomic_guid: c2e8ab6e-431e-460a-a2aa-3bc6a32022e3
