@@ -1,0 +1,61 @@
+title: Active Directory Query Or Modification Via OpenLDAP Client Utilities
+id: 0cd51b2c-2f8f-42fb-8247-94ef2106b887
+status: experimental
+description: |
+    Detects OpenLDAP client utilities ("ldapsearch", "ldapadd", "ldapmodify") querying or modifying an Active Directory directory from a Linux host with a simple bind password supplied on the command line.
+    Adversaries with domain credentials use these utilities to enumerate users and groups or to create accounts in Active Directory from Linux footholds.
+references:
+    - https://www.man7.org/linux/man-pages/man1/ldapsearch.1.html
+    - https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-ldap.html
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1087.002/T1087.002.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1069.002/T1069.002.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/388942adbd9641f4dfdcf079d7efe9a75ec0ac43/atomics/T1136.002/T1136.002.md
+author: elhoim
+date: 2026-10-01
+tags:
+    - attack.discovery
+    - attack.persistence
+    - attack.t1087.002
+    - attack.t1069.002
+    - attack.t1136.002
+    - detection.threat-hunting
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith:
+            - '/ldapadd'
+            - '/ldapmodify'
+            - '/ldapsearch'
+    selection_bind_password:
+        CommandLine|contains: ' -w '
+    selection_ad:
+        CommandLine|contains:
+            - 'CN=Users'
+            - 'objectCategory'
+            - 'objectClass=group'
+            - 'objectClass=user'
+            - 'sAMAccountName'
+            - ' -f '
+    condition: all of selection_*
+falsepositives:
+    - Administrators or identity management scripts querying or provisioning Active Directory from Linux
+level: low
+simulation:
+    - type: atomic-red-team
+      name: Active Directory Domain Search
+      technique: T1087.002
+      atomic_guid: 096b6d2a-b63f-4100-8fa0-525da4cd25ca
+    - type: atomic-red-team
+      name: Active Directory Domain Search Using LDAP - Linux (Ubuntu)/macOS
+      technique: T1069.002
+      atomic_guid: d58d749c-4450-4975-a9e9-8b1d562755c2
+    - type: atomic-red-team
+      name: Active Directory Create Admin Account
+      technique: T1136.002
+      atomic_guid: 562aa072-524e-459a-ba2b-91f1afccf5ab
+    - type: atomic-red-team
+      name: Active Directory Create User Account (Non-elevated)
+      technique: T1136.002
+      atomic_guid: 8c992cb3-a46e-4fd5-b005-b1bab185af31
