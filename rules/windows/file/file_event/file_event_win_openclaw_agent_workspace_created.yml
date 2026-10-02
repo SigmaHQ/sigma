@@ -1,0 +1,41 @@
+title: Potential Autonomous AI Agent Workspace File Creation
+id: 97e942d3-2e3d-41f0-8fea-8a33fc199db0
+status: experimental
+description: |
+    Detects FileCreate events under the dot-folder used by the OpenClaw agent family and its copycat ecosystem.
+    Catches initial workspace bootstrap, credential and session state writes, and ongoing tool I/O.
+    Sister rule to proc_creation_win_openclaw_agent_workdir.yml. Fires even when the writing process is not itself running with its CurrentDirectory under the folder, for example a setup script that absolute-paths into the workspace.
+references:
+    - https://github.com/openclaw/openclaw/blob/ea16a5e9e10c5b2be28ed46ea77ba5a7aa787d8c/README.md
+    - https://github.com/HKUDS/nanobot/blob/9ccef018c222b198991d36db8166cfc0c3aa7ea5/README.md
+    - https://github.com/nanocoai/nanoclaw/blob/975a2f0f5b0ea19bbf35fadfd394df35e5341d3a/README.md
+author: David El (0xdavidel)
+date: 2026-05-15
+tags:
+    - attack.initial-access
+    - attack.t1195.002
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_path:
+        TargetFilename|contains:
+            - '\.openclaw\'
+            - '\.moltbot\'
+            - '\.moltbook\'
+            - '\.clawdbot\'
+            - '\.clawd\'
+            - '\.clawbot\'
+            - '\.nanobot\'
+            - '\.nanoclaw\'
+            - '\.picoclaw\'
+            - '\.zeroclaw\'
+            - '\.moltis\'
+            - '\.agentzero\'
+    condition: selection_path
+falsepositives:
+    - Sanctioned developer or operator use of these agents. Apply a per-host or per-user allowlist filter.
+    - Apple Hermes JavaScript engine bytecode cache (Meta React Native, present in Slack, Discord, Messenger, Electron apps). The .hermes folder is intentionally NOT covered by this rule to avoid that false positive.
+    - Backup or sync software touching the user profile that happens to traverse one of these folders.
+level: medium
+regression_tests_path: regression_data/rules/windows/file/file_event/file_event_win_openclaw_agent_workspace_created/info.yml
