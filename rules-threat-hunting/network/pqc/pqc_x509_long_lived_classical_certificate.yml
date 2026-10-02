@@ -1,0 +1,30 @@
+title: Long-Lived Classical Certificate Spanning the CRQC Horizon
+id: 44c6ccc9-ea66-4d64-a24e-8051d0c3e27f
+status: experimental
+description: A certificate using a classical (RSA/ECC) key with a validity period
+  extending past the projected cryptographically-relevant-quantum-computer window
+  (~2030-2035). Data protected under such a certificate must remain confidential past
+  the point where the key may be broken. Numeric validity comparison is done in post-processing;
+  this rule surfaces classical long-lived certs for review.
+references:
+- https://www.cisa.gov/quantum
+- https://csrc.nist.gov/pubs/ir/8547/ipd
+author: TAI Creative LLC
+date: '2026-07-16'
+tags:
+- attack.collection
+- attack.t1040
+logsource:
+  product: zeek
+  service: x509
+detection:
+  selection:
+    certificate.key_alg|contains:
+    - rsa
+    - ecPublicKey
+    - id-ecPublicKey
+  condition: selection
+falsepositives:
+- Short-lived certs (filter by validity period downstream); inventory finding.
+level: low
+license: DRL-1.1

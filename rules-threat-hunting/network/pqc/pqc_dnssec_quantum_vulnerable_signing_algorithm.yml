@@ -1,0 +1,31 @@
+title: DNSSEC Using Quantum-Vulnerable Signing Algorithm
+id: 7107671f-9897-4308-83a6-bdde7f4d4d0a
+status: experimental
+description: A DNSKEY/RRSIG uses an RSA or ECDSA DNSSEC algorithm (5, 7, 8, 10, 13,
+  14). DNSSEC signatures are forgeable on a CRQC via Shor's algorithm; post-quantum
+  DNSSEC algorithms are not yet widely deployed. Inventory rule for the DNS control
+  plane.
+references:
+- https://csrc.nist.gov/pubs/ir/8547/ipd
+author: TAI Creative LLC
+date: '2026-07-16'
+tags:
+- attack.resource-development
+- attack.t1587.003
+logsource:
+  product: zeek
+  service: dns
+detection:
+  selection:
+    dnssec_algorithm:
+    - 5
+    - 7
+    - 8
+    - 10
+    - 13
+    - 14
+  condition: selection
+falsepositives:
+- Universal until PQC DNSSEC (algorithms 16/17) is deployed.
+level: low
+license: DRL-1.1
