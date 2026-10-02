@@ -1,13 +1,17 @@
 title: Gatekeeper Bypass via Xattr
 id: f5141b6d-9f42-41c6-a7bf-2a780678b29b
 status: test
-description: Detects macOS Gatekeeper bypass via xattr utility
+description: |
+    Detects macOS Gatekeeper bypass via the xattr utility, either by deleting the
+    com.apple.quarantine attribute directly or by clearing all extended attributes,
+    which removes quarantine as a side effect.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/1fed40dc7e48f16ed44dcdd9c73b9222a70cca85/atomics/T1553.001/T1553.001.md
     - https://www.loobins.io/binaries/xattr/
-author: Daniil Yugoslavskiy, oscd.community
+    - https://github.com/raimurokko/macos-threat-tracking/blob/main/campaigns/2026-08-04-cloudflare-clickfix/payload_analysis.md
+author: Daniil Yugoslavskiy, oscd.community, Novum Analytica GmbH
 date: 2020-10-19
-modified: 2024-04-18
+modified: 2026-08-06
 tags:
     - attack.defense-impairment
     - attack.t1553.001
@@ -15,12 +19,18 @@ logsource:
     category: process_creation
     product: macos
 detection:
-    selection:
+    selection_delete_quarantine:
         Image|endswith: '/xattr'
         CommandLine|contains|all:
             - '-d'
             - 'com.apple.quarantine'
-    condition: selection
+    selection_clear_all:
+        Image|endswith: '/xattr'
+        CommandLine|contains:
+            - ' -c '
+            - ' -cr '
+            - ' -rc '
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate activities
 level: low
