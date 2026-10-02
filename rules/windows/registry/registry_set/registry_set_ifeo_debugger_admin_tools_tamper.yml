@@ -1,0 +1,56 @@
+title: Process Execution Hijacking Via IFEO Debugger Entry
+id: c81b6de9-b054-44b4-9d8a-3478750d805b
+related:
+    - id: ecfda7d0-7ea9-484d-988b-0669df1bac94
+      type: similar
+    - id: baca5663-583c-45f9-b5dc-ea96a22ce542
+      type: similar
+status: experimental
+description: |
+    Detects any registry write adding a "Debugger" value under Image File Execution Options (IFEO)
+    for common administrative, security and system binaries. Attackers use this technique to silently
+    redirect to malicious commands when a user attempt to launch a target executable or preventing it
+    from launching at all.
+references:
+    - https://www.hexacorn.com/blog/2013/01/19/beyond-good-ol-run-key-part-13/
+    - https://github.com/Siradankullanici/OpenSourceViruses/blob/3267564a35f6e13559a3119eb68d0da8d2e91a0a/suspiciousregchangesandtaskkils
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-14
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1546.012
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|endswith:
+            # Admin and diagnostic tools
+            - '\Image File Execution Options\calc.exe\Debugger'
+            - '\Image File Execution Options\cleanmgr.exe\Debugger'
+            - '\Image File Execution Options\control.exe\Debugger'
+            - '\Image File Execution Options\msconfig.exe\Debugger'
+            - '\Image File Execution Options\msinfo32.exe\Debugger'
+            - '\Image File Execution Options\mmc.exe\Debugger'
+            - '\Image File Execution Options\mspaint.exe\Debugger'
+            - '\Image File Execution Options\mstsc.exe\Debugger'
+            - '\Image File Execution Options\powershell_ise.exe\Debugger'
+            - '\Image File Execution Options\regedit.exe\Debugger'
+            - '\Image File Execution Options\regedt32.exe\Debugger'
+            - '\Image File Execution Options\SecEdit.exe\Debugger'
+            - '\Image File Execution Options\takeown.exe\Debugger'
+            - '\Image File Execution Options\taskmgr.exe\Debugger'
+            # Critical system processes
+            - '\Image File Execution Options\explorer.exe\Debugger'
+            - '\Image File Execution Options\rundll32.exe\Debugger'
+            - '\Image File Execution Options\runonce.exe\Debugger'
+            - '\Image File Execution Options\svchost.exe\Debugger'
+            - '\Image File Execution Options\winlogon.exe\Debugger'
+            # Security and recovery tools
+            - '\Image File Execution Options\SecurityHealthSystray.exe\Debugger'
+            - '\Image File Execution Options\SystemResetPlatform.exe\Debugger'
+    condition: selection
+falsepositives:
+    - Legitimate debuggers registered for administrative, security or system binaries
+level: high
