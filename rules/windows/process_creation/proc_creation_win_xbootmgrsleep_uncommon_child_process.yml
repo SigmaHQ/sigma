@@ -1,6 +1,6 @@
-title: Suspicious Child Process From XBootMgrSleep.EXE
+title: Uncommon Child Process From XBootMgrSleep.EXE
 id: 74697c29-1b30-4e1f-a517-33574061821d
-status: test
+status: experimental
 description: |
     Detects a process other than XBootMgr.exe spawned by XBootMgrSleep.exe.
     XBootMgrSleep.exe is a Microsoft-signed Windows Performance Toolkit binary that can execute an arbitrary executable after a delay.
@@ -19,8 +19,8 @@ detection:
     selection:
         ParentImage|endswith: '\xbootmgrsleep.exe'
     filter_main_xbootmgr:
-        Image|endswith: '\xbootmgr.exe'
-    condition: selection and not filter_main_xbootmgr
+        Image: 'C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\xbootmgr.exe'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Custom Windows Performance Toolkit automation that intentionally launches another executable through XBootMgrSleep.exe
 level: medium
