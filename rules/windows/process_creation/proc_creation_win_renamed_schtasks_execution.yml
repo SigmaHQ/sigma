@@ -10,6 +10,7 @@ references:
     - https://ss64.com/nt/schtasks.html
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-11-27
+modified: 2026-10-02
 tags:
     - attack.execution
     - attack.persistence
@@ -43,7 +44,14 @@ detection:
         CommandLine|contains: 'schtasks'
     filter_main_img:
         Image|endswith: '\schtasks.exe'
-    condition: (all of selection_cmd_* and not filter_main_cmd) or (selection_pe and not filter_main_img)
+    filter_main_openfiles:
+        Image:
+            - 'C:\Windows\System32\openfiles.exe'
+            - 'C:\Windows\SysWOW64\openfiles.exe'
+        CommandLine|contains:
+            - ' /query '
+            - ' /fo '
+    condition: (all of selection_cmd_* and not filter_main_cmd and not filter_main_openfiles) or (selection_pe and not filter_main_img)
 falsepositives:
     - Unlikely
 level: high
