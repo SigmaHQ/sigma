@@ -1,0 +1,30 @@
+title: Potential Mandatory Profile Persistence Via NTUSER.MAN Creation
+id: f4b983ea-615e-4a71-8ad9-cc42ebb4817e
+status: experimental
+description: |
+    Detects the creation or modification of an NTUSER.MAN file in a user profile path.
+    NTUSER.MAN is used for mandatory profiles and takes precedence over NTUSER.DAT when Windows loads the user's HKCU hive at logon.
+    Attackers can stage a modified hive as NTUSER.MAN to introduce HKCU persistence without generating registry write telemetry.
+references:
+    - https://deceptiq.com/blog/ntuser-man-registry-persistence
+    - https://learn.microsoft.com/en-us/windows-server/storage/folder-redirection/deploy-roaming-user-profiles
+author: Ammar Jokhadar (Thawd Security)
+date: 2026-07-21
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1547
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection_local_profile:
+        TargetFilename|contains: ':\Users\'
+        TargetFilename|endswith: '\NTUSER.MAN'
+    selection_unc_profile:
+        TargetFilename|startswith: '\\'
+        TargetFilename|endswith: '\NTUSER.MAN'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate mandatory profile deployment in kiosk, shared workstation, or roaming profile environments.
+level: high
