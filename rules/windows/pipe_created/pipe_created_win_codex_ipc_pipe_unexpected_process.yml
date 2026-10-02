@@ -1,0 +1,33 @@
+title: OpenAI Codex IPC Named Pipe Access by Unexpected Process
+id: f0b5c3d4-9e6a-4f7c-bd0e-3a4f5b6c7d8e
+status: experimental
+description: |
+    Detects creation or connection to OpenAI Codex inter-process communication (IPC) named pipes by a process other than codex legitimate binaries.
+    Codex uses named pipes (\\.\pipe\codex-runner-*) for communication between codex.exe and the codex-command-runner-*.exe processes within the sandbox.
+    Creation or connection to such pipes by unrelated processes may indicate an attempt to inject commands into the Codex sandbox, intercept its output, or exploit the IPC channel to break out of the restricted token context.
+references:
+    - https://jonny-johnson.medium.com/a-deep-dive-into-codex-windows-sandbox-a2489bf4ae91
+    - https://openai.com/index/building-codex-windows-sandbox/
+author: Jonathan Johnson, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-05-26
+tags:
+    - attack.execution
+    - attack.lateral-movement
+    - attack.t1559
+    - attack.t1059
+logsource:
+    category: pipe_created
+    product: windows
+detection:
+    selection:
+        PipeName|contains: '\codex-runner-'
+        PipeName|endswith:
+            - '-in'
+            - '-out'
+    filter_main_expected_images:
+        Image|endswith: '\codex.exe'
+        Image|contains: '\codex-command-runner-'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: medium
