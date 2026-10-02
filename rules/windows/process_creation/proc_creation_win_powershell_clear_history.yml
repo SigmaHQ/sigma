@@ -1,0 +1,48 @@
+title: Clear PowerShell History via CommandLine
+id: 8b1f125c-c933-46d0-a510-1ab15cc45326
+related:
+    - id: 26b692dc-1722-49b2-b496-a8258aa6371d
+      type: similar
+    - id: f99276ad-d122-4989-a09a-d00904a5f9d2
+      type: similar
+status: experimental
+description: Detects PowerShell command line invocations that clear or disable the PSReadLine command history via Remove-Item, Clear-History, or Set-PSReadlineOption.
+references:
+    - https://gist.github.com/hook-s3c/7363a856c3cdbadeb71085147f042c1a
+    - https://securelist.ru/tr/hacking-cat/117062/
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/clear-history?view=powershell-7.6
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-10-02
+tags:
+    - attack.stealth
+    - attack.t1070.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_clear_history:
+        - CommandLine|contains: 'Clear-History'
+        - CommandLine|contains|all:
+            - 'Set-PSReadlineOption'
+            - 'HistorySaveStyle'
+            - 'SaveNothing'
+    selection_cli_delete:
+        CommandLine|contains:
+            - 'Remove-Item '
+            - 'rm '
+            - 'del '
+    selection_cli_filepath:
+        CommandLine|contains:
+            - 'ConsoleHost_history.txt'
+            - '(Get-PSReadlineOption).HistorySavePath'
+    condition: selection_img and (selection_clear_history or all of selection_cli_*)
+falsepositives:
+    - Legitimate PowerShell scripts
+level: medium
