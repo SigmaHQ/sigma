@@ -1,0 +1,35 @@
+title: System Shell Spawned From Celery Worker Process
+id: 904f6442-3b57-4b3f-987c-1559f58ce8d8
+status: experimental
+description: |
+    Detects a system shell interpreter being spawned directly by a Celery worker process.
+    This behavior indicates a Python background task execution framework is evaluating raw string input through a shell execution context, which is highly indicative of successful command or prompt injection exploitation against an LLM agent task.
+references:
+    - https://docs.celeryq.dev/en/stable/userguide/tasks.html
+    - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+author: Jennifer Batina
+date: 2026-07-09
+tags:
+    - attack.execution
+    - attack.t1059.004
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith:
+            - '/ash'
+            - '/bash'
+            - '/csh'
+            - '/dash'
+            - '/ksh'
+            - '/sh'
+            - '/tcsh'
+            - '/zsh'
+        ParentImage|contains: '/python3'
+        ParentCommandLine|contains: 'celery'
+    condition: selection
+falsepositives:
+    - Legacy or custom administrative tasks deliberately hardcoded with shell=True or os.system execution inside Celery task functions.
+    - Media processing, deployment, or reporting pipelines that intentionally shell out to external tools (e.g. ffmpeg, git) from within a task.
+level: medium
