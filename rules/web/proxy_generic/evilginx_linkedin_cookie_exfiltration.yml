@@ -1,0 +1,34 @@
+title: Evilginx LinkedIn Session Cookie Exfiltration
+id: a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+status: experimental
+description: |
+    Detects potential exfiltration of LinkedIn li_at session cookies through proxy logs,
+    which is a key indicator of Evilginx 3.x Adversary-in-the-Middle (AiTM) phishing attacks.
+    The li_at cookie grants full session access to LinkedIn accounts, bypassing 2FA.
+references:
+    - https://github.com/kgretzky/evilginx2
+    - https://attack.mitre.org/techniques/T1539/
+    - https://breakdev.org/evilginx-3-0-update/
+author: CyberLeakWatch Investigations
+date: 2026-03-12
+tags:
+    - attack.credential_access
+    - attack.t1539
+    - attack.initial_access
+    - attack.t1566.002
+logsource:
+    category: proxy
+detection:
+    selection_cookie:
+        cs-cookie|contains: 'li_at'
+    selection_host:
+        cs-host|endswith: '.linkedin.com'
+    filter_legitimate:
+        cs-uri|contains:
+            - '/voyager/api/'
+            - '/li/track'
+    condition: selection_cookie and not selection_host and not filter_legitimate
+falsepositives:
+    - Legitimate LinkedIn API integrations using li_at tokens
+    - LinkedIn browser extensions
+level: high
