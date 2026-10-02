@@ -1,0 +1,29 @@
+title: Redis Server Process Writing To SSH Authorized Keys File
+id: 5a6dff70-3536-49cb-b14a-f39da78d417c
+status: experimental
+description: |
+    Detects the redis-server process writing to a user's SSH authorized_keys file.
+    An unauthenticated Redis instance can be made to write its database to an arbitrary
+    path via CONFIG SET dir and CONFIG SET dbfilename followed by SAVE, which is used to
+    append an attacker-controlled SSH public key and gain persistent shell access.
+    A legitimate Redis deployment does not write to this path.
+references:
+    - https://hacktricks.wiki/en/network-services-pentesting/6379-pentesting-redis.html
+    - https://the-hunters-ledger.com/hunting-detections/seasia-gov-exploitation-toolkit-144-172-106-236-detections/
+author: The Hunters Ledger
+date: 2026-07-17
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098.004
+logsource:
+    category: file_event
+    product: linux
+detection:
+    selection:
+        Image|endswith: '/redis-server'
+        TargetFilename|endswith: '/.ssh/authorized_keys'
+    condition: selection
+falsepositives:
+    - Unlikely. No legitimate Redis deployment configuration writes to this file
+level: high
