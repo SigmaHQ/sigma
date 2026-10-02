@@ -1,0 +1,33 @@
+title: SafeLine WAF High Rate Of Blocked Attacks From Single Source
+id: 66b3e910-4f54-4d6b-88d3-c9650ab1b8fc
+status: experimental
+description: |
+    Detects a high rate of attacks blocked by the Chaitin SafeLine WAF coming
+    from a single source IP. One blocked probe is routine WAF operation and is
+    covered by the single-event safeline rules; a burst of denies in a short
+    window indicates a targeted campaign (manual attacker or focused tooling)
+    that the WAF is absorbing but the SOC should escalate: perimeter block,
+    threat-intel lookup and review of what the same source touched before the
+    blocks started. The threshold is an initial value, tune it to the site's
+    baseline.
+    Verified field semantics against live SafeLine 9.4.1 syslog output.
+references:
+    - https://github.com/chaitin/SafeLine
+author: DevCop95
+date: 2026-09-23
+tags:
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    product: safeline
+    category: webserver
+detection:
+    selection:
+        action: 'deny'
+    timeframe: 10m
+    condition: selection | count() by src_ip > 10
+falsepositives:
+    - Authorized penetration tests and red team exercises running directory or payload fuzzing
+    - Egress NAT or forward proxies concentrating many users (and attackers) behind one IP
+    - Misbehaving integrations retrying blocked requests in a tight loop
+level: high
