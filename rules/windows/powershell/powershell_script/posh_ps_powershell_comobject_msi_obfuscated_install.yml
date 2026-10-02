@@ -5,7 +5,7 @@ related:
       type: similar
 status: experimental
 description: |
-    Detects obfuscated PowerShell command or script execution that attempt to install MSI packages via the Windows Installer COM object (`WindowsInstaller.Installer`).
+    Detects obfuscated PowerShell command or script execution that attempts to install MSI packages via the Windows Installer COM object (`WindowsInstaller.Installer`).
     The technique involves manipulating strings to hide functionality, such as constructing class names using string insertion (e.g., 'indowsInstaller.Installer'.Insert(0,'W')) and correcting
     malformed URLs (e.g., converting 'htps://' to 'https://') at runtime. This behavior is commonly associated with malware loaders or droppers that aim to bypass static detection
     by hiding intent in runtime-generated strings and using legitimate tools for code execution. The use of `InstallProduct` and COM object creation, particularly combined with
@@ -25,6 +25,7 @@ tags:
 logsource:
     category: ps_script
     product: windows
+    definition: 'Requirements: Script Block Logging must be enabled'
 detection:
     selection:
         ScriptBlockText|contains|all:
