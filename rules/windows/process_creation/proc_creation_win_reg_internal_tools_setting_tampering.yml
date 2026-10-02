@@ -12,10 +12,10 @@ references:
     - https://www.mandiant.com/resources/unc2165-shifts-to-evade-sanctions
     - https://www.sentinelone.com/blog/cybervolk-returns-flawed-volklocker-brings-new-features-with-growing-pains/
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
-date: 2025-12-17
+date: 2026-10-02
 tags:
     - attack.persistence
-    - attack.defense-evasion
+    - attack.defense-impairment
     - attack.t1112
 logsource:
     category: process_creation
@@ -58,10 +58,14 @@ detection:
             - 'NoRun'
             - 'NoSetTaskbar'
             - 'NoTrayContextMenu'
-            - 'shutdownwithoutlogon'
             - 'StartMenuLogOff'
+            - 'shutdownwithoutlogon'
     condition: all of selection_*
 falsepositives:
     - Legitimate use of reg.exe to change system settings
 level: medium
+simulation:
+    - name: Modify Registry of Current User Profile - cmd
+      atomic_tests_guid:
+        - 1324796b-d0f6-455a-b4ae-21ffee6aa6b9
 regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_reg_internal_tools_setting_tampering/info.yml
