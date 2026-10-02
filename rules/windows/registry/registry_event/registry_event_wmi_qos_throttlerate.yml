@@ -1,0 +1,30 @@
+title: QoS ThrottleRate Set by WMI
+id: e4b2d9a1-8f3a-4c9b-9e2a-1d7f6b5a3c21
+status: experimental
+description: |
+    Detects when a Quality of Service (QoS) Throttle Rate policy is created/updated by the Windows Management
+    Instrumentation (WMI) provider service (wmiprvse.exe). Threat actors use WMI to remotely script or automate
+    changes. They abuse this feature to choke outbound EDR connection, ulitimately bypassing EDR, slow down
+    data leaks to bypass filters, or cause intentional denial-of-service conditions on critical communication apps.
+references:
+    - https://learn.microsoft.com/en-us/windows-server/networking/technologies/qos/qos-policy-top
+    - https://www.zerosalarium.com/2026/06/edrchoker-choking-telemetry-stream-block-edr.html
+author: Tamseel Ahmad
+date: 2026-06-12
+tags:
+    - attack.defense-impairment
+    - attack.t1687
+    - attack.t1685
+logsource:
+    product: windows
+    category: registry_event
+detection:
+    selection:
+        Image|endswith: '\wmiprvse.exe'
+        TargetObject|contains|all:
+            - '\Software\Policies\Microsoft\Windows\QoS\'
+            - 'ThrottleRate'
+    condition: selection
+falsepositives:
+    - Legitimate QOS throttle modification
+level: medium # Change the lvl accordingly after initial baselining
