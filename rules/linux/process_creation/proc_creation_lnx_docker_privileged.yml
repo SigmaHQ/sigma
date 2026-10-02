@@ -1,0 +1,34 @@
+title: Linux Privileged Docker Container Execution
+id: c9f4a7e2-2d8b-4a31-c3e9-1b5f8d4a7c20
+status: experimental
+description: |
+    Detects execution of docker run or docker exec with the --privileged flag.
+    A privileged container has full access to the host kernel, all devices,
+    and bypasses Docker namespace isolation. Attackers exploit this to mount
+    the host filesystem, load kernel modules, access raw devices, and escape
+    the container to gain root on the underlying host. The --restart=always
+    flag combined with --privileged additionally establishes persistent access.
+references:
+    - https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities
+    - https://www.trendmicro.com/en_us/research/19/l/why-running-a-privileged-container-in-docker-is-a-bad-idea.html
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.privilege-escalation
+    - attack.t1611
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: '/docker'
+        CommandLine|contains: '--privileged'
+    selection_subcmd:
+        CommandLine|contains:
+            - ' run '
+            - ' exec '
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of privileged containers by platform or infrastructure teams
+    - Container runtime components that require privileged mode for system operations
+level: high

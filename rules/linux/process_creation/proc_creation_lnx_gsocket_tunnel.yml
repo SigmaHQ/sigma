@@ -1,0 +1,33 @@
+title: Linux Covert SSH Tunnel via GSocket
+id: a7d2e5c9-9b6f-4e18-a1c7-8f3d6b2e5a90
+status: experimental
+description: |
+    Detects execution of gsocket, gs-netcat, or associated binaries that
+    provide SSH-like access over the Global Socket Relay Network (GSRN) without
+    requiring an exposed TCP port. GSSocket authenticates using a shared secret
+    and routes traffic through a relay, making it invisible to network-level
+    monitoring tools that look for direct inbound connections. Attackers use it
+    to maintain persistent backdoor access on hosts behind NAT or strict firewalls.
+references:
+    - https://github.com/hackerschoice/gsocket
+    - https://www.hackerschoice.com/gsocket
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.command-and-control
+    - attack.t1572
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith:
+            - '/gsocket'
+            - '/gs-netcat'
+            - '/gs-sftp'
+            - '/gs-mount'
+    condition: selection
+falsepositives:
+    - Legitimate use of gsocket by authorized administrators for secure remote access
+    - Security team using gsocket in an approved red team exercise
+level: high
