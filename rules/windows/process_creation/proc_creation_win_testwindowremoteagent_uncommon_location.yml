@@ -1,0 +1,38 @@
+title: Potentially Suspicious TestWindowRemoteAgent Execution From Uncommon Location
+id: a74b332e-0f71-409f-bd85-1492d98bab76
+status: experimental
+description: Detects the Microsoft Visual Studio Test Window Remote Agent executing from outside expected Visual Studio installation directories in outbound client mode. The binary is listed by LOLBAS and can be abused for attacker-controlled network activity such as DNS-based exfiltration.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Testwindowremoteagent/
+    - https://learn.microsoft.com/en-us/visualstudio/test/remote-testing?view=visualstudio
+author: Diablo Research
+date: 2026-10-02
+tags:
+    - attack.exfiltration
+    - attack.t1048
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\TestWindowRemoteAgent.exe'
+        - OriginalFileName: 'TestWindowRemoteAgent.dll'
+    selection_cli_start:
+        CommandLine|contains: ' start '
+    selection_cli_host:
+        CommandLine|contains:
+            - ' -h '
+            - ' --hostname '
+    selection_cli_port:
+        CommandLine|contains:
+            - ' -p '
+            - ' --port '
+    filter_main_legitimate_location:
+        Image|startswith:
+            - 'C:\Program Files\Microsoft Visual Studio\'
+            - 'C:\Program Files (x86)\Microsoft Visual Studio\'
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Developers or administrators who intentionally copy the Visual Studio remote agent to a non-default location and use it for legitimate remote testing.
+level: medium
+
