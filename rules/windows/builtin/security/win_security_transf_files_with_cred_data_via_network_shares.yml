@@ -9,7 +9,7 @@ references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 author: Teymur Kheirkhabarov, oscd.community
 date: 2019-10-22
-modified: 2021-11-30
+modified: 2025-07-11
 tags:
     - attack.credential-access
     - attack.t1003.002
@@ -19,18 +19,21 @@ logsource:
     product: windows
     service: security
 detection:
-    selection:
+    selection_eid:
         EventID: 5145
-        RelativeTargetName|contains:
-            - '\mimidrv'
-            - '\lsass'
-            - '\windows\minidump\'
-            - '\hiberfil'
-            - '\sqldmpr'
-            - '\sam'
-            - '\ntds.dit'
-            - '\security'
-    condition: selection
+    selection_object:
+        - RelativeTargetName|contains:
+              - '\mimidrv'
+              - '\lsass'
+              - '\windows\minidump\'
+              - '\hiberfil'
+              - '\sqldmpr'
+        - RelativeTargetName:
+              - 'Windows\NTDS\ntds.dit'
+              - 'Windows\System32\config\SAM'
+              - 'Windows\System32\config\SECURITY'
+              - 'Windows\System32\config\SYSTEM'
+    condition: all of selection_*
 falsepositives:
     - Transferring sensitive files for legitimate administration work by legitimate administrator
 level: medium

@@ -1,0 +1,49 @@
+title: PFX File Creation
+id: dca1b3e8-e043-4ec8-85d7-867f334b5724
+status: test
+description: |
+    Detects the creation of PFX files (Personal Information Exchange format).
+    PFX files contain private keys and certificates bundled together, making them valuable targets for attackers seeking to:
+
+        - Exfiltrate digital certificates for impersonation or signing malicious code
+        - Establish persistent access through certificate-based authentication
+        - Bypass security controls that rely on certificate validation
+
+    Analysts should investigate PFX file creation events by examining which process created the PFX file and its parent process chain, as well as unusual locations outside standard certificate stores or development environments.
+references:
+    - https://github.com/OTRF/detection-hackathon-apt29/issues/14
+    - https://github.com/OTRF/ThreatHunter-Playbook/blob/2d4257f630f4c9770f78d0c1df059f891ffc3fec/docs/evals/apt29/detections/6.B.1_6392C9F1-D975-4F75-8A70-433DEDD7F622.md
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+date: 2020-05-02
+modified: 2025-10-19
+tags:
+    - attack.credential-access
+    - attack.t1552.004
+    - detection.threat-hunting
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|endswith: '.pfx'
+    filter_optional_onedrive:
+        Image:
+            - 'C:\Program Files\Microsoft OneDrive\OneDrive.exe'
+            - 'C:\Program Files (x86)\Microsoft OneDrive\OneDrive.exe'
+        TargetFilename|endswith: '\OneDrive\CodeSigning.pfx'
+    filter_optional_visual_studio:
+        TargetFilename|startswith:
+            - 'C:\Program Files (x86)\Microsoft Visual Studio\'
+            - 'C:\Program Files\Microsoft Visual Studio\'
+    filter_optional_cmake:
+        TargetFilename|startswith: 'C:\Program Files\CMake\'
+    condition: selection and not 1 of filter_optional_*
+falsepositives:
+    - System administrators legitimately managing certificates and PKI infrastructure
+    - Development environments where developers create test certificates for application signing
+    - Automated certificate deployment tools and scripts used in enterprise environments
+    - Software installation processes that include certificate provisioning (e.g., web servers, VPN clients)
+    - Certificate backup and recovery operations performed by IT staff
+    - Build systems and CI/CD pipelines that generate code signing certificates
+    - Third-party applications that create temporary certificates for secure communications
+level: low

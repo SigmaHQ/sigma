@@ -1,34 +1,56 @@
-name: Auto message for PR's and Issues
+name: Greet First-Time Contributors
 
-on: [pull_request_target, issues]
+on:
+  pull_request_target:
+    types:
+      - opened
+  issues:
+    types:
+      - opened
+
+permissions:
+  issues: write
+  pull-requests: write
 
 jobs:
-  build:
-    name: Hello new contributor
+  greeting:
+    name: Greet First-Time Contributors
+    if: github.event_name == 'issues' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/first-interaction@v1.3.0
+      # Reverted from actions/first-interaction@v3 back to v1 due to a known upstream bug
+      # where all contributors are greeted (not just first-timers) in repos with GitHub
+      # Issues disabled, because isFirstIssue() always returns true in that case.
+      # See: https://github.com/actions/first-interaction/issues/369
+      - uses: actions/first-interaction@34f15e814fe48ac9312ccf29db4e74fa767cbab7 # v1.3.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          issue-message: |-
-            Welcome @${{github.actor}} :wave:
+          issue-message: |
+            Welcome @${{ github.actor }} :wave:
 
             It looks like this is your first issue on the Sigma rules repository!
 
-            The following repository accepts issues related to `false positives` or 'rule ideas'.
+            The following repository accepts issues related to `false positives` or `rule ideas`.
 
             If you're reporting an issue related to the pySigma library please consider submitting it [here](https://github.com/SigmaHQ/pySigma)
 
-            If you're reporting an issue related to the deprecated sigmac library please consider submitting it [here](https://github.com/SigmaHQ/legacy-sigmatools)
-
             Thanks for taking the time to open this issue, and welcome to the Sigma community! :smiley:
 
+            If you want to engage more with the community for official support, general discussions or announcements:
 
-          pr-message: |-
-            Welcome @${{github.actor}} :wave:
-            
+            👉 [Join our Discord server](https://discord.gg/CZhaX3ygdt)
+
+          pr-message: |
+            Welcome @${{ github.actor }} :wave:
+
             It looks like this is your first pull request on the Sigma rules repository!
 
-            Please make sure to read the [SigmaHQ conventions](https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/) document to make sure your contribution is adhering to best practices and has all the necessary elements in place for a successful approval.
+            Please read the [SigmaHQ conventions](https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/) to ensure your contribution adheres to best practices and includes all the necessary elements for a successful review.
+
+            Also check [CONTRIBUTING.md](https://github.com/SigmaHQ/sigma/blob/main/CONTRIBUTING.md) for more information on how to contribute to the Sigma rules repository, specifically proper testing and validation of your rules.
 
             Thanks again, and welcome to the Sigma community! :smiley:
+
+            If you want to engage more with the community for official support, general discussions or announcements:
+
+            👉 [Join our Discord server](https://discord.gg/CZhaX3ygdt)

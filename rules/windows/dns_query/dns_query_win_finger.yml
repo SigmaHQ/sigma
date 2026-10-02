@@ -1,0 +1,32 @@
+title: DNS Query by Finger Utility
+id: c082c2b0-525b-4dbc-9a26-a57dc4692074
+related:
+    - id: 2fdaf50b-9fd5-449f-ba69-f17248119af6
+      type: similar
+    - id: af491bca-e752-4b44-9c86-df5680533dbc
+      type: similar
+status: experimental
+description: |
+    Detects DNS queries made by the finger utility, which can be abused by threat actors to retrieve remote commands for execution on Windows devices.
+    In one ClickFix malware campaign, adversaries leveraged the finger protocol to fetch commands from a remote server.
+    Since the finger utility is not commonly used in modern Windows environments, its presence already raises suspicion.
+    Investigating such DNS queries can also help identify potential malicious infrastructure used by threat actors for command and control (C2) communication.
+references:
+    - https://www.bleepingcomputer.com/news/security/decades-old-finger-protocol-abused-in-clickfix-malware-attacks/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-11-19
+tags:
+    - attack.command-and-control
+    - attack.t1071.004
+    - attack.execution
+    - attack.t1059.003
+logsource:
+    product: windows
+    category: dns_query
+detection:
+    selection:
+        Image|endswith: '\finger.exe'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high

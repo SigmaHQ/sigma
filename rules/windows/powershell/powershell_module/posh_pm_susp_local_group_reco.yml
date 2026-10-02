@@ -1,15 +1,17 @@
 title: Suspicious Get Local Groups Information
 id: cef24b90-dddc-4ae1-a09a-8764872f69fc
+related:
+    - id: fa6a5a45-3ee2-4529-aa14-ee5edc9e29cb
+      type: similar
 status: test
 description: |
-    Adversaries may attempt to find local system groups and permission settings.
-    The knowledge of local system permission groups can help adversaries determine which groups exist and which users belong to a particular group.
-    Adversaries may use this information to determine which users have elevated permissions, such as the users found within the local administrators group.
+    Detects the use of PowerShell modules and cmdlets to gather local group information.
+    Adversaries may use local system permission groups to determine which groups exist and which users belong to a particular group such as the local administrators group.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1069.001/T1069.001.md
 author: frack113
 date: 2021-12-12
-modified: 2022-12-25
+modified: 2025-08-22
 tags:
     - attack.discovery
     - attack.t1069.001
@@ -18,21 +20,28 @@ logsource:
     category: ps_module
     definition: 0ad03ef1-f21b-4a79-8ce8-e6900c54b65b
 detection:
-    test_3:
+    selection_localgroup:
         - Payload|contains:
-              - 'get-localgroup'
-              - 'Get-LocalGroupMember'
+              - 'get-localgroup '
+              - 'get-localgroupmember '
         - ContextInfo|contains:
-              - 'get-localgroup'
-              - 'Get-LocalGroupMember'
-    test_6:
-        - Payload|contains|all:
-              - 'Get-WMIObject'
-              - 'Win32_Group'
+              - 'get-localgroup '
+              - 'get-localgroupmember '
+    selection_wmi_module:
+        - Payload|contains:
+              - 'get-wmiobject '
+              - 'gwmi '
+              - 'get-ciminstance '
+              - 'gcim '
         - ContextInfo|contains|all:
-              - 'Get-WMIObject'
-              - 'Win32_Group'
-    condition: 1 of test_*
+              - 'get-wmiobject '
+              - 'gwmi '
+              - 'get-ciminstance '
+              - 'gcim '
+    selection_wmi_class:
+        - Payload|contains: 'win32_group'
+        - ContextInfo|contains: 'win32_group'
+    condition: selection_localgroup or all of selection_wmi_*
 falsepositives:
     - Administrator script
 level: low

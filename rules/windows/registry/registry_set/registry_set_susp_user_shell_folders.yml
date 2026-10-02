@@ -1,12 +1,19 @@
 title: Modify User Shell Folders Startup Value
 id: 9c226817-8dc9-46c2-a58d-66655aafd7dc
+related:
+    - id: 8f3ab69a-aa22-4943-aa58-e0a52fdf6818
+      type: similar
 status: test
-description: Detect modification of the startup key to a path where a payload could be stored to be launched during startup
+description: |
+    Detect modification of the User Shell Folders registry values for Startup or Common Startup which could indicate persistence attempts.
+    Attackers may modify User Shell Folders registry keys to point to malicious executables or scripts that will be executed during startup.
+    This technique is often used to maintain persistence on a compromised system by ensuring that the malicious payload is executed automatically.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/9e5b12c4912c07562aec7500447b11fa3e17e254/atomics/T1547.001/T1547.001.md
-author: frack113
+    - https://www.welivesecurity.com/en/eset-research/muddywater-snakes-riverbank/
+author: frack113, Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2022-10-01
-modified: 2023-08-17
+modified: 2026-01-05
 tags:
     - attack.persistence
     - attack.privilege-escalation
@@ -16,10 +23,34 @@ logsource:
     category: registry_set
 detection:
     selection:
-        TargetObject|contains: 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders'
-        TargetObject|endswith: 'Startup' # cover Common Startup and Startup
-        # can use Details|contains: path if get too many FP
-    condition: selection
+        TargetObject|contains:
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
+        TargetObject|endswith:
+            - '\Common Startup'
+            - '\Startup'
+    filter_main_details_null:
+        Details: null
+    filter_main_programdata_startup:
+        Details|contains:
+            - 'C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup'
+            - '%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup'
+    filter_main_userprofile_startup_1:
+        Details|contains:
+            - '%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup'
+            - '%%USERPROFILE%%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup'
+    filter_main_userprofile_startup_2:
+        Details|contains|all:
+            - 'C:\Users\'
+            - '\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup'
+    # Apply more filters if new legitimate paths are identified
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_susp_user_shell_folders/info.yml
+simulation:
+    - type: atomic-red-team
+      name: Change Startup Folder - HKLM Modify User Shell Folders Common Startup Value
+      technique: T1547.001
+      atomic_guid: acfef903-7662-447e-a391-9c91c2f00f7b
