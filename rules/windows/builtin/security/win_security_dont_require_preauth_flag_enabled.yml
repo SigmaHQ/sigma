@@ -1,0 +1,49 @@
+title: Kerberos Pre-Authentication Disabled On A User Account
+id: 44203865-a195-46d9-97bd-12d1c1f81414
+status: experimental
+description: |
+    Detects a change to a user account that turns off Kerberos pre-authentication by setting the "DONT_REQ_PREAUTH" (0x400000) flag in "userAccountControl".
+    With pre-authentication disabled, a domain controller returns an AS-REP encrypted with the account's password-derived key to any requester, which can be captured and cracked offline (AS-REP Roasting). Setting this flag on an account the attacker can write to is a common way to make that account roastable.
+    Scope: this rule matches user account changes logged as event 4738 and relies on "userAccountControl" being logged as a hexadecimal value. It does not cover the same flag set through a directory service modification (event 5136) or on computer accounts (event 4742).
+references:
+    - https://blog.harmj0y.net/activedirectory/roasting-as-reps/
+    - https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/useraccountcontrol-manipulate-account-properties
+author: mmadersbacher
+date: 2026-08-16
+tags:
+    - attack.credential-access
+    - attack.persistence
+    - attack.t1558.004
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Audit Policy : Account Management > Audit User Account Management, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\Account Management\Audit User Account Management'
+detection:
+    # 4738 logs "userAccountControl" as a hex value. DONT_REQ_PREAUTH (0x400000) is the
+    # sixth hex digit from the right, so the patterns below match any nibble at that position
+    # that has the 0x4 bit set. The filter drops changes where the flag was already set before.
+    selection:
+        EventID: 4738
+        NewUacValue|endswith:
+            - '4?????'
+            - '5?????'
+            - '6?????'
+            - '7?????'
+            - 'C?????'
+            - 'D?????'
+            - 'E?????'
+            - 'F?????'
+    filter_main_already_disabled:
+        OldUacValue|endswith:
+            - '4?????'
+            - '5?????'
+            - '6?????'
+            - '7?????'
+            - 'C?????'
+            - 'D?????'
+            - 'E?????'
+            - 'F?????'
+    condition: selection and not filter_main_already_disabled
+falsepositives:
+    - Legacy applications or interoperability accounts that are intentionally configured without Kerberos pre-authentication. Filter these accounts by "TargetUserName".
+level: high
