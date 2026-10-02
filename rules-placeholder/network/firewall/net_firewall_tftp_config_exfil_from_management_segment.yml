@@ -1,0 +1,32 @@
+title: Outbound TFTP Transfer from Network Device Management Segment
+id: cfacfeb4-df02-449d-a300-b5c747d6f625
+status: experimental
+description: |
+    Detects outbound TFTP (UDP/69) sessions originating from network device
+    management subnets to external destinations, consistent with the
+    configuration-exfiltration step described in CISA advisory AA26-194A
+    (actors copy configs as config.bkp/output.txt then transfer via TFTP).
+references:
+    - https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-194a
+author: Zach Vessey
+date: 2026-07-16
+tags:
+    - attack.exfiltration
+    - attack.t1048.003
+logsource:
+    category: firewall
+detection:
+    selection:
+        dst_port: 69
+        proto: udp
+        src_ip|cidr|expand: '%management_networks%'
+    filter_internal_dst:
+        dst_ip|cidr:
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+    condition: selection and not filter_internal_dst
+falsepositives:
+    - Legitimate scheduled TFTP config/firmware backups to an approved external
+      backup host (should be added to an allowlist)
+level: high
