@@ -1,0 +1,50 @@
+title: Arbitrary Command Execution Using Windows Sandbox CLI
+id: 2116ff63-a084-4168-b10c-7a4750b53d6d
+related:
+    - id: 3d9ac57f-46ea-4e59-a581-a59f61bb3a18
+      type: similar
+    - id: 86fdab07-ef1e-4528-bf4b-e1f9eefd1546
+      type: similar
+    - id: c8faeb88-b4de-4242-ba6c-57f7a75e114a
+      type: similar
+status: experimental
+description: |
+    Detects potential abuse of the Windows Sandbox CLI (wsb.exe, available on Windows 11 24H2 and later) as a LOLBIN.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Wsb/
+    - https://learn.microsoft.com/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-cli
+    - https://web.archive.org/web/20250116184008/http://blog.syscall.party/2020/12/02/weaponizing-windows-sandbox.html
+    - https://github.com/LloydLabs/wsb-detect
+author: Konrad 'unrooted' Klawikowski
+date: 2026-07-22
+tags:
+    - attack.execution
+    - attack.defense-evasion
+    - attack.privilege-escalation
+    - attack.lateral-movement
+    - attack.exfiltration
+    - attack.t1218
+    - attack.t1564.006
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\wsb.exe'
+        - OriginalFileName: 'wsb.exe'
+    selection_cli:
+        # Fileless inline-config execution via embedded LogonCommand
+        - CommandLine|contains|all:
+              - '--config'
+              - '<LogonCommand>'
+        # Headless SYSTEM-context exec, or runtime read-write host-folder sharing
+        - CommandLine|contains:
+              - ' -r System'
+              - ' --run-as System'
+              - '--allow-write'
+    condition: all of selection_*
+falsepositives:
+    - Developers, QA, or CI pipelines that script Windows Sandbox from inline XML configurations or drive a running sandbox via the wsb.exe CLI for build/test verification
+    - Power users who script Sandbox usage to avoid maintaining .wsb files on disk
+level: medium
