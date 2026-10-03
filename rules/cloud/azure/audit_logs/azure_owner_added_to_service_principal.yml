@@ -1,0 +1,34 @@
+title: Owner Added To Azure Service Principal
+id: 26385dec-200b-4b42-9cc9-2e61ed9b1bdb
+status: experimental
+description: |
+    Detects when a new owner is added to an Azure service principal. Service principal
+    ownership grants the ability to manage the object's credentials (add password or
+    certificate credentials, consent to permissions) without requiring a tenant-wide
+    admin role, which can be used to authenticate as the service principal for
+    persistence or privilege escalation. This complements azure_app_owner_added.yml,
+    which covers owners added to an application but does not fire for service
+    principals that have no locally-owned application registration, for example
+    enterprise applications added from the gallery.
+references:
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities#core-directory
+    - https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/assign-app-owners
+    - https://www.microsoft.com/en-us/security/blog/2024/01/25/midnight-blizzard-guidance-for-responders-on-nation-state-attack/
+author: descambiado
+date: 2026-08-31
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098.003
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        operationName: 'Add owner to service principal'
+    condition: selection
+falsepositives:
+    - Co-owner assignments during application onboarding
+    - Ownership transfers between teams
+    - Automated provisioning pipelines assigning service principal ownership
+level: medium
