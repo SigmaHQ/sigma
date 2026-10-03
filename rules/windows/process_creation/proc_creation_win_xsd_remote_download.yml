@@ -1,0 +1,29 @@
+title: Remote File Download Via Xsd.EXE
+id: d961be19-a693-4777-8d2b-63cdd661a7cf
+status: experimental
+description: |
+    Detects the Microsoft XML Schema Definition Tool "xsd.exe" loading input from a remote HTTP or HTTPS location.
+    Adversaries may abuse this behavior to retrieve remote content using a Microsoft-signed developer utility.
+references:
+    - https://learn.microsoft.com/en-us/dotnet/standard/serialization/xml-schema-definition-tool-xsd-exe
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OtherMSBinaries/xsd.yml
+author: Diablo Research
+date: 2026-10-04
+tags:
+    - attack.command-and-control
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\xsd.exe'
+        - OriginalFileName: 'xsd.exe'
+    selection_url:
+        CommandLine|contains:
+            - 'http://'
+            - 'https://'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of Xsd.exe with remote XML or schema resources by developers
+level: medium
