@@ -1,0 +1,32 @@
+title: Suspicious Child Process Spawned By IntelliTrace.EXE
+id: ecc8eb3a-d52a-4a63-8e38-f81e31285eed
+status: experimental
+description: |
+    Detects suspicious command and script interpreters spawned by the Microsoft Visual Studio IntelliTrace utility.
+    IntelliTrace supports launching an arbitrary executable for diagnostic tracing and may be abused to proxy execution through a Microsoft-signed developer utility.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/IntelliTrace/
+    - https://learn.microsoft.com/en-us/visualstudio/debugger/intellitrace
+author: Nazar Diachok (@Diablo-research)
+date: 2026-10-04
+tags:
+    - attack.execution
+    - attack.t1127
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\IntelliTrace.exe'
+    selection_child:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\wscript.exe'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate Visual Studio diagnostic workflows that intentionally trace command or script interpreters
+level: medium
