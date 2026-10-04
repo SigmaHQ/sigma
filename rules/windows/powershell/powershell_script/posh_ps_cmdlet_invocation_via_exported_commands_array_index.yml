@@ -6,14 +6,17 @@ description: |
     and invoke cmdlets indirectly by array index. This can be used to evade detections
     that look for explicit strings such as Invoke-RestMethod or Invoke-Expression.
 references:
-    - https://www.linkedin.com/posts/mark-o-halloran1_clickfix-defense-evasion-tactic-today-i-ugcPost-7453463467736408064-snrp
+    - https://detect.fyi/hunting-clickfix-initial-access-techniques-8c1b38d5ef9b
+    - https://www.csoonline.com/article/4141923/clickfix-attackers-using-new-tactic-to-evade-detection-says-microsoft.html
+    - https://www.hhs.gov/sites/default/files/clickfix-attacks-sector-alert-tlpclear.pdf
+    - https://www.proofpoint.com/us/blog/threat-insight/clipboard-compromise-powershell-self-pwn
 author: Norbert Jaśniewicz (AlphaSOC)
 date: 2026-06-11
 tags:
     - attack.execution
-    - attack.t1059.001
     - attack.stealth
-    - attack.t1027.010
+    - attack.t1027
+    - attack.t1059.001
 logsource:
     product: windows
     category: ps_script
@@ -30,5 +33,7 @@ detection:
         ScriptBlockText|contains: '[*]'
     condition: all of selection_*
 falsepositives:
-    - Unknown
+    - Legitimate module inventory/inspection scripts
+    - Legitimate dynamic cmdlet invocation via array index
+    - Module development/debugging scripts
 level: medium
