@@ -1,0 +1,90 @@
+title: 'Failed Logon - Public IP Attempting Frequently Targeted Account - Linux'
+id: f698fb2a-f888-4b4f-b309-fcc56d7096b5
+level: 'informational'
+author: 'Joseph Brennan'
+status: 'experimental'
+date: '2026-09-26'
+description: |
+    Detects individual failed SSH logon attempts to Linux systems from public IP addresses targeting accounts commonly abused by threat actors. 
+    This rule is intended to identify and normalize the underlying failed authentication events for use by a related Sigma correlation rule (f55634e2-baa3-489b-bbce-0c9818cf62ee), 
+    which evaluates the volume and timing of these events to detect potential brute-force activity.
+logsource:
+    product: 'linux'
+    service: 'sshd'
+detection:
+    keywords: 
+        - 'failed password'
+        - 'authentication failure'
+        - 'authentication fails'
+        - 'Access denied'
+    selection_targeted_accounts:
+        user_name|contains:
+            - 'root'
+            - 'admin'
+            - 'ubuntu'
+            - 'user'
+            - 'test'
+            - 'guest'
+            - 'postgres'
+            - 'pi'
+            - 'oracle'
+            - 'deploy'
+            - 'git'
+            - 'gitlab'
+            - 'mysql'
+            - 'ftpuser'
+            - 'support'
+            - 'ubnt'
+            - 'debian'
+            - 'nagios'
+            - 'apache'
+            - 'tomcat'
+            - 'usuario'
+            - '1234'
+            - 'ftp'
+            - 'operator'
+            - 'hadoop'
+            - 'ts3'
+        deviceProcessName: "sshd"
+        user_name|exists: true
+        client_ip|exists: true
+    selection_privateIPRange:
+        client_ip|cidr:
+            - '10.0.0.0/8' 
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+            - '127.0.0.0/8'
+            - '169.254.0.0/16'
+            - '100.64.0.0/10'
+            - 'fc00::/7'
+            - 'fe80::/10' 
+            - "::1/128" 
+    condition: keywords and selection_targeted_accounts and not selection_privateIPRange
+---
+title: 'Potential Brute Force - Public IP Targeting Commonly Abused Accounts - Linux'
+description: |
+    Detects potential brute-force attempts against a single Linux server by identifying a high volume of failed logon attempts
+    within a 15-minute interval from a single public IP address targeting accounts commonly abused by threat actors.
+id: f55634e2-baa3-489b-bbce-0c9818cf62ee
+date: '2026-09-26'
+references: 
+    - https://www.f5.com/labs/articles/spaceballs-security--the-top-attacked-usernames-and-passwords
+tags:
+    - attack.credential-access
+    - attack.t1110.001
+level: 'medium'
+status: 'experimental'
+author: 'Joseph Brennan'
+correlation:
+    type: event_count
+    rules: 
+        - f698fb2a-f888-4b4f-b309-fcc56d7096b5
+    timespan: 15m
+    condition:
+        gte: 50
+    group-by:
+        - 'client_ip'
+        - 'host'
+falsepositives:
+    - 'Authorized vulnerability scanners or external attack surface management services testing the host'
+    - 'Misconfigured automation (configuration management, backup or deployment jobs) connecting from public addresses with stale credentials'
