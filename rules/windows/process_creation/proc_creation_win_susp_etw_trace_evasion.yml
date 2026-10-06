@@ -2,14 +2,18 @@ title: ETW Trace Evasion Activity
 id: a238b5d0-ce2d-4414-a676-7a531b3d13d6
 status: test
 description: |
-    Detects command line activity that tries to clear or disable any ETW trace log which could be a sign of logging evasion.
+    Detects command line activity that attempts to tamper with Event Tracing for Windows (ETW) by clearing or disabling
+    trace logs or providers. Adversaries may target ETW to blind security tooling and evade detection by removing
+    visibility into process activity, network connections, and other telemetry sources.
+    Techniques include clearing logs via wevtutil, disabling trace sessions via logman, and removing or modifying
+    ETW providers using PowerShell cmdlets such as Remove-EtwTraceProvider and Set-EtwTraceProvider.
 references:
     - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/wevtutil
     - https://abuse.io/lockergoga.txt
     - https://medium.com/palantir/tampering-with-windows-event-tracing-background-offense-and-defense-4be7ac62ac63
 author: '@neu5ron, Florian Roth (Nextron Systems), Jonhnathan Ribeiro, oscd.community'
 date: 2019-03-22
-modified: 2022-06-28
+modified: 2026-10-05
 tags:
     - attack.stealth
     - attack.defense-impairment
@@ -20,36 +24,46 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_clear_1:
-        CommandLine|contains|all:
-            - 'cl'
-            - '/Trace'
-    selection_clear_2:
-        CommandLine|contains|all:
+    selection_wevtutil_img:
+        - Image|endswith: '\wevtutil.exe'
+        - OriginalFileName: 'wevtutil.exe'
+    selection_wevtutil_cli_clear:   # Example: wevtutil cl "/Trace" or wevtutil cl "Microsoft-Windows-DNS-Client/Operational"
+        CommandLine|contains:
+            - ' cl '
             - 'clear-log'
-            - '/Trace'
-    selection_disable_1:
-        CommandLine|contains|all:
-            - 'sl'
-            - '/e:false'
-    selection_disable_2:
-        CommandLine|contains|all:
+        CommandLine|contains|windash: '/Trace'
+    selection_wevtutil_cli_disable:   # Example: wevtutil sl "Microsoft-Windows-DNS-Client/Operational" /e:false
+        CommandLine|contains:
+            - ' sl '
             - 'set-log'
-            - '/e:false'
-    selection_disable_3:   # ETW provider removal from a trace session
+        CommandLine|contains|windash: '/e:false'
+    selection_logman_img:   # Example: logman update trace EventLog-Application --p "Microsoft-Windows-Security-Auditing" -ets
+        - Image|endswith: '\logman.exe'
+        - OriginalFileName: 'Logman.exe'
+    selection_logman_update:   # Example: logman update trace EventLog-Application --p "Microsoft-Windows-Security-Auditing" -ets
         CommandLine|contains|all:
-            - 'logman'
             - 'update'
             - 'trace'
             - '--p'
             - '-ets'
-    selection_pwsh_remove:   # Autologger provider removal
-        CommandLine|contains: 'Remove-EtwTraceProvider'
-    selection_pwsh_set:   # Provider “Enable” property modification
-        CommandLine|contains|all:
-            - 'Set-EtwTraceProvider'
-            - '0x11'
-    condition: 1 of selection_*
+    selection_pwsh_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'powershell.exe'
+              - 'pwsh.dll'
+    selection_pwsh_cli:
+        # Example: Remove-EtwTraceProvider -AutologgerName "EventLog-Application" -Guid "{54849625-5478-4994-A5BA-3E3B0328C30D}"
+        - CommandLine|contains: 'Remove-EtwTraceProvider'
+        # Example: Set-EtwTraceProvider -AutologgerName "EventLog-Application" -Guid "{54849625-5478-4994-A5BA-3E3B0328C30D}" -Enabled 0x11
+        - CommandLine|contains|all:
+              - 'Set-EtwTraceProvider'
+              - '0x11'
+    condition: |
+        (selection_wevtutil_img and 1 of selection_wevtutil_cli_*)
+        or (all of selection_logman_*)
+        or (all of selection_pwsh_*)
 falsepositives:
     - Unknown
 level: high
