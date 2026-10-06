@@ -1,17 +1,17 @@
-title: Potential Cmdlet Invocation Via ExportedCommands Array Index
+title: PowerShell Dynamic Module Invocation Via ExportedCommands Array Index - PS Script
 id: 4ff4ad3e-9fb5-4a70-9962-d6ea58090318
+related:
+    - id: 0c3ebe9f-df09-4e00-be0f-73d4ca8d62f6
+      type: similar
 status: experimental
 description: |
-    Detects PowerShell scripts that enumerate Microsoft.PowerShell.Utility exported commands
+    Detects obfuscated PowerShell scripts that enumerate Microsoft.PowerShell.Utility exported commands
     and invoke cmdlets indirectly by array index. This can be used to evade detections
     that look for explicit strings such as Invoke-RestMethod or Invoke-Expression.
 references:
-    - https://detect.fyi/hunting-clickfix-initial-access-techniques-8c1b38d5ef9b
-    - https://www.csoonline.com/article/4141923/clickfix-attackers-using-new-tactic-to-evade-detection-says-microsoft.html
-    - https://www.hhs.gov/sites/default/files/clickfix-attacks-sector-alert-tlpclear.pdf
-    - https://www.proofpoint.com/us/blog/threat-insight/clipboard-compromise-powershell-self-pwn
+    - https://www.linkedin.com/posts/mark-o-halloran1_clickfix-defense-evasion-tactic-today-i-ugcPost-7453463467736408064-snrp/
 author: Norbert Jaśniewicz (AlphaSOC)
-date: 2026-06-11
+date: 2026-10-06
 tags:
     - attack.execution
     - attack.stealth
@@ -23,8 +23,10 @@ logsource:
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
     selection_module_export_enum:
+        ScriptBlockText|contains:
+            - 'Get-Module '
+            - 'gmo '
         ScriptBlockText|contains|all:
-            - 'Get-Module'
             - 'ListAvailable'
             - 'Microsoft.PowerShell.Utility'
             - 'ExportedCommands'
@@ -33,7 +35,5 @@ detection:
         ScriptBlockText|contains: '[*]'
     condition: all of selection_*
 falsepositives:
-    - Legitimate module inventory/inspection scripts
-    - Legitimate dynamic cmdlet invocation via array index
-    - Module development/debugging scripts
+    - Legitimate use of exported commands array indexing in PowerShell scripts (should be rare)
 level: medium
