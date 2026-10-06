@@ -1,0 +1,34 @@
+title: System Restore Point Disabling or Removal Attempt via PowerShell
+id: f33aef95-e27b-414f-ba14-b2e363692486
+status: experimental
+description: |
+    Detects PowerShell commands that attempt to disable or remove Windows System Restore Points.
+    This technique is used by attackers post-intrusion to inhibit system recovery, commonly observed
+    alongside shadow copy deletion in ransomware operations.
+references:
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/disable-computerrestore?view=powershell-5.1
+    - https://securelist.ru/tr/hacking-cat/117062/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-10-02
+tags:
+    - attack.impact
+    - attack.t1490
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_cli:
+        CommandLine|contains:
+            - 'Disable-ComputerRestore'
+            - 'Remove-ComputerRestorePoint'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate administrator actions
+level: high
