@@ -1,0 +1,52 @@
+title: Entra ID Session Token Rejected For Sign-In From Cloud Hosting ASN
+id: 85cbba8c-5768-4a67-bdb8-1f5a654ae02a
+status: experimental
+description: |
+    Detects Entra ID (Azure AD) sign-in failures meaning a presented session or refresh token was rejected (sign-in
+    frequency, password change or expired flow token) when the source address belongs to a cloud hosting or VPS
+    provider network. Tools replaying a stolen session or refresh token (adversary-in-the-middle phishing kits,
+    infostealer cookie replay) retry from rented infrastructure and keep being rejected once Conditional Access
+    sign-in frequency or a password reset invalidates the token. A high count for one account from one address is
+    the strongest signal; single events also occur from cloud desktops after a password change.
+references:
+    - https://learn.microsoft.com/en-us/entra/identity-platform/reference-error-codes
+    - https://attack.mitre.org/techniques/T1550/004/
+author: Tim Shelton (HAWK.io)
+date: 2026-10-07
+tags:
+    - attack.defense-evasion
+    - attack.lateral-movement
+    - attack.t1550.004
+    - detection.threat-hunting
+logsource:
+    product: azure
+    service: signinlogs
+detection:
+    selection_code:
+        ResultType:
+            - 70044 # Session expired or invalid due to sign-in frequency checks
+            - 70043 # Refresh token expired or invalid due to sign-in frequency checks
+            - 50132 # Session invalid due to password change or invalid SSO artifact
+            - 50133 # Session invalid due to password expiration or recent password change
+            - 50089 # Flow token expired
+    selection_asn:
+        AutonomousSystemNumber:
+            - 16509 # Amazon AWS
+            - 14618 # Amazon AWS
+            - 8987 # Amazon AWS (EU)
+            - 396982 # Google Cloud
+            - 8075 # Microsoft Azure
+            - 14061 # DigitalOcean
+            - 16276 # OVH
+            - 9009 # M247
+            - 63949 # Akamai/Linode
+            - 20473 # Vultr (Choopa)
+            - 24940 # Hetzner
+            - 51167 # Contabo
+            - 212238 # Datacamp
+            - 60068 # Datacamp / CDN77
+            - 62240 # Clouvider
+    condition: all of selection_*
+falsepositives:
+    - Cloud desktops (e.g. Amazon WorkSpaces) or company VPN egress hosted in these networks after a password change or sign-in frequency expiry
+level: low

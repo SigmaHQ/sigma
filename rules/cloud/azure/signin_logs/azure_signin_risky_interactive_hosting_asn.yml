@@ -1,0 +1,54 @@
+title: Risky Successful Interactive Entra ID Sign-In From Cloud Hosting Or VPN Provider ASN
+id: 839bb565-29f4-432d-9418-5d9886e8a275
+status: experimental
+description: |
+    Detects a successful interactive Entra ID (Azure AD) sign-in that Entra ID Protection rated risky (low, medium or
+    high) and whose source address belongs to a cloud hosting, VPS or commercial VPN provider network.
+    Stolen credentials and replayed sessions (adversary-in-the-middle kits, operator VPS) usually arrive from rented
+    infrastructure, while employees sign in interactively from ISP, mobile and corporate addresses.
+    Non-interactive token refreshes are not matched because cloud desktops refresh tokens from provider ranges, and
+    the risk condition keeps partner, guest and cloud-desktop sign-ins from those networks out.
+references:
+    - https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/signinlogs
+    - https://attack.mitre.org/techniques/T1078/004/
+author: Tim Shelton (HAWK.io)
+date: 2026-10-07
+tags:
+    - attack.initial-access
+    - attack.defense-evasion
+    - attack.t1078.004
+logsource:
+    product: azure
+    service: signinlogs
+detection:
+    selection_success:
+        ResultType: 0
+        IsInteractive: true
+    selection_asn:
+        AutonomousSystemNumber:
+            - 16509 # Amazon AWS
+            - 14618 # Amazon AWS
+            - 8987 # Amazon AWS (EU)
+            - 396982 # Google Cloud
+            - 8075 # Microsoft Azure
+            - 14061 # DigitalOcean
+            - 16276 # OVH
+            - 9009 # M247
+            - 63949 # Akamai/Linode
+            - 20473 # Vultr (Choopa)
+            - 24940 # Hetzner
+            - 51167 # Contabo
+            - 212238 # Datacamp
+            - 60068 # Datacamp / CDN77
+            - 62240 # Clouvider
+            - 136787 # TEFINCOM (NordVPN egress)
+            - 209854 # Surfshark egress
+    selection_risk:
+        RiskLevelDuringSignIn:
+            - 'low'
+            - 'medium'
+            - 'high'
+    condition: all of selection_*
+falsepositives:
+    - Users who sign in interactively from a cloud desktop or a company-approved VPN hosted in these networks while Entra ID Protection rates the sign-in risky
+level: medium
