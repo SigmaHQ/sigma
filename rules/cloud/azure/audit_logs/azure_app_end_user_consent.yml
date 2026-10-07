@@ -1,10 +1,21 @@
 title: End User Consent
 id: 9b2cc4c4-2ad4-416d-8e8e-ee6aa6f5035a
 status: test
-description: Detects when an end user consents to an application
+description: |
+    Detects when an end user consents to an application in Microsoft Entra ID.
+    On its own this is a high-volume, low-fidelity signal. It is the base event behind
+    illicit consent grant (consent phishing) attacks, where a user is tricked into
+    granting a malicious OAuth application persistent, account-level access to M365 data
+    that survives password resets and is not blocked by MFA. High-fidelity detection
+    requires stateful enrichment at the SIEM layer (for example, alerting only on a
+    first-seen user-and-application pair, on unverified publishers, or on high-privilege
+    delegated scopes).
 references:
     - https://learn.microsoft.com/en-us/entra/architecture/security-operations-applications#end-user-consent
-author: Bailey Bercik '@baileybercik', Mark Morowczynski '@markmorow'
+    - https://learn.microsoft.com/en-us/defender-office-365/detect-and-remediate-illicit-consent-grants
+    - https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/protect-against-consent-phishing
+author: Bailey Bercik '@baileybercik', Mark Morowczynski '@markmorow', Lorena Goldoni '@lorygold'
+modified: 2026-06-23
 date: 2022-07-28
 tags:
     - attack.credential-access
@@ -17,5 +28,8 @@ detection:
         ConsentContext.IsAdminConsent: 'false'
     condition: selection
 falsepositives:
-    - Unknown
+    - Benign end-user consent to legitimate applications is common and expected. Tune by
+      correlating with publisher verification status, requested scopes, and whether the
+      user-and-application pair has been seen before. Pair with Defender for Cloud Apps
+      OAuth app governance for app reputation context.
 level: low
