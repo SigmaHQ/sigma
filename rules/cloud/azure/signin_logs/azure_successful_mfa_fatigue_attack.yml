@@ -1,0 +1,105 @@
+title: 'User Rejected MFA Prompt - Azure'
+id: 7c4f56fe-aa96-4d60-9345-456dbb22b6ac
+logsource:
+    product: azure
+    service: signinlogs
+author: 'Joseph Brennan'
+status: 'experimental'
+date: '2026-10-03'
+level: 'informational'
+description: |
+    Detects failed Entra ID MFA authentication attempts where an MFA prompt was denied or rejected by a user.
+    This rule is intended to identify individual failed MFA prompt events for use by correlation rules.
+detection:
+    selection_mfa_failed_prompt:
+        authentication_result: failure
+        resulttype:
+            - 500121
+            - 70037
+            - 1003033
+        mfanotificationoutcome|contains:
+            - 'mfa denied'
+            - 'user denied'
+    condition:  selection_mfa_failed_prompt
+---
+title: 'Potential MFA Fatigue Attack - User Repeatedly Denied MFA Prompts - Azure'
+id: f3efcd61-e3ae-4fa0-a52d-151e95f38400
+author: 'Joseph Brennan'
+status: 'experimental'
+date: '2026-10-03'
+level: 'medium'
+description: |
+    Detects a potential MFA fatigue attack by identifying an Entra ID account that repeatedly denies MFA prompts within a ten (10) minute interval.
+    A high volume of failed MFA prompts may indicate an attacker repeatedly generating authentication requests in an attempt to convince a user to approve one.
+correlation:
+    type: event_count
+    rules: 
+        - 7c4f56fe-aa96-4d60-9345-456dbb22b6ac
+    group-by:
+        - AccountUPN
+    timespan: 10m
+    condition:
+        gte: 7
+---
+title: 'Successful Account Logon - Azure'
+id: a8c28837-2291-4ede-8c9f-0e1782064347
+author: 'Joseph Brennan'
+status: 'experimental'
+date: '2026-10-03'
+level: 'informational'
+description: |
+    Detects successful Entra ID account logons.
+    This rule is intended to identify individual successful authentication events for use by correlation rules.
+logsource:
+    product: azure
+    service: signinlogs
+detection:
+    selection_successful_account_logon:
+        authentication_result: success
+        resulttype: 0
+    condition: selection_successful_account_logon
+---
+title: 'Count Successful Logons Per Account - Azure'
+id: 58c9738b-5a7c-4fbe-af50-953517b9dfed
+author: 'Joseph Brennan'
+status: 'experimental'
+date: '2026-10-03'
+level: 'informational'
+description: |
+    Counts successful Entra ID account logons for each account within a ten (10) minute interval.
+    This rule is intended to aggregate successful logon events for use by correlation rules.
+correlation:
+    type: event_count
+    rules: 
+        - a8c28837-2291-4ede-8c9f-0e1782064347
+    group-by:
+        - AccountUPN
+    timespan: 10m
+    condition:
+        gte: 1
+---
+title: 'Potential Successful MFA Fatigue Attack - Repeated MFA Rejections Followed By Successful Logon - Azure'
+id: c250e579-b241-48a0-8df6-2130a57ab92e
+status: 'experimental'
+description: |
+    Detects a potential successful MFA fatigue attack where an Entra ID account repeatedly rejects MFA prompts within a short period of time 
+    and is subsequently followed by a successful account logon.
+author: 'Joseph Brennan'
+level: 'medium'
+date: '2026-10-03'
+references: 
+    - https://www.okta.com/en-gb/blog/identity-security/mfa-fatigue-growing-security-concern/
+tags:
+    - attack.credential-access
+    - attack.t1621
+correlation:
+    type: temporal
+    rules:
+        - f3efcd61-e3ae-4fa0-a52d-151e95f38400
+        - 58c9738b-5a7c-4fbe-af50-953517b9dfed
+    timespan: 10m
+    group-by:
+        - AccountUPN
+falsepositives:
+    - 'Help desk or IT support activity assisting a user with MFA enrollment, re-registration, or authentication troubleshooting may produce similar behavior.'
+    - 'A user may repeatedly fail MFA prompts due to authentication issues and subsequently complete a legitimate successful authentication.'
