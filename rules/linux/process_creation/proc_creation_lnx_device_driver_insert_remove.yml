@@ -1,0 +1,50 @@
+title: Potential Kernel Module Insertion/Removal - Linux
+id: 85b78882-a58d-405f-bbb3-201d41812e8c
+status: experimental
+description: Detects the use of commands such as 'insmod', 'modprobe', and 'rmmod' which are commonly used to load or remove kernel modules, a technique often used by adversaries to insert or remove rootkits.
+references:
+    - https://web.archive.org/web/20240829141228/https://reveng007.github.io/blog/2022/03/08/reveng_rkit_detailed.html
+    - https://xcellerator.github.io/posts/linux_rootkits_02/
+    - https://archive.0x00sec.org/t/kernel-rootkits-getting-your-hands-dirty/1485
+    - https://thomas-byrne.co.uk/projects/makingarootkit/
+    - https://web.archive.org/web/2024/https://dl.acm.org/doi/10.1145/3688808
+    - https://blog.kyntra.io/Singularity-A-final-boss-linux-kernel-rootkit
+author: CheraghiMilad
+date: 2024-12-10
+modified: 2026-09-20
+tags:
+    - attack.stealth
+    - attack.t1014
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_binary:
+        Image|endswith:
+            - '/kmod'
+            - '/insmod'
+            - '/rmmod'
+            - '/modprobe'
+    selection_sudo:
+        Image|endswith: '/sudo'
+        CommandLine|contains:
+            - 'insmod'
+            - 'rmmod'
+            - 'modprobe'
+    condition: selection_binary or selection_sudo
+falsepositives:
+    - Administrative tasks such as legitimate system administration involving device driver modules.
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Loadable Kernel Module based Rootkit
+      technique: T1014
+      atomic_guid: dfb50072-e45a-4c75-a17e-a484809c8553
+    - type: atomic-red-team
+      name: Loadable Kernel Module based Rootkit
+      technique: T1014
+      atomic_guid: 75483ef8-f10f-444a-bf02-62eb0e48db6f
+    - type: atomic-red-team
+      name: Loadable Kernel Module based Rootkit (Diamorphine)
+      technique: T1014
+      atomic_guid: 0b996469-48c6-46e2-8155-a17f8b6c2247
