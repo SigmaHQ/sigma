@@ -1,0 +1,37 @@
+title: Process Name Masquerading via Prctl Syscall
+id: f61968b7-b286-4257-9fd7-a89ba8722973
+status: experimental
+description: |
+    Detects usage of prctl syscall with PR_SET_NAME (option 0x0f),
+    which is commonly used for process name masquerading or hiding malicious processes.
+references:
+    - https://isc.sans.edu/diary/33102
+    - https://man7.org/linux/man-pages/man2/prctl.2.html
+author: Milad Cheraghi
+date: 2026-09-27
+tags:
+    - attack.stealth
+    - attack.t1036.004
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: SYSCALL
+        syscall: 157 # prctl
+        a0: 'f' # PR_SET_NAME
+        exe|contains:
+            - /home
+            - /tmp
+            - /mnt
+            - /opt
+            - /dev/shm
+    condition: selection
+falsepositives:
+    - Legitimate software that changes process name for monitoring or sandboxing.
+simulation:
+    - type: atomic-red-team
+      name: linux rename /proc/pid/comm using prctl
+      technique: T1036.004
+      atomic_guid: f0e3aaea-5cd9-4db6-a077-631dd19b27a8
+level: medium
