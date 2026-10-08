@@ -10,7 +10,7 @@ references:
     - https://www.nextron-systems.com/?s=antivirus
 author: Florian Roth (Nextron Systems), Arnim Rupp
 date: 2017-02-19
-modified: 2024-12-25
+modified: 2026-10-05
 tags:
     - attack.resource-development
     - attack.t1588
@@ -18,7 +18,7 @@ logsource:
     product: windows
     service: application
 detection:
-    keywords:
+    keywords_generic:
         - 'Adfind'
         - 'ASP/BackDoor '
         - 'ATK/'
@@ -42,7 +42,8 @@ detection:
         - 'Filecoder'
         - 'GrandCrab '
         - 'HackTool'
-        - 'HKTL'
+        - 'HKTL.'
+        - 'HKTL/'
         - 'HTool-'
         - '/HTool'
         - '.HTool'
@@ -94,6 +95,8 @@ detection:
         # - 'PWSX'
         # - 'Razy'
         # - 'Ryuk'
+    keywords_re:
+        '|re': '\bHKTL\b'  # also matches case-sensitively
     filter_optional_generic:
         - 'anti_ransomware_service.exe'
         - 'Anti-Ransomware'
@@ -105,7 +108,7 @@ detection:
         Level: 4  # Information level
     filter_optional_restartmanager:
         Provider_Name: 'Microsoft-Windows-RestartManager'
-    condition: keywords and not 1 of filter_optional_*
+    condition: 1 of keywords_* and not 1 of filter_optional_*
 falsepositives:
     - Some software piracy tools (key generators, cracks) are classified as hack tools
 level: high
