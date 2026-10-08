@@ -1,11 +1,11 @@
-title: Suspicious Process Accessing Bindfltapi DLL
+title: Potential Process Accessing Bindfltapi DLL
 id: 7a3f9c12-0b7e-4d3a-9a8e-0f6c2b45d7e1
 status: experimental
 description: |
     Detects processes obtaining execute access to bindfltapi.dll, the user-mode API layer used to
     manipulate the Bind Filter minifilter driver. Legitimate tooling such as Store apps, Windows
     Sandbox or Windows containers relies on it, and system processes load it routinely, which is why
-    these are filtered out. Any other process opening bindfltapi.dll with execute access is a strong
+    they are filtered out. Any other process opening bindfltapi.dll with execute access is a strong
     indicator that a bind link is being created to redirect a trusted file or DLL path, a technique
     documented by EDR-Redir and Bitdefender Labs to blind EDR sensors and neutralise AMSI.
 references:
@@ -48,9 +48,8 @@ detection:
             - '\tiworker.exe'
             - '\TrustedInstaller.exe'
             - '\MsMpEng.exe'
-            - '\System'
             - '\dllhost.exe'
     condition: selection and (exec_mask or exec_text) and not filter
 falsepositives:
-    - Other legitimate system components loading bindfltapi.dll
+    - Store (UWP) apps, Windows Sandbox or Windows containers accessing bindfltapi.dll
 level: medium
