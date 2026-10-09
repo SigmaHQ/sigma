@@ -1,0 +1,29 @@
+title: Cisco Duo MFA Push Denied As Anomalous
+id: 30396f18-8049-453a-aefb-4836c12ed74d
+status: experimental
+description: |
+    Detects a Duo authentication denied with the reason "anomalous_push", which is Duo's own risk engine scoring the push pattern as consistent with push harassment or push spray.
+    Both techniques assume the attacker already holds a valid password and is repeatedly triggering push prompts until the user approves one out of habit or fatigue.
+    This is the vendor verdict on the attack pattern itself, so it fires while the pushes are still being rejected, rather than after a user notices and reports them.
+references:
+    - https://logtriage.app/rules/duo-mfa-fatigue-bypass/
+    - https://duo.com/docs/adminapi#authentication-logs
+    - https://duo.com/docs/risk-based-auth
+author: LogTriage
+date: 2026-09-21
+tags:
+    - attack.credential-access
+    - attack.initial-access
+    - attack.t1621
+logsource:
+    product: cisco
+    service: duo
+detection:
+    selection:
+        event_type: 'authentication'
+        reason: 'anomalous_push'
+    condition: selection
+falsepositives:
+    - A device with a flaky mobile connection producing repeated push retries that Duo scores as anomalous
+    - A user repeatedly retrying a slow or stuck authentication across several applications in a short window
+level: medium
