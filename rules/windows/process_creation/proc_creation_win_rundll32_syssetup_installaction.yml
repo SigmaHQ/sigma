@@ -1,0 +1,33 @@
+title: Application Whitelisting Bypass Via Syssetup.DLL
+id: d661eda1-aa47-4a2a-85ff-c39a0515fd5c
+status: experimental
+description: |
+    Detects execution of "syssetup.dll" via rundll32 calling the "SetupInfObjectInstallAction" export against an INF file.
+    Adversaries abuse this signed library to run local or remote scriptlet/executable payloads referenced from a crafted INF file,
+    bypassing application whitelisting (AWL).
+references:
+    - https://lolbas-project.github.io/lolbas/Libraries/Syssetup/
+    - https://twitter.com/pabraeken/status/994392481927258113
+    - https://github.com/huntresslabs/evading-autoruns
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1127
+    - attack.t1218.011
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\rundll32.exe'
+        - OriginalFileName: 'RUNDLL32.EXE'
+    selection_cli:
+        CommandLine|contains|all:
+            - 'syssetup'
+            - 'SetupInfObjectInstallAction'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
