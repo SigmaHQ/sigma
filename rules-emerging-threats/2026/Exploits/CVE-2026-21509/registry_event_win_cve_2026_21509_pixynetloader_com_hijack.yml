@@ -1,0 +1,38 @@
+title: CVE-2026-21509 - PixyNetLoader Deployment and COM Hijacking
+id: e2b84f5a-6c7d-4d8e-9f1a-5c9e1f2b3d4e
+status: experimental
+description: |
+    Detects PixyNetLoader deployment indicators including COM object hijacking, DLL proxy loading, and steganography-based payload extraction.
+    PixyNetLoader is a sophisticated loader used by APT28 to deploy Covenant Grunt implants with persistence via COM hijacking and scheduled tasks.
+references:
+    - https://www.zscaler.com/blogs/security-research/apt28-leverages-cve-2026-21509-operation-neusploit
+    - https://www.picussecurity.com/resource/blog/cve-2026-21509-apt28-exploits-microsoft-office-zero-day-vulnerability
+author: Jamal Uddin Shaikh
+date: 2026/02/10
+tags:
+    - attack.persistence
+    - attack.t1546.015
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.t1055
+    - cve.2026.21509
+logsource:
+    product: windows
+    category: registry_event
+detection:
+    selection_com_hijack:
+        EventType: 'SetValue'
+        TargetObject|contains:
+            - '\Software\Classes\CLSID\'
+            - '\InprocServer32'
+        Details|contains:
+            - 'EhStorShell.dll'
+            - '\AppData\Local\Temp\'
+            - '\AppData\Roaming\'
+    selection_com_taskband:
+        TargetObject|contains: '{1f3427c8-5c10-4210-aa03-2ee45287d668}'
+    condition: selection_com_hijack or selection_com_taskband
+falsepositives:
+    - Legitimate COM component registration
+    - Software installation and updates
+level: critical
