@@ -1,0 +1,36 @@
+title: Potential Self-Deletion Via Choice/Del Command Combination
+id: 8b2a095d-5ce5-407a-b54c-7b299237a13a
+status: experimental
+description: |
+    Detects "cmd.exe" using "choice" with a timeout as a sleep, then "del"/"erase"
+    to remove a file. This is a common self-deletion one-liner used by .NET
+    stealers and RATs, like SectopRAT, to remove their own executable after exit.
+references:
+    - https://www.fortinet.com/blog/threat-research/uncovering-a-sectoprat-variant-embedded-in-legitimate-software
+    - https://tria.ge/221220-agsp7sbe5s/behavioral2
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/choice
+author: Vladan Sekulic
+date: 2026-09-30
+tags:
+    - attack.stealth
+    - attack.t1070.004
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\cmd.exe'
+        - OriginalFileName: 'Cmd.Exe'
+    selection_choice:
+        CommandLine|contains|all:
+            - 'choice '
+            - ' /t '  # timeout = the sleep
+    selection_del:
+        CommandLine|contains:
+            - 'del '
+            - 'erase '
+    condition: all of selection_*
+falsepositives:
+    - Legitimate .NET Apps, uninstallers or updaters that self-delete using choice as a delay
+level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_cmd_choice_del_combined_execution/info.yml
