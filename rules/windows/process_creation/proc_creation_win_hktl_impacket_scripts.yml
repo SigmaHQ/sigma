@@ -1,0 +1,70 @@
+title: HackTool - Impacket Attack Scripts Execution
+id: 13462d36-3c93-4b92-9ab4-ad34f500ef34
+related:
+    - id: 5d4c3b2a-1f0e-9d8c-7b6a-5f4e3d2c1b0a
+      type: similar
+status: experimental
+description: |
+    Detects execution of impacket attack scripts via the Python interpreter on Windows.
+    Impacket provides Python implementations of various Windows network protocols and is
+    widely used for lateral movement (wmiexec, psexec, smbexec), credential access
+    (secretsdump), Kerberos abuse (GetNPUsers, GetUserSPNs), NTLM relay (ntlmrelayx),
+    and Active Directory enumeration and manipulation.
+references:
+    - https://github.com/fortra/impacket
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-22
+tags:
+    - attack.execution
+    - attack.lateral-movement
+    - attack.credential-access
+    - attack.discovery
+    - attack.t1047
+    - attack.t1021.002
+    - attack.t1003
+    - attack.t1087.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|contains: '\python'
+        - OriginalFileName|contains: 'python'
+    selection_cli:
+        CommandLine|contains:
+            - 'secretsdump.py'
+            - 'wmiexec.py'
+            - 'psexec.py'
+            - 'smbexec.py'
+            - 'atexec.py'
+            - 'dcomexec.py'
+            - 'ntlmrelayx.py'
+            - 'smbrelayx.py'
+            - 'GetNPUsers.py'
+            - 'GetUserSPNs.py'
+            - 'getTGT.py'
+            - 'getST.py'
+            - 'ticketer.py'
+            - 'ticketConverter.py'
+            - 'goldenPac.py'
+            - 'raiseChild.py'
+            - 'dacledit.py'
+            - 'owneredit.py'
+            - 'rbcd.py'
+            - 'addcomputer.py'
+            - 'lookupsid.py'
+            - 'findDelegation.py'
+            - 'GetADUsers.py'
+            - 'GetADComputers.py'
+            - 'samrdump.py'
+            - 'rpcdump.py'
+            - 'rpcmap.py'
+            - 'services.py'
+            - 'reg.py'
+            - 'wmiquery.py'
+            - 'dpapi.py'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of impacket in authorised red team engagements
+    - Scripts legitimately named services.py or reg.py unrelated to impacket
+level: high
