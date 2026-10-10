@@ -1,0 +1,21 @@
+title: MikroTik Inbound SSH Drop on WAN
+id: 9b1c5e42-7a8d-43f1-b924-a12c8b7f3d64
+status: experimental
+description: Detects inbound SSH traffic arriving on the external WAN interface that was dropped by the router's firewall rules. This is typically indicative of automated internet scanning.
+author: OriolesMagic333
+date: 2026-07-02
+logsource:
+    category: firewall
+    product: mikrotik
+detection:
+    selection:
+        in_interface|contains: 'WAN'
+        dst_port: 22
+        protocol: 'TCP'
+        message|contains: 'DROP'
+    condition: selection
+falsepositives:
+    - Internet background radiation (expected behavior on public IPs)
+level: low
+tags:
+    - attack.t1046 # Network Service Discovery
