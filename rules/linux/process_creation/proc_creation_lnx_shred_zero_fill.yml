@@ -1,0 +1,31 @@
+title: Shred with Zero-Fill Flag Used to Conceal Deletion
+id: d2b4f6a8-3c5e-4d7b-a9c1-6e8f0b2d4a5c
+status: experimental
+description: |
+    Detects use of shred with the -z (--zero) flag, which adds a final zero-fill pass after
+    random overwrites to hide the fact that shred was used at all.
+    Without this flag, the random-pattern overwrite can be identified forensically as evidence
+    of shred execution. The -z flag is a deliberate attempt to obscure anti-forensic activity,
+    making it a stronger indicator of malicious intent than shred alone.
+references:
+    - https://man7.org/linux/man-pages/man1/shred.1.html
+    - https://www.virustotal.com/gui/file/759cff11d5b44124c5728663cebb8ed671c1c12c1ce7204fa29d852408b147c7/content
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-21
+tags:
+    - attack.stealth
+    - attack.t1070.004
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        # shred -z /var/log/auth.log
+        # shred -vfz -n 3 ~/.bash_history
+        # shred --zero /etc/passwd
+        Image|endswith: '/shred'
+        CommandLine|re: '\s(-[A-ya-y]{0,2}z|--zero)'
+    condition: selection
+falsepositives:
+    - Authorized secure data sanitization in regulated environments
+level: medium
