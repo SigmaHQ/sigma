@@ -1,0 +1,33 @@
+title: Execution Of Binary Dropped By Compromised Jscrambler Npm Package
+id: dcfc9d76-da69-4119-a39c-c92de13ebb45
+status: experimental
+description: |
+    Detects execution of the binary dropped (infostealer) by the compromised
+    jscrambler npm package. The loader (dist/setup.js) decompresses a
+    platform-matched payload from dist/intro.js into a randomly named with a
+    .exe suffix inside the OS temp directory and launches it.
+references:
+    - https://socket.dev/blog/jscrambler-supply-chain-attack
+author: thereisnobackup
+date: 2026-07-18
+tags:
+    - attack.initial-access
+    - attack.t1195.001
+    - attack.execution
+    - attack.t1059.007
+    - attack.stealth
+    - attack.t1027.009
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|contains: '\node'
+        ParentCommandLine|contains: 'dist/setup.js'
+        CommandLine|endswith: '.exe'
+        CommandLine|contains: '\AppData\Local\Temp\'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
