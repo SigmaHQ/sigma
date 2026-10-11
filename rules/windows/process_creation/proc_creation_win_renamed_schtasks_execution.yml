@@ -10,11 +10,12 @@ references:
     - https://ss64.com/nt/schtasks.html
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-11-27
+modified: 2026-10-02
 tags:
-    - attack.defense-evasion
     - attack.execution
     - attack.persistence
     - attack.privilege-escalation
+    - attack.stealth
     - attack.t1036.003
     - attack.t1053.005
 logsource:
@@ -43,7 +44,13 @@ detection:
         CommandLine|contains: 'schtasks'
     filter_main_img:
         Image|endswith: '\schtasks.exe'
-    condition: (all of selection_cmd_* and not filter_main_cmd) or (selection_pe and not filter_main_img)
+    filter_optional_cmd_openfiles:
+        CommandLine|contains|all:
+            - 'openfiles'
+            - ' /query '
+            - ' /fo'
+    condition: (all of selection_cmd_* and not filter_main_cmd and not filter_optional_cmd_openfiles) or (selection_pe and not filter_main_img)
 falsepositives:
     - Unlikely
 level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_renamed_schtasks_execution/info.yml
