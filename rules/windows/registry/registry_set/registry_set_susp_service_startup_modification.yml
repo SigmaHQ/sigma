@@ -14,7 +14,7 @@ references:
     - https://www.elastic.co/guide/en/security/8.19/suspicious-imagepath-service-creation.html
     - https://docs.specterops.io/ghostpack-docs/SharpUp-mdx/checks/unquotedservicepath
 author: Florian Roth (Nextron Systems), frack113
-date: 2026-03-09
+date: 2026-10-11
 tags:
     - attack.persistence
     - attack.defense-impairment
@@ -61,7 +61,9 @@ detection:
             - '\Temp\'
     condition: selection and not 1 of filter_optional_*
 falsepositives:
-    - Unknown
+    - Software installation or deployment scripts setting a service to start automatically
+    - Management tooling running from a staging directory and changing service start types
+    - Legitimate administrative activity re-configuring service startup. Inspect the writing process and user context to determine intent
 level: high
 regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_susp_service_startup_modification/info.yml
 simulation:

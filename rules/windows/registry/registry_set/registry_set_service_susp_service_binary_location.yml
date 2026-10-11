@@ -14,7 +14,7 @@ references:
     - https://www.elastic.co/guide/en/security/8.19/suspicious-imagepath-service-creation.html
     - https://docs.specterops.io/ghostpack-docs/SharpUp-mdx/checks/unquotedservicepath
 author: Florian Roth (Nextron Systems), frack113
-date: 2026-03-09
+date: 2026-10-11
 tags:
     - attack.persistence
     - attack.defense-impairment
@@ -57,7 +57,9 @@ detection:
         Image: 'C:\Windows\system32\services.exe'
     condition: 1 of selection_* and not 1 of filter_optional_*
 falsepositives:
-    - Unknown
+    - Software installation or upgrade staging a service binary in a temporary or user-profile directory before moving it
+    - Backup or deployment tooling running from a staging directory and registering or updating a service
+    - Legitimate administrative activity re-pointing a service ImagePath. Inspect the writing process and user context to determine intent
 level: high
 regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_service_susp_service_binary_location/info.yml
 simulation:
