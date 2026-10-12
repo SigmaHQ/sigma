@@ -13,7 +13,7 @@ references:
     - https://medium.com/palantir/tampering-with-windows-event-tracing-background-offense-and-defense-4be7ac62ac63
 author: '@neu5ron, Florian Roth (Nextron Systems), Jonhnathan Ribeiro, oscd.community'
 date: 2019-03-22
-modified: 2026-10-05
+modified: 2026-10-12
 tags:
     - attack.stealth
     - attack.defense-impairment
@@ -57,9 +57,19 @@ detection:
         # Example: Remove-EtwTraceProvider -AutologgerName "EventLog-Application" -Guid "{54849625-5478-4994-A5BA-3E3B0328C30D}"
         - CommandLine|contains: 'Remove-EtwTraceProvider'
         # Example: Set-EtwTraceProvider -Guid '{A0C1853B-5C40-4B15-8766-3CF1C58F985A}' -AutologgerName 'EventLog-Application' -Property 0x11
+        # Note: 0x11 and 17 are equivalent and represent the same property value
         - CommandLine|contains|all:
               - 'Set-EtwTraceProvider'
               - '0x11'
+        - CommandLine|contains|all:
+              - 'Set-EtwTraceProvider'
+              - ' 17'
+        - CommandLine|contains|all:
+              - 'Set-EtwTraceProvider'
+              - "'17'"
+        - CommandLine|contains|all:
+              - 'Set-EtwTraceProvider'
+              - '"17"'
     condition: |
         (selection_wevtutil_img and 1 of selection_wevtutil_cli_*)
         or (all of selection_logman_*)
