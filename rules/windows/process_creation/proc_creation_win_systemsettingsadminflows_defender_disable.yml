@@ -1,0 +1,49 @@
+title: Windows Defender Disabled Via SystemSettingsAdminFlows.EXE
+id: da92713f-ca2d-4fab-8320-098013d3f43a
+status: experimental
+description: |
+    Detects the usage of SystemSettingsAdminFlows.exe to disable Windows Defender.
+    SystemSettingsAdminFlows.exe is a legitimate Windows component used for administrative configuration tasks.
+    However, attackers may abuse it to disable Windows Defender as part of their attack chain, especially in the context of ransomware or other malware campaigns.
+references:
+    - https://thedfirreport.com/2026/02/23/apache-activemq-exploit-leads-to-lockbit-ransomware/
+    - https://www.huntress.com/blog/lolbin-to-inc-ransomware
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+author: Chirag Damani (KPMG India), Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-07-01
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_ssaf_img:
+        - Image|endswith: '\SystemSettingsAdminFlows.exe'
+        - OriginalFileName: 'SystemSettingsAdminFlows.EXE'
+    selection_ssaf_cli:
+        CommandLine|contains: 'defender'
+    selection_cli_enable_opt:
+        CommandLine|contains:
+            - 'RTP '
+            - 'RealTimeProtection '
+            - 'DisableEnhancedNotifications '
+    selection_cli_enable_value:
+        CommandLine|contains: '1'
+    selection_cli_disable_opt:
+        CommandLine|contains:
+            - 'SubmitSamplesConsent '
+            - 'SpyNetReporting '
+            - 'DisableCDPUserAuthPolicy '
+    selection_cli_disable_value:
+        CommandLine|contains: '0'
+    # In Enterprise environments, if defender was disabled via GUI, it would be expected to see the following parent-child process relationship:
+    # Thus, uncomment the below filter to exclude such cases because of high false positives:
+    # filter_main_gui_options:
+    #     ParentImage|endswith:
+    #         - '\SystemSettings.exe'
+    #         - '\Explorer.exe'
+    condition: all of selection_ssaf_* and (all of selection_cli_enable_* or all of selection_cli_disable_*)
+falsepositives:
+    - Legitimate turn off of Windows Defender by the technical users or administrators for troubleshooting or other purposes.
+level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_lolbin_systemsettingsadminflows_defender_disable/info.yml
