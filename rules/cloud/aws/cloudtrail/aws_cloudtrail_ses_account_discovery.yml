@@ -1,7 +1,10 @@
 title: AWS SES Account Availability Discovery Via Long-Lived Access Key
 id: 5f75f934-e78a-4653-9d3a-50e799af9edc
 status: experimental
-description: Detects SES GetAccount, ListIdentities, or GetSendQuota API calls made with a long-term AWS access key, which may indicate an attacker using compromised credentials to discover the availability of an SES account.
+description: |
+    Detects SES account availability discovery via CloudTrail using a long-term AWS access key.
+    Adversaries call these APIs to learn whether a compromised SES account is still restricted to the sandbox, where email can only be sent to verified addresses and volume is capped at 200 messages per day, or is already in production mode, where it can send to arbitrary recipients with a quota typically raised to 50,000 emails per day.
+    An account in production mode lets the attacker send phishing from the victim's verified domains, shifting the sending cost and the reputational damage onto the victim.
 references:
     - https://www.wiz.io/blog/wiz-discovers-cloud-email-abuse-campaign
     - https://www.datadoghq.com/blog/detect-phishing-activity-amazon-ses/
