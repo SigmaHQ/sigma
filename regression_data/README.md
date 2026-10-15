@@ -48,7 +48,7 @@ directory.
   path: regression_data/rules/windows/process_creation/<rule_name>/<sample>.evtx
 ```
 
-The sample used is taken from the `path` field; the file name is arbitrary.
+The sample is defined in the `path` field; the file name is arbitrary.
 
 ### Json / NDJson / JsonL
 
@@ -82,7 +82,6 @@ pipelines:                                   # optional, fallback for test_cases
     - regression_data/pipelines/process_creation_fieldmapping.yml
 rules:
     - id: 7dbbcac2-57a0-45ac-b306-ff30a8bd2981   # resolved against --rules-paths
-      title: Windows AMSI Related Registry Tampering Via CommandLine
 test_cases:
     - name: Positive Detection Test
       type: evtx
@@ -104,8 +103,7 @@ own `pipelines`; a test case's `pipelines` always take precedence.
 (`json`/`ndjson`/`jsonl`), since they feed the `sigma convert` step. EVTX tests
 run the rule directly via `evtx-sigma-checker` and ignore both fields.
 
-Each entry in `rules` needs an `id` (looked up against `--rules-paths`) and a
-`title`.
+Each entry in `rules` needs an `id` (looked up against `--rules-paths`).
 
 Fields per entry in `test_cases`:
 
