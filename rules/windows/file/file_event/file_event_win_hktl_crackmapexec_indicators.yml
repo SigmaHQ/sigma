@@ -9,7 +9,7 @@ references:
     - https://github.com/byt3bl33d3r/CrackMapExec/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2024-03-11
-modified: 2024-06-27
+modified: 2026-10-14
 tags:
     - attack.credential-access
     - attack.t1003.001
@@ -24,8 +24,10 @@ detection:
             - '\temp.ps1' # https://github.com/byt3bl33d3r/CrackMapExec/blob/3c3e412193cb6d3237abe90c543e5d995bfa4447/cme/modules/keepass_trigger.py#L42C41-L42C68
             - '\msol.ps1' # https://github.com/byt3bl33d3r/CrackMapExec/blob/3c3e412193cb6d3237abe90c543e5d995bfa4447/cme/modules/msol.py#L48C98-L48C106
     selection_names_re:
-        - TargetFilename|re: '\\[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.txt$' # https://github.com/byt3bl33d3r/CrackMapExec/blob/3c3e412193cb6d3237abe90c543e5d995bfa4447/cme/protocols/wmi/wmiexec.py#L86
-        - TargetFilename|re: '\\[a-zA-Z]{8}\.tmp$' # https://github.com/byt3bl33d3r/CrackMapExec/blob/3c3e412193cb6d3237abe90c543e5d995bfa4447/cme/protocols/smb/atexec.py#L145C19-L146
+        # CrackMapExec writes these output files directly into C:\Windows\Temp, never into a subfolder.
+        # Anchoring to the Temp root avoids the csc.exe / PowerShell Add-Type compile folders (C:\Windows\Temp\<8 letters>\<8 letters>.tmp)
+        - TargetFilename|re|i: '^C:\\Windows\\Temp\\[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.txt$' # https://github.com/byt3bl33d3r/CrackMapExec/blob/3c3e412193cb6d3237abe90c543e5d995bfa4447/cme/protocols/wmi/wmiexec.py#L86
+        - TargetFilename|re|i: '^C:\\Windows\\Temp\\[a-z]{8}\.tmp$' # https://github.com/byt3bl33d3r/CrackMapExec/blob/3c3e412193cb6d3237abe90c543e5d995bfa4447/cme/protocols/smb/atexec.py#L145C19-L146
     condition: selection_path and 1 of selection_names_*
 falsepositives:
     - Unknown
