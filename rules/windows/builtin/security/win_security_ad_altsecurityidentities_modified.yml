@@ -1,0 +1,31 @@
+title: Active Directory Explicit Certificate Mapping Modified
+id: 585251a0-c851-4e65-a4a7-dc4cfe2ccc01
+status: experimental
+description: |
+    Detects modification of the "altSecurityIdentities" attribute of an Active Directory object, which holds explicit certificate mappings used for certificate-based authentication.
+    Attackers with write access to this attribute on a target account can map a certificate they control to that account and authenticate as it (ESC14).
+references:
+    - https://posts.specterops.io/adcs-esc14-abuse-technique-333a004dc2b9
+    - https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
+author: elhoim
+date: 2026-10-15
+tags:
+    - attack.persistence
+    - attack.credential-access
+    - attack.defense-impairment
+    - attack.t1556
+    - attack.t1649
+logsource:
+    product: windows
+    service: security
+    definition: |
+        The "Audit Directory Service Changes" logging policy must be configured in order to receive events. Audit events are generated only for objects with configured system access control lists (SACLs).
+        Note that the default policy does not cover User objects. For that a custom AuditRule need to be setup (See https://github.com/OTRF/Set-AuditRule)
+detection:
+    selection:
+        EventID: 5136
+        AttributeLDAPDisplayName: 'altSecurityIdentities'
+    condition: selection
+falsepositives:
+    - Legitimate explicit certificate mappings configured by administrators (e.g. smart card or third-party PKI users)
+level: medium

@@ -1,0 +1,42 @@
+title: Active Directory Weak Explicit Certificate Mapping Added
+id: 32c33920-67e6-4f66-a161-e48dca1339e1
+related:
+    - id: 585251a0-c851-4e65-a4a7-dc4cfe2ccc01
+      type: similar
+status: experimental
+description: |
+    Detects a weak explicit certificate mapping (X509IssuerSubject, X509SubjectOnly or X509RFC822) being written to the "altSecurityIdentities" attribute of an Active Directory object.
+    Weak mappings do not bind the account to a specific certificate. An attacker able to obtain any certificate with a matching subject or e-mail address can authenticate as the mapped account (ESC14).
+references:
+    - https://posts.specterops.io/adcs-esc14-abuse-technique-333a004dc2b9
+    - https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
+author: elhoim
+date: 2026-10-15
+tags:
+    - attack.persistence
+    - attack.credential-access
+    - attack.defense-impairment
+    - attack.t1556
+    - attack.t1649
+logsource:
+    product: windows
+    service: security
+    definition: |
+        The "Audit Directory Service Changes" logging policy must be configured in order to receive events. Audit events are generated only for objects with configured system access control lists (SACLs).
+        Note that the default policy does not cover User objects. For that a custom AuditRule need to be setup (See https://github.com/OTRF/Set-AuditRule)
+detection:
+    selection_attribute:
+        EventID: 5136
+        AttributeLDAPDisplayName: 'altSecurityIdentities'
+        OperationType: '%%14674' # Value Added
+    selection_weak_subject_rfc822:
+        AttributeValue|startswith:
+            - 'X509:<S>' # X509SubjectOnly
+            - 'X509:<RFC822>' # X509RFC822
+    selection_weak_issuer_subject: # X509IssuerSubject
+        AttributeValue|startswith: 'X509:<I>'
+        AttributeValue|contains: '<S>'
+    condition: selection_attribute and 1 of selection_weak_*
+falsepositives:
+    - Legacy explicit certificate mappings configured by administrators
+level: high

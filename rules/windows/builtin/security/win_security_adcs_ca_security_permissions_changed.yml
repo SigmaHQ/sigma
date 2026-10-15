@@ -1,0 +1,31 @@
+title: ADCS Certification Authority Security Permissions Changed
+id: f788ff76-2c7f-49b9-94c1-d618dfe839d1
+status: experimental
+description: |
+    Detects changes to the security permissions of an Active Directory Certificate Services (ADCS) Certification Authority.
+    Attackers holding the "Manage CA" right can grant themselves or another principal the "Manage Certificates" (officer) right
+    in order to approve pending certificate requests or re-enable dangerous CA settings (ESC7).
+references:
+    - https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf
+    - https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4882
+author: elhoim
+date: 2026-10-15
+tags:
+    - attack.privilege-escalation
+    - attack.credential-access
+    - attack.t1649
+logsource:
+    product: windows
+    service: security
+    definition: |
+        Requires auditing of Certification Services on the CA server.
+            (1) CA\AuditFilter must have the relevant bits set (e.g. "certutil -setreg CA\AuditFilter 127" followed by a CertSvc restart).
+            (2) The "Audit Certification Services" subcategory must be enabled (auditpol /set /subcategory:"Certification Services" /success:enable).
+detection:
+    selection:
+        EventID: 4882 # The security permissions for Certificate Services changed
+    condition: selection
+falsepositives:
+    - Legitimate changes to CA roles and permissions by PKI administrators
+level: medium

@@ -1,0 +1,31 @@
+title: ADCS Issuance Policy Linked To Group
+id: 35a00958-e0fb-4871-914a-d55d7d0451ab
+status: experimental
+description: |
+    Detects modification of the "msDS-OIDToGroupLink" attribute of an issuance policy object (msPKI-Enterprise-Oid).
+    Linking an issuance policy to a group causes users authenticating with a certificate carrying that policy to receive the group membership in their Kerberos ticket.
+    Attackers abuse this (ESC13) by linking an issuance policy of an enrollable template to a privileged group.
+references:
+    - https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53
+    - https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/authentication-mechanism-assurance-for-ad-ds-in-windows-server-2008-r2-step-by-step-guide
+author: elhoim
+date: 2026-10-15
+tags:
+    - attack.privilege-escalation
+    - attack.credential-access
+    - attack.t1649
+logsource:
+    product: windows
+    service: security
+    definition: |
+        Enable "Audit Directory Service Changes" (Success) on Domain Controllers under:
+        Computer Configuration -> Policies -> Windows Settings -> Security Settings -> Advanced Audit Policy Configuration -> Audit Policies -> DS Access.
+        Additionally, an auditing SACL needs to be configured on the "CN=OID,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<tld>" container.
+detection:
+    selection:
+        EventID: 5136
+        AttributeLDAPDisplayName: 'msDS-OIDToGroupLink'
+    condition: selection
+falsepositives:
+    - Legitimate configuration of Authentication Mechanism Assurance (AMA)
+level: high

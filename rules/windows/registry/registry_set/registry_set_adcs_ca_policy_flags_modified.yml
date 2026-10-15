@@ -1,0 +1,37 @@
+title: ADCS CA Security-Relevant Configuration Value Modified
+id: 35718680-13a9-43ce-96c9-3783edc73103
+related:
+    - id: 32a1966a-c4cb-4d86-a667-365256a1be60 # process_creation
+      type: similar
+status: experimental
+description: |
+    Detects modifications to security-relevant configuration values of an Active Directory Certificate Services (ADCS) Certification Authority on the CA host.
+    Attackers with administrative access to the CA can modify these values to enable "EDITF_ATTRIBUTESUBJECTALTNAME2" via "EditFlags" (ESC6),
+    remove "IF_ENFORCEENCRYPTICERTREQUEST" from "InterfaceFlags" (ESC11) or disable the SID security extension via "DisableExtensionList" (ESC16).
+references:
+    - https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf
+    - https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation
+    - https://blog.compass-security.com/2022/11/relaying-to-ad-certificate-services-over-rpc/
+author: elhoim
+date: 2026-10-15
+tags:
+    - attack.privilege-escalation
+    - attack.credential-access
+    - attack.defense-impairment
+    - attack.t1649
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_base:
+        TargetObject|contains: '\Services\CertSvc\Configuration\'
+    selection_value:
+        TargetObject|endswith:
+            - '\PolicyModules\CertificateAuthority_MicrosoftDefault.Policy\DisableExtensionList'
+            - '\PolicyModules\CertificateAuthority_MicrosoftDefault.Policy\EditFlags'
+            - '\InterfaceFlags'
+    condition: all of selection_*
+falsepositives:
+    - Initial CA installation and configuration
+    - Legitimate CA configuration changes by PKI administrators
+level: medium

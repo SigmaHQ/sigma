@@ -1,0 +1,36 @@
+title: ADCS Certificate Request With Subject Alternative Name Request Attribute
+id: 8c0c7eef-e150-4c26-90b6-e79ffa16c908
+status: experimental
+description: |
+    Detects certificate requests received or issued by an Active Directory Certificate Services (ADCS) CA where the request attributes contain a "SAN:" attribute.
+    When the CA policy flag EDITF_ATTRIBUTESUBJECTALTNAME2 is enabled (ESC6), any requester can supply an arbitrary Subject Alternative Name (e.g. the UPN of a Domain Admin)
+    through the "SAN" request attribute and obtain a certificate that authenticates as that principal.
+    Note that SANs embedded directly in the CSR extensions (e.g. ESC1) are not reflected in the request attributes and are not covered by this rule.
+references:
+    - https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf
+    - https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4886
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4887
+author: elhoim
+date: 2026-10-15
+tags:
+    - attack.privilege-escalation
+    - attack.credential-access
+    - attack.t1649
+logsource:
+    product: windows
+    service: security
+    definition: |
+        Requires auditing of Certification Services on the CA server.
+            (1) CA\AuditFilter must have the relevant bits set (e.g. "certutil -setreg CA\AuditFilter 127" followed by a CertSvc restart).
+            (2) The "Audit Certification Services" subcategory must be enabled (auditpol /set /subcategory:"Certification Services" /success:enable).
+detection:
+    selection:
+        EventID:
+            - 4886 # Certificate Services received a certificate request
+            - 4887 # Certificate Services approved a certificate request and issued a certificate
+        Attributes|contains: 'san:'
+    condition: selection
+falsepositives:
+    - Legitimate certificate requests supplying a SAN through request attributes on CAs that intentionally have EDITF_ATTRIBUTESUBJECTALTNAME2 enabled
+level: high

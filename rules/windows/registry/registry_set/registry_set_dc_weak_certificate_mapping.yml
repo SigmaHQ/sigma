@@ -1,0 +1,50 @@
+title: Weak Certificate Mapping Enabled On Domain Controller
+id: f823f0f0-3eba-4a4f-a414-e4bc24f5dbb5
+status: experimental
+description: |
+    Detects registry changes that weaken certificate-based authentication on Domain Controllers (ESC10).
+        - Setting the KDC "StrongCertificateBindingEnforcement" value to 0 disables strong certificate mapping for Kerberos (PKINIT).
+        - Enabling the UPN mapping bit (0x4) in the Schannel "CertificateMappingMethods" value allows implicit UPN-based certificate mapping for Schannel (e.g. LDAPS).
+    Attackers able to change the UPN of an account they control can then obtain a certificate that authenticates as another principal.
+references:
+    - https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7
+    - https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation
+    - https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
+author: elhoim
+date: 2026-10-15
+tags:
+    - attack.persistence
+    - attack.credential-access
+    - attack.defense-impairment
+    - attack.t1556
+    - attack.t1649
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_kdc:
+        TargetObject|endswith: '\Services\Kdc\StrongCertificateBindingEnforcement'
+        Details: 'DWORD (0x00000000)'
+    selection_schannel:
+        TargetObject|endswith: '\Control\SecurityProviders\Schannel\CertificateMappingMethods'
+        Details: # Any value with the UPN mapping bit (0x4) set
+            - 'DWORD (0x00000004)'
+            - 'DWORD (0x00000005)'
+            - 'DWORD (0x00000006)'
+            - 'DWORD (0x00000007)'
+            - 'DWORD (0x0000000c)'
+            - 'DWORD (0x0000000d)'
+            - 'DWORD (0x0000000e)'
+            - 'DWORD (0x0000000f)'
+            - 'DWORD (0x00000014)'
+            - 'DWORD (0x00000015)'
+            - 'DWORD (0x00000016)'
+            - 'DWORD (0x00000017)'
+            - 'DWORD (0x0000001c)'
+            - 'DWORD (0x0000001d)'
+            - 'DWORD (0x0000001e)'
+            - 'DWORD (0x0000001f)'
+    condition: 1 of selection_*
+falsepositives:
+    - Legacy compatibility configurations applied by administrators
+level: high

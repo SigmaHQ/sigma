@@ -1,0 +1,48 @@
+title: Insecure ADCS CA Configuration Set Via Certutil.EXE
+id: 32a1966a-c4cb-4d86-a667-365256a1be60
+related:
+    - id: 35718680-13a9-43ce-96c9-3783edc73103 # registry_set
+      type: similar
+status: experimental
+description: |
+    Detects the use of "certutil.exe -setreg" to apply an insecure configuration to an Active Directory Certificate Services (ADCS) Certification Authority:
+        - Enabling the "EDITF_ATTRIBUTESUBJECTALTNAME2" policy flag, which allows any requester to specify an arbitrary Subject Alternative Name (ESC6).
+        - Removing the "IF_ENFORCEENCRYPTICERTREQUEST" interface flag, which allows unencrypted ICertPassage RPC enrollment and NTLM relay to the CA (ESC11).
+        - Adding the szOID_NTDS_CA_SECURITY_EXT OID (1.3.6.1.4.1.311.25.2) to "DisableExtensionList", which globally removes the SID security extension from issued certificates (ESC16).
+references:
+    - https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf
+    - https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation
+    - https://blog.compass-security.com/2022/11/relaying-to-ad-certificate-services-over-rpc/
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil
+author: elhoim
+date: 2026-10-15
+tags:
+    - attack.privilege-escalation
+    - attack.credential-access
+    - attack.defense-impairment
+    - attack.t1649
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\certutil.exe'
+        - OriginalFileName: 'CertUtil.exe'
+    selection_cli_setreg:
+        CommandLine|contains|windash: '-setreg'
+    selection_flag_esc6:
+        CommandLine|contains:
+            - '+EDITF_ATTRIBUTESUBJECTALTNAME2'
+            - ' EDITF_ATTRIBUTESUBJECTALTNAME2'
+    selection_flag_esc11:
+        CommandLine|contains: '-IF_ENFORCEENCRYPTICERTREQUEST'
+    selection_flag_esc16:
+        CommandLine|contains|all:
+            - 'DisableExtensionList'
+            - '1.3.6.1.4.1.311.25.2'
+    filter_main_esc16_removal:
+        CommandLine|contains: '-1.3.6.1.4.1.311.25.2'
+    condition: selection_img and selection_cli_setreg and 1 of selection_flag_* and not 1 of filter_main_*
+falsepositives:
+    - Administrators intentionally applying these settings, which is strongly discouraged
+level: high

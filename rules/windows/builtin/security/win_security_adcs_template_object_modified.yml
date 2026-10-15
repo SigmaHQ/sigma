@@ -1,0 +1,39 @@
+title: ADCS Certificate Template Security-Relevant Attribute Modified
+id: 267356fe-4afd-4595-8750-497ffee1b6f2
+status: experimental
+description: |
+    Detects modifications to the security descriptor or to security-relevant attributes of an Active Directory Certificate Services (ADCS) certificate template object (pKICertificateTemplate).
+    Attackers with write access to a template (ESC4) can grant themselves enrollment rights, enable "Enrollee Supplies Subject", remove manager approval or authorized signatures,
+    or add authentication EKUs in order to turn the template into an ESC1-vulnerable template and obtain certificates for privileged accounts.
+references:
+    - https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf
+    - https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5136
+author: elhoim
+date: 2026-10-15
+tags:
+    - attack.privilege-escalation
+    - attack.credential-access
+    - attack.t1649
+logsource:
+    product: windows
+    service: security
+    definition: |
+        Enable "Audit Directory Service Changes" (Success) on Domain Controllers under:
+        Computer Configuration -> Policies -> Windows Settings -> Security Settings -> Advanced Audit Policy Configuration -> Audit Policies -> DS Access.
+        Additionally, an auditing SACL needs to be configured on the "CN=Certificate Templates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<tld>" container.
+detection:
+    selection:
+        EventID: 5136
+        ObjectClass: 'pKICertificateTemplate'
+        AttributeLDAPDisplayName:
+            - 'msPKI-Certificate-Application-Policy'
+            - 'msPKI-Certificate-Name-Flag'
+            - 'msPKI-Enrollment-Flag'
+            - 'msPKI-RA-Signature'
+            - 'nTSecurityDescriptor'
+            - 'pKIExtendedKeyUsage'
+    condition: selection
+falsepositives:
+    - Legitimate certificate template administration by PKI administrators
+level: medium

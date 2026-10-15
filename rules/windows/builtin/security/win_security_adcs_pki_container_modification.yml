@@ -1,0 +1,43 @@
+title: ADCS PKI Container Object Permissions Or NTAuthCertificates Modified
+id: 8be6c321-3336-4661-b0ec-498c33d07421
+related:
+    - id: 267356fe-4afd-4595-8750-497ffee1b6f2
+      type: similar
+status: experimental
+description: |
+    Detects changes to the security descriptor of objects in the Active Directory "Public Key Services" container (Certification Authorities, Enrollment Services, AIA, OID, etc.)
+    as well as any modification of the NTAuthCertificates object.
+    Attackers with control over these objects (ESC5) can add a rogue CA certificate to NTAuthCertificates, take control of enterprise CA objects or grant themselves rights over PKI configuration,
+    enabling the issuance of certificates usable for domain authentication.
+    Changes to certificate template objects are excluded as they are covered by a dedicated rule.
+references:
+    - https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf
+    - https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5136
+author: elhoim
+date: 2026-10-15
+tags:
+    - attack.privilege-escalation
+    - attack.credential-access
+    - attack.t1649
+logsource:
+    product: windows
+    service: security
+    definition: |
+        Enable "Audit Directory Service Changes" (Success) on Domain Controllers under:
+        Computer Configuration -> Policies -> Windows Settings -> Security Settings -> Advanced Audit Policy Configuration -> Audit Policies -> DS Access.
+        Additionally, an auditing SACL needs to be configured on the "CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<tld>" container.
+detection:
+    selection_container:
+        EventID: 5136
+        ObjectDN|contains: 'CN=Public Key Services,CN=Services,CN=Configuration,'
+    selection_change_acl:
+        AttributeLDAPDisplayName: 'nTSecurityDescriptor'
+    selection_change_ntauth:
+        ObjectDN|startswith: 'CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,'
+    filter_main_template:
+        ObjectClass: 'pKICertificateTemplate' # Covered by 267356fe-4afd-4595-8750-497ffee1b6f2
+    condition: selection_container and 1 of selection_change_* and not 1 of filter_main_*
+falsepositives:
+    - Legitimate PKI administration such as CA installation, renewal of a CA certificate or "certutil -dspublish" operations
+level: medium

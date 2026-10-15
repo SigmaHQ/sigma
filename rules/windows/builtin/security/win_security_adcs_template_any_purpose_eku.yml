@@ -1,0 +1,44 @@
+title: ADCS Certificate Template With Any Purpose EKU
+id: 0277cbb6-a8a2-430c-ac66-e78add9d8dd0
+related:
+    - id: bfbd3291-de87-4b7c-88a2-d6a5deb28668
+      type: similar
+status: experimental
+description: |
+    Detects an Active Directory Certificate Services (ADCS) certificate template that is loaded, updated or modified to carry the "Any Purpose" Extended Key Usage (2.5.29.37.0).
+    Certificates issued from such templates (ESC2) can be used for client authentication, code signing or as an enrollment agent certificate to request certificates on behalf of other users.
+references:
+    - https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf
+    - https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4898
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4899
+author: elhoim
+date: 2026-10-15
+tags:
+    - attack.privilege-escalation
+    - attack.credential-access
+    - attack.t1649
+logsource:
+    product: windows
+    service: security
+    definition: |
+        Events 4898 and 4899 require "Audit Certification Services" on the CA server, while event 5136 requires "Audit Directory Service Changes" on Domain Controllers
+        and an auditing SACL on the "CN=Certificate Templates,CN=Public Key Services,CN=Services,CN=Configuration" container.
+detection:
+    selection_4898:
+        EventID: 4898 # Certificate Services loaded a template
+        TemplateContent|contains: '2.5.29.37.0'
+    selection_4899:
+        EventID: 4899 # A Certificate Services template was updated
+        NewTemplateContent|contains: '2.5.29.37.0'
+    selection_5136:
+        EventID: 5136
+        ObjectClass: 'pKICertificateTemplate'
+        AttributeLDAPDisplayName:
+            - 'pKIExtendedKeyUsage'
+            - 'msPKI-Certificate-Application-Policy'
+        AttributeValue: '2.5.29.37.0'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate certificate templates intentionally configured with the Any Purpose EKU
+level: medium
