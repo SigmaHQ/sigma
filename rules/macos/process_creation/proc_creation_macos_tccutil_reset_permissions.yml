@@ -1,0 +1,31 @@
+title: TCC Permissions Reset Via Tccutil
+id: 8e937b49-ea64-4f7b-9797-0c59a0a0a5dc
+status: experimental
+description: |
+    Detects the use of tccutil to reset Transparency, Consent, and Control (TCC) permissions for AppleEvents or for all services.
+    macOS infostealers such as Banshee reset AppleEvents permissions to clear previous consent decisions and re-trigger automation prompts that let them control other applications.
+    Investigate the parent process, as legitimate resets are usually performed by administrators or MDM tooling.
+references:
+    - https://www.loobins.io/binaries/tccutil/
+    - https://research.checkpoint.com/2025/banshee-macos-stealer-that-stole-code-from-macos-xprotect/
+author: Varun Poojari
+date: 2026-10-01
+tags:
+    - attack.privilege-escalation
+    - attack.t1548.006
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection_img:
+        Image|endswith: '/tccutil'
+    selection_cli_action:
+        CommandLine|contains: ' reset '
+    selection_cli_service:
+        CommandLine|contains:
+            - ' AppleEvents'
+            - ' All'
+    condition: all of selection_*
+falsepositives:
+    - Administrators or MDM solutions (e.g. Jamf, Kandji) resetting TCC permissions during troubleshooting
+level: medium
