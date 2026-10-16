@@ -1,0 +1,33 @@
+title: Potential Shell Or Command Execution Via GDB
+id: f73b3f35-82e7-492d-ad80-4e5ce268d5e0
+status: experimental
+description: |
+    Detects the use of the GNU Debugger (gdb) to spawn a shell or execute operating system commands.
+    gdb can run arbitrary commands via its "shell" command, the "!" escape, an inline Python one-liner, or "call system()". When gdb is executed with elevated privileges (e.g. via sudo), this is abused for privilege escalation or to break out of restricted environments.
+references:
+    - https://gtfobins.github.io/gtfobins/gdb/
+    - https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html
+author: Defa Mulya Pratama
+date: 2026-10-07
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_bin:
+        Image|endswith: '/gdb'
+    selection_exec:
+        CommandLine|contains:
+            - 'shell '
+            - '!/bin/'
+            - '!sh'
+            - '!bash'
+            - 'os.system'
+            - 'call system'
+            - 'call (void)system'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate debugging sessions that invoke the "shell" command may occur, but are uncommon in automation and should be reviewed.
+level: high
