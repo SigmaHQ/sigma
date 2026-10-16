@@ -1,0 +1,57 @@
+title: Potential SharePoint Exploitation Via Suspicious User-Agent
+id: ae068a0f-0ac2-476a-a247-e1b0ede9cd45
+related:
+    - id: ab8d8f94-4737-4c7c-bbd8-c31f0b20a51c
+      type: derived
+status: experimental
+description: |
+    Detects POST requests to sensitive SharePoint endpoints (/_trust/,
+    /_layouts/15/) where the user-agent matches a known scripting runtime or HTTP library default.
+
+    Exploitation or reconnaissance tools written on PowerShell, Python, Go, Java, Ruby, or curl
+    typically ship with these default user-agents. This pattern is consistent with automated
+    exploitation or reconnaissance targeting SharePoint claim-based token forgery, authentication
+    bypass, and administrative page abuse.
+
+    If the request is successful (2xx response), it may indicate a successful exploitation attempt.
+    If the request is unsuccessful (non-2xx response), it may indicate a failed exploitation attempt
+    or reconnaissance activity. Check for other suspicious activity from the same source IP address,
+    such as multiple failed attempts or other suspicious user-agents.
+references:
+    - https://x.com/testanull/status/2079082982640668990
+    - https://learn.microsoft.com/en-us/sharepoint/dev/general-development/claims-based-identity-and-concepts-in-sharepoint
+    - https://www.rapid7.com/blog/post/ra-microsoft-sharepoint-jwt-token-authentication-bypass-cve-2026-55040/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-18
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - detection.threat-hunting
+logsource:
+    category: webserver
+detection:
+    selection_endpoint:
+        cs-method: POST
+        cs-uri-stem|contains:
+            - '/_trust/'
+            - '/_layouts/15/'
+    selection_useragent:
+        cs-user-agent|contains:
+            - 'WindowsPowerShell'   # PowerShell Invoke-WebRequest / Invoke-RestMethod
+            - 'python-requests'     # Python requests library
+            - 'Python-urllib'       # Python urllib
+            - 'python/'             # Generic Python HTTP clients
+            - 'Go-http-client'      # Go net/http default
+            - 'curl/'               # curl
+            - 'Wget/'               # Wget
+            - 'Java/'               # Java HttpURLConnection
+            - 'Apache-HttpClient'   # Apache HttpComponents (Java)
+            - 'libwww-perl'         # Perl LWP
+            - 'ruby'                # Ruby Net::HTTP
+            - 'axios/'              # Node.js axios
+            - 'node-fetch'          # Node.js node-fetch
+            - 'got/'                # Node.js got
+    condition: all of selection_*
+falsepositives:
+    - Legitimate administrative automation POSTing to SharePoint trust or layout endpoints (extremely rare; validate against known admin activity)
+level: medium
