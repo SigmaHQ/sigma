@@ -1,0 +1,37 @@
+title: CVE-2026-21509 - Malicious RTF File Access and WebDAV Connection
+id: b7c51e2f-3d4a-4c5b-9e8f-2b6c7d8e9f1a
+status: experimental
+description: |
+    Detects suspicious RTF file opening followed by WebDAV network connections, a key indicator of CVE-2026-21509 exploitation.
+    APT28's Operation Neusploit uses weaponized RTF documents that trigger WebDAV connections to download malicious payloads.
+references:
+    - https://www.zscaler.com/blogs/security-research/apt28-leverages-cve-2026-21509-operation-neusploit
+author: Jamal Uddin Shaikh
+date: 2026/02/10
+tags:
+    - attack.initial_access
+    - attack.t1566.001
+    - attack.execution
+    - attack.t1203
+    - cve.2026.21509
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_rtf_creation:
+        TargetFilename|endswith: '.rtf'
+        Image|endswith:
+            - '\WINWORD.EXE'
+            - '\outlook.exe'
+    selection_rtf_names:
+        TargetFilename|contains:
+            - 'BULLETEN'
+            - 'BULLETIN'
+            - 'document.doc'
+            - 'training'
+            - 'military'
+            - 'meteorological'
+    condition: selection_rtf_creation or selection_rtf_names
+falsepositives:
+    - Legitimate RTF document creation and editing
+level: medium
