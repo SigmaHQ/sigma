@@ -1,0 +1,36 @@
+title: Resource-Based Constrained Delegation Attribute Modified
+id: d83152bb-3ee7-4662-bb5e-1f0b0c010f48
+status: experimental
+description: |
+    Detects modification of the "msDS-AllowedToActOnBehalfOfOtherIdentity" attribute on an Active Directory object via Directory Service change auditing (Event 5136).
+    This attribute holds the security descriptor that controls Resource-Based Constrained Delegation (RBCD). By writing it on a victim computer object, an attacker grants a controlled account (often a machine account they can create through the default MachineAccountQuota) the right to obtain Kerberos service tickets impersonating arbitrary users to that host, leading to host/domain takeover.
+    This complements the noPac (sAMAccountName spoofing) and MachineAccountQuota abuse detections by catching the delegation-rights write that frequently follows.
+references:
+    - https://www.thehacker.recipes/ad/movement/kerberos/delegations/rbcd
+    - https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/1581cf48-c9bd-4a32-9853-f0c9f3e7a9e7
+    - https://posts.specterops.io/a-case-study-in-wagging-the-dog-computer-takeover-2bcb7f94c783
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098
+logsource:
+    product: windows
+    service: security
+    definition: The "Audit Directory Service Changes" logging policy must be configured in order to receive events. Audit events are generated only for objects with configured system access control lists (SACLs). Audit events are generated only for objects with configured system access control lists (SACLs) and only when accessed in a manner that matches their SACL settings. This policy covers the following events ids - 5136, 5137, 5138, 5139, 5141. Note that the default policy does not cover Computer objects. For that a custom AuditRule need to be setup (See https://github.com/OTRF/Set-AuditRule)
+detection:
+    selection:
+        EventID: 5136
+        AttributeLDAPDisplayName: 'msDS-AllowedToActOnBehalfOfOtherIdentity'
+        # If you experience a lot of FP you could filter on the expected delegation-management accounts
+        # OperationType: '%%14674' # Value Added
+    # As stated in the FP sections it's better to filter out the expected accounts that perform this operation to tighten the logic
+    # Uncomment the filter below and add the account name (or any other specific field) accordingly
+    # Don't forget to add it to the condition section below
+    # filter:
+        # SubjectUserName: "%name%"
+    condition: selection
+falsepositives:
+    - Legitimate configuration of Resource-Based Constrained Delegation by administrators or provisioning/automation tooling. Expected accounts can be added as exceptions.
+level: high
