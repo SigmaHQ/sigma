@@ -1,0 +1,37 @@
+title: Sensitive Data Archived Via Ditto - MacOS
+id: 7b1f4c62-9e83-4a51-bb27-6d0c3e5a8f14
+status: experimental
+description: |
+    Detects the "ditto" utility archiving a path that holds credentials, browser secrets or cryptocurrency wallet data.
+    "ditto" is Apple's own copy and archive tool and preserves resource forks and extended attributes, which is why macOS infostealers use it to stage collected data into a single archive before exfiltration.
+    AMOS collects Keychain files, browser credentials and wallet data and compresses them with "ditto" into an archive in "/tmp" prior to upload.
+references:
+    - https://www.loobins.io/binaries/ditto/
+    - https://www.cyberproof.com/blog/inside-amos-stealer-how-this-threat-targets-macos-credentials-and-keychains/
+author: clivoa
+date: 2026-08-15
+tags:
+    - attack.collection
+    - attack.t1560.001
+    - attack.t1005
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection_img:
+        Image|endswith: '/ditto'
+    selection_paths:
+        CommandLine|contains:
+            - '/Library/Keychains'
+            - '/.ssh'
+            - 'Login Data'
+            - '/Cookies'
+            - 'Extension Settings'
+            - '/Exodus'
+            - '/Electrum'
+            - '/Ledger Live'
+    condition: all of selection_*
+falsepositives:
+    - Backup or migration tooling that archives the Keychain directory or SSH keys on a schedule
+    - A user archiving their own SSH keys or browser profile before moving to another machine
+level: medium
