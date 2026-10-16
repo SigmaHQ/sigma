@@ -1,12 +1,7 @@
 title: Web Static Asset Hotlinked From Non-Owned Origin
 id: 9c4e2a71-3f6b-4d8e-b1a5-7e2c0d9f6a34
 status: experimental
-description: |
-    Detects static web assets (images, stylesheets, scripts, icons) requested with a Referer header from an origin the organization does not own.
-    Cloned pages, often login portals used for credential phishing, frequently keep loading assets from the legitimate site, which leaks the clone's location through the Referer.
-    A localhost or private IP Referer suggests a phishing kit under development, while a lookalike domain suggests a live campaign.
-    Replace the '%owned_web_origins%' placeholder with every origin the organization serves content from (public domains, subdomains, CDNs, load balancer VIPs and server addresses).
-    Anchor each value to avoid matches inside attacker-controlled hostnames, e.g. '://example.com/', '://example.com:', '.example.com/' and '.example.com:'.
+description: Detects static web assets requested with a Referer from a non-owned origin, typical of a cloned page (often a login portal) that still hotlinks the legitimate site's assets.
 references:
     - https://docs.canarytokens.org/guide/css-cloned-site-token.html
     - https://docs.canarytokens.org/guide/cloned-web-token.html
@@ -35,6 +30,7 @@ detection:
             - ''
             - '-'
     filter_main_owned:
+        # Owned origins, anchored e.g. '://example.com/', '.example.com/'
         cs-referer|contains|expand: '%owned_web_origins%'
     condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
