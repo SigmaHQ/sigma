@@ -1,0 +1,28 @@
+title: Suspicious Child Process From IEDiagCmd.EXE
+id: 51841f84-6bac-4405-848d-87df4b91fe32
+status: experimental
+description: |
+    Detects IEDiagCmd.exe spawning a child process from outside the standard Windows system directories.
+    Attackers can redirect the WINDIR environment variable to make IEDiagCmd.exe execute a pre-planted binary such as netsh.exe from a user-controlled location.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Iediagcmd/
+    - https://twitter.com/Hexacorn/status/1507516393859731456
+author: Nazar Diachok (@Diablo-research)
+date: 2026-09-29
+tags:
+    - attack.stealth
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\iediagcmd.exe'
+    filter_main_system_directory:
+        Image|contains:
+            - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Custom diagnostic workflows that intentionally cause IEDiagCmd.exe to launch a process outside the standard Windows system directories
+level: high
