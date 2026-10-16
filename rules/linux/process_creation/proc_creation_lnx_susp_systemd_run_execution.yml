@@ -1,0 +1,48 @@
+title: Potential Execution Or Persistence Via Systemd-Run
+id: 57b35be1-5231-496b-ba3c-af772b5f9f90
+status: experimental
+description: |
+    Detects potentially suspicious execution of the "systemd-run" utility.
+    Attackers can abuse "systemd-run" to launch commands, scripts or reverse shells as a transient service, scope or timer.
+    This allows the payload to run under a trusted system process, detach from the current session, evade process-tree based monitoring and establish persistence via transient timers.
+references:
+    - https://www.elastic.co/guide/en/security/current/potential-proxy-execution-via-systemd-run.html
+    - https://redcanary.com/blog/threat-detection/attck-t1501-understanding-systemd-service-persistence/
+    - https://www.freedesktop.org/software/systemd/man/latest/systemd-run.html
+author: Defa Mulya Pratama
+date: 2026-10-07
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1053.006
+    - attack.t1569.002
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_bin:
+        Image|endswith: '/systemd-run'
+    selection_opt_scheduling:
+        CommandLine|contains:
+            - '--on-active'
+            - '--on-boot'
+            - '--on-calendar'
+            - '--on-startup'
+            - '--on-unit-active'
+            - '--on-unit-inactive'
+            - '--timer-property'
+    selection_opt_suspicious:
+        CommandLine|contains:
+            - '/dev/shm/'
+            - '/tmp/'
+            - '/var/tmp/'
+            - '/bin/bash'
+            - '/bin/sh'
+            - 'bash -c'
+            - 'sh -c'
+            - '--remain-after-exit'
+    condition: selection_bin and 1 of selection_opt_*
+falsepositives:
+    - Legitimate administrators or automation tools using "systemd-run" to launch scheduled or transient services and scripts.
+level: medium
