@@ -1,0 +1,41 @@
+title: Potential VirtualBox Component Masquerading via Service Installation
+id: 9d2f6a3e-4c1b-4f8a-b7e5-3a6d1c9f2e0b
+status: experimental
+description: |
+    Detects installation of a Windows service (System EventID 7045)
+    named after known VirtualBox Guest Additions components (VBoxGuest, VBoxMouse, VBoxSF,
+    VBoxService, VBoxVideo, VBoxWDDM). Fires when either:
+      (a) the service binary is registered outside the legitimate VirtualBox install/driver
+          paths, or
+      (b) a driver-class component name (VBoxGuest/VBoxMouse/VBoxSF/VBoxVideo/VBoxWDDM) is
+          registered as a user-mode/own-process service instead of a kernel or file-system
+          driver — a structural mismatch that cannot occur with the genuine component and is
+          a strong indicator of name-based masquerading (T1036.005).
+    Adversaries reuse trusted VirtualBox names to blend malicious persistence into expected
+    guest-VM/EDR-noise telemetry.
+references:
+    - https://www.vmray.com/execution-level-analysis-of-a-russian-speaking-multi-operator-intrusion-campaign-operation-standoff/
+author: Pavan Pothamsetti (PpT2211)
+date: 2026-08-24
+tags:
+    - attack.defense-evasion
+    - attack.t1036.005
+    - attack.persistence
+    - attack.t1543.003
+logsource:
+    product: windows
+    service: system
+detection:
+    selection_eventid:
+        EventID: 7045
+    selection_vbox_names:
+        ServiceName|contains: [vboxguest, vboxmouse, vboxsf, vboxservice, vboxvideo, vboxwddm]
+    filter_legit_path:
+        ImagePath|contains:
+            - 'program files\oracle\virtualbox'
+            - '\system32\drivers\vbox'
+            - '\system32\vboxservice'
+    selection_driver_type_mismatch:
+        ServiceName|contains: [vboxguest, vboxmouse, vboxsf, vboxvideo, vboxwddm]
+        ServiceType: ['user mode service', 'win32 own process', 16, 32]
+    condition: (selection_eventid and selection_vbox_names and not filter_legit_path) or selection_driver_type_mismatch
