@@ -1,12 +1,19 @@
 title: Creation of a Local Hidden User Account by Registry
 id: 460479f3-80b7-42da-9c43-2cc1d54dbccd
+related:
+    - id: 8106cdf0-7503-49a9-806a-c5cee9885369
+      type: similar
 status: test
-description: Sysmon registry detection of a local hidden user account.
+description: |
+    Detects creation or modification of local account name entries ending with a
+    dollar sign under the SAM Users Names registry path. This indicates an attempt
+    to creates a hidden local user account, which is a technique used by threat
+    actors to maintain persistence on a compromised system while avoiding detection.
 references:
     - https://twitter.com/SBousseaden/status/1387530414185664538
 author: Christian Burkard (Nextron Systems)
 date: 2021-05-03
-modified: 2025-10-31
+modified: 2026-08-21
 tags:
     - attack.persistence
     - attack.t1136.001
@@ -14,11 +21,15 @@ logsource:
     product: windows
     category: registry_event
 detection:
-    selection:
+    selection_create:
+        EventType: 'CreateKey'
+        TargetObject|endswith: '$'
+        TargetObject|contains: '\SAM\SAM\Domains\Account\Users\Names\'
+    selection_set:
+        EventType: 'SetValue'
         TargetObject|contains: '\SAM\SAM\Domains\Account\Users\Names\'
         TargetObject|endswith: '$\(Default)'
-        Image|endswith: '\lsass.exe'
-    condition: selection
+    condition: 1 of selection_*
 falsepositives:
     - Unknown
 level: high
