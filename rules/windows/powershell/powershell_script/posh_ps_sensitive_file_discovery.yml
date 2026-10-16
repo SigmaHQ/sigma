@@ -9,6 +9,7 @@ references:
     - https://twitter.com/malmoeb/status/1570814999370801158
 author: frack113
 date: 2022-09-16
+modified: 2026-10-14
 tags:
     - attack.discovery
     - attack.t1083
@@ -26,7 +27,10 @@ detection:
         ScriptBlockText|contains: '-recurse'
     selection_file:
         ScriptBlockText|contains:
-            - '.pass'
+            # '.pass' alone also matches property access such as $cred.Password or .PassThru
+            - '\*.pass'
+            - '.pass"'
+            - '.pass'''
             - '.kdbx'
             - '.kdb'
     condition: all of selection_*
