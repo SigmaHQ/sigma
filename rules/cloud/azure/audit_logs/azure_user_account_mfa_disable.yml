@@ -6,8 +6,10 @@ description: |
     Threat actors were seen disabling multi factor authentication for users in order to maintain or achieve access to the account. Also see in SIM Swap attacks.
 references:
     - https://www.sans.org/blog/defending-against-scattered-spider-and-the-com-with-cybercrime-intelligence/
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities
 author: Harjot Singh (@cyb3rjy0t)
 date: 2024-08-21
+modified: 2026-05-09
 tags:
     - attack.credential-access
     - attack.persistence
@@ -17,11 +19,12 @@ logsource:
     definition: 'Requirements: The TargetResources array needs to be mapped accurately in order for this rule to work'
 detection:
     selection:
-        LoggedByService: 'Core Directory'
-        Category: 'UserManagement'
-        OperationName: 'Update user'
-        TargetResources.ModifiedProperties.DisplayName: 'StrongAuthenticationRequirement'
-        TargetResources.ModifiedProperties.NewValue|contains: "State\":0"
+        properties.loggedByService: 'Core Directory'
+        category: 'UserManagement'
+        operationName: 'Update user'
+        properties.targetResources|contains|all:
+            - 'StrongAuthenticationRequirement'
+            - 'Disabled'
     condition: selection
 falsepositives:
     - Legitimate authorized activity.

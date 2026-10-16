@@ -6,8 +6,11 @@ description: |
     URIs for domain names that no longer exist (dangling URIs), not using HTTPS, wildcards at the end of the domain, URIs that are no unique to that app, or URIs that point to domains you do not control should be investigated.
 references:
     - https://learn.microsoft.com/en-us/entra/architecture/security-operations-applications#application-configuration-changes
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities#core-directory
+    - https://analyticsrules.exchange/analyticrules/9fb2ee72-959f-4c2b-bc38-483affc539e4/
 author: Mark Morowczynski '@markmorow', Bailey Bercik '@baileybercik'
 date: 2022-06-02
+modified: 2026-05-09
 tags:
     - attack.initial-access
     - attack.stealth
@@ -21,7 +24,11 @@ logsource:
     service: auditlogs
 detection:
     selection:
-        properties.message: Update Application Sucess- Property Name AppAddress
+        category: ApplicationManagement
+        operationName:
+            - Update Application
+            - Update Service principal
+        properties.targetResources|contains: 'AppIdentifierUri'
     condition: selection
 falsepositives:
     - When and administrator is making legitimate URI configuration changes to an application. This should be a planned event.
