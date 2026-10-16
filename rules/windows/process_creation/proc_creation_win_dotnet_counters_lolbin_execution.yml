@@ -1,0 +1,28 @@
+title: Binary Proxy Execution Via Dotnet-Counters.EXE
+id: 89ee6dad-dabf-4ddd-b6a9-6087ce65e220
+status: experimental
+description: Detects the use of dotnet-counters.exe to launch an arbitrary child process.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Dotnet-Counters/
+    - https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-counters
+author: Nazar Diachok
+date: 2026-09-26
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1127
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\dotnet-counters.exe'
+        - OriginalFileName: 'dotnet-counters.dll'
+    selection_cli:
+        CommandLine|contains|all:
+            - '-- '
+            - 'collect'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of the utility to collect performance counters from a program at startup.
+level: medium
