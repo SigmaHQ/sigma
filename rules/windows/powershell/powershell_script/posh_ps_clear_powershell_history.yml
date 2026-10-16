@@ -1,15 +1,18 @@
 title: Clear PowerShell History - PowerShell
 id: 26b692dc-1722-49b2-b496-a8258aa6371d
 related:
-    - id: dfba4ce1-e0ea-495f-986e-97140f31af2d
-      type: derived
+    - id: f99276ad-d122-4989-a09a-d00904a5f9d2
+      type: similar
+    - id: 8b1f125c-c933-46d0-a510-1ab15cc45326
+      type: similar
 status: test
 description: Detects keywords that could indicate clearing PowerShell history
 references:
     - https://gist.github.com/hook-s3c/7363a856c3cdbadeb71085147f042c1a
+    - https://securelist.ru/tr/hacking-cat/117062/
 author: Ilyas Ochkov, Jonhnathan Ribeiro, Daniil Yugoslavskiy, oscd.community
 date: 2022-01-25
-modified: 2022-12-02
+modified: 2026-10-02
 tags:
     - attack.stealth
     - attack.t1070.003
@@ -18,24 +21,21 @@ logsource:
     category: ps_script
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-    selection1a:
+    selection_del_cmdlet:
         ScriptBlockText|contains:
-            - 'del'
-            - 'Remove-Item'
-            - 'rm'
-    selection1b:
-        ScriptBlockText|contains: '(Get-PSReadlineOption).HistorySavePath'
-    selection_2:
+            - 'del '
+            - 'Remove-Item '
+            - 'rm '
+    selection_del_file:
+        ScriptBlockText|contains:
+            - '(Get-PSReadlineOption).HistorySavePath'
+            - 'ConsoleHost_history.txt'
+    selection_disable_history:
         ScriptBlockText|contains|all:
             - 'Set-PSReadlineOption'
-            - '–HistorySaveStyle'  # not sure if the homoglyph –/- is intended, just checking for both
+            - 'HistorySaveStyle'
             - 'SaveNothing'
-    selection_3:
-        ScriptBlockText|contains|all:
-            - 'Set-PSReadlineOption'
-            - '-HistorySaveStyle'
-            - 'SaveNothing'
-    condition: 1 of selection_* or all of selection1*
+    condition: all of selection_del_* or selection_disable_history
 falsepositives:
     - Legitimate PowerShell scripts
 level: medium
