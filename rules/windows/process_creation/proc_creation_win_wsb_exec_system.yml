@@ -1,0 +1,39 @@
+title: Headless SYSTEM-Context Command Execution Via Windows Sandbox CLI
+id: 86fdab07-ef1e-4528-bf4b-e1f9eefd1546
+status: experimental
+description: |
+    Detects use of the wsb.exe exec subcommand with -r System, which executes a command inside an already-running Windows Sandbox in the NT AUTHORITY\SYSTEM context.
+references:
+    - https://learn.microsoft.com/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-cli#exec
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Wsb/
+author: Konrad 'unrooted' Klawikowski
+date: 2026-07-22
+tags:
+    - attack.execution
+    - attack.defense-evasion
+    - attack.privilege-escalation
+    - attack.t1218
+    - attack.t1564.006
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_image:
+        - Image|endswith: '\wsb.exe'
+        - OriginalFileName: 'wsb.exe'
+    selection_subcommand:
+        CommandLine|contains: ' exec '
+    selection_system:
+        CommandLine|contains:
+            - ' -r System'
+            - ' --run-as System'
+    condition: all of selection_*
+fields:
+    - CommandLine
+    - ParentImage
+    - ParentCommandLine
+    - User
+falsepositives:
+    - Internal IT or development automation that scripts SYSTEM-context tasks inside sandboxes for testing
+    - Sandbox-based CI runners that need elevated execution
+level: medium
