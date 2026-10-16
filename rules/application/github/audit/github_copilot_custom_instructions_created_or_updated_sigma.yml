@@ -1,0 +1,25 @@
+title: GitHub - Copilot Custom Instructions Created or Updated
+id: a47f847e-5854-4871-96a9-975cccaf1181
+status: experimental
+description: A new GitHub Copilot custom instruction set was created or updated. Creation or modification of custom instructions may indicate an attempt to tamper with Copilot.
+references:
+    - https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/audit-log-events-for-your-organization
+    - https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/add-custom-instructions/add-organization-instructions
+author: Stamatis Chatzimangou (@_st0pp3r_)
+date: 2026-07-06
+tags:
+    - attack.impact
+    - attack.t1565
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection:
+        action:
+            - 'copilot.custom_instructions_created'
+            - 'copilot.custom_instructions_updated'
+    condition: selection
+falsepositives:
+    - Legitimate administrators creating or updating Copilot coding standards for the organisation or a repository.
+level: medium
