@@ -1,0 +1,36 @@
+title: BITS Notification Command Configured With A Shell Via PowerShell
+id: db4b0c99-c2ee-421f-87be-6d6c6da1d6f7
+related:
+    - id: b9cbbc17-d00d-4e3d-a827-b06d03d2380d
+      type: similar
+status: experimental
+description: Detects PowerShell scripts that configure a BITS notification command to invoke a command shell, which can be abused to execute commands when a transfer completes or encounters an error.
+references:
+    - https://learn.microsoft.com/en-us/powershell/module/bitstransfer/set-bitstransfer
+    - https://learn.microsoft.com/en-us/windows/win32/api/bits1_5/nf-bits1_5-ibackgroundcopyjob2-setnotifycmdline
+author: duy-tu2005
+date: 2026-09-26
+tags:
+    - attack.persistence
+    - attack.execution
+    - attack.stealth
+    - attack.t1197
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_callback:
+        ScriptBlockText|contains|all:
+            - 'Set-BitsTransfer'
+            - '-NotifyCmdLine'
+    selection_shell:
+        ScriptBlockText|contains:
+            - 'cmd.exe'
+            - 'powershell.exe'
+            - 'pwsh.exe'
+            - '$env:ComSpec'
+    condition: all of selection_*
+falsepositives:
+    - Software deployment or administrative transfer scripts that use a shell as a completion or error handler
+level: medium
