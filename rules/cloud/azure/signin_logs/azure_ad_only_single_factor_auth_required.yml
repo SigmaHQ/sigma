@@ -3,9 +3,10 @@ id: 28eea407-28d7-4e42-b0be-575d5ba60b2c
 status: test
 description: Detect when users are authenticating without MFA being required.
 references:
-    - https://learn.microsoft.com/en-gb/entra/architecture/security-operations-user-accounts
+    - https://learn.microsoft.com/en-gb/entra/architecture/security-operations-user-accounts#monitoring-for-successful-unusual-sign-ins
 author: MikeDuddington, '@dudders1'
 date: 2022-07-27
+modified: 2026-05-08
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -20,8 +21,8 @@ logsource:
     service: signinlogs
 detection:
     selection:
-        Status: 'Success'
-        AuthenticationRequirement: 'singleFactorAuthentication'
+        resultType: 0
+        properties.authenticationRequirement: 'singleFactorAuthentication'
     condition: selection
 falsepositives:
     - If this was approved by System Administrator.
