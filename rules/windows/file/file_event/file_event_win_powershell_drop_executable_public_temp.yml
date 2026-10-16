@@ -1,0 +1,38 @@
+title: PowerShell Dropping Executable to User-Writable Directory
+id: c2f7fc01-c538-4473-abc8-457b02f8e8ca
+status: experimental
+description: >
+  Detects PowerShell writing executable or script files to user-writable
+  paths such as C:\Users\Public or TEMP directories. May indicate
+  payload staging prior to execution as seen in BrokenPipe-style LPE chains.
+author: Saksham Bhattarai
+date: 2026-09-19
+modified: 2026-09-19
+tags:
+  - attack.execution
+  - attack.t1059.001
+  - attack.t1105
+logsource:
+  category: file_event
+  product: windows
+detection:
+  selection_process:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+  selection_path:
+    TargetFilename|contains:
+      - '\Users\Public\'
+      - '\AppData\Local\Temp\'
+  selection_ext:
+    TargetFilename|endswith:
+      - '.exe'
+      - '.ps1'
+  filter_main_policy_test:
+    TargetFilename|re: '\\__PSScriptPolicyTest_[^\\]+\.ps1$'
+  condition: selection_process and selection_path and selection_ext and not filter_main_policy_test
+falsepositives:
+  - Legitimate software deployment scripts
+  - Admin scripts that stage tools to Public folder
+  - Package managers extracting to Temp
+level: medium
