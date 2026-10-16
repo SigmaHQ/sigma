@@ -1,0 +1,46 @@
+title: IFEO Debugger Entry Attempted via Command Line
+id: ecfda7d0-7ea9-484d-988b-0669df1bac94
+related:
+    - id: c81b6de9-b054-44b4-9d8a-3478750d805b
+      type: similar
+    - id: baca5663-583c-45f9-b5dc-ea96a22ce542
+      type: similar
+status: experimental
+description: |
+    Detects "reg.exe" or PowerShell trying to add a "Debugger" value under Image File Execution Options
+    (IFEO) via the command line. Attackers use this to redirect any target executable to perform
+    malicious actions as a debugger.
+references:
+    - https://github.com/Siradankullanici/OpenSourceViruses/blob/3267564a35f6e13559a3119eb68d0da8d2e91a0a/suspiciousregchangesandtaskkils
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-14
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1546.012
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\reg.exe'
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'reg.exe'
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_cli:
+        CommandLine|contains|all:
+            - '\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\'
+            - 'Debugger'
+        CommandLine|contains:
+            - ' add '
+            - 'Set-ItemProperty '
+            - 'New-ItemProperty '
+            - 'sp '
+    condition: all of selection_*
+falsepositives:
+    - Legitimate developers registering a real debugger binary via the command line during debugging sessions
+level: medium
