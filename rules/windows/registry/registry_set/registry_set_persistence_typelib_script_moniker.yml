@@ -1,0 +1,35 @@
+title: COM TypeLib Hijack Via Scriptlet Or Remote Moniker
+id: a077d7ab-3c9c-41d9-a1e7-db2c78cabe1e
+status: experimental
+description: |
+    Detects a type library whose win32/win64 path is set to a "script:" moniker, a ".sct" scriptlet or a URL.
+    Type libraries are registered to DLL, OCX or TLB files. Windows resolves a "script:" path through scrobj.dll and runs the scriptlet in whichever process loads the type library.
+    Attackers register the hijack under the user's own HKCU\Software\Classes\TypeLib (no admin rights needed) for a type library that Explorer loads at logon, such as the Microsoft Scriptlet Library {EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}.
+references:
+    - https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661
+author: Tim Shelton (HAWK.io)
+date: 2026-10-13
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1546.015
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_key:
+        TargetObject|contains: '\TypeLib\'
+    selection_arch:
+        TargetObject|contains:
+            - '\win32'
+            - '\win64'
+    selection_value:
+        - Details|startswith:
+              - 'script:'
+              - 'http:'
+              - 'https:'
+        - Details|contains: '.sct'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
