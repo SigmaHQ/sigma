@@ -1,0 +1,44 @@
+name: "Label inactive PRs"
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # Daily at 06:00 UTC.
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  label-inactive:
+    if: github.repository_owner == 'SigmaHQ'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      INACTIVE_DAYS: 30
+    steps:
+      - name: Add "Inactive" to PRs stalled on author input
+        run: |
+          set -euo pipefail
+          cutoff=$(date -u -d "${INACTIVE_DAYS} days ago" +%F)
+          echo "Cutoff: no activity before ${cutoff}"
+
+          stalled=$(gh api "search/issues?q=repo:${GITHUB_REPOSITORY}+is:pr+is:open+label:%22Author%20Input%20Required%22+updated:%3C${cutoff}" \
+            --jq '.items[] | select(.labels | map(.name) | index("Inactive") | not) | .number')
+
+          for pr in $stalled; do
+            echo "Adding Inactive to #${pr}"
+            gh pr edit "${pr}" --add-label "Inactive"
+          done
+
+      - name: Remove "Inactive" from PRs that became active again
+        run: |
+          set -euo pipefail
+          cutoff=$(date -u -d "${INACTIVE_DAYS} days ago" +%F)
+
+          active=$(gh api "search/issues?q=repo:${GITHUB_REPOSITORY}+is:pr+is:open+label:%22Inactive%22+updated:%3E%3D${cutoff}" \
+            --jq '.items[] | .number')
+
+          for pr in $active; do
+            echo "Removing Inactive from #${pr}"
+            gh pr edit "${pr}" --remove-label "Inactive"
+          done
