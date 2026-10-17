@@ -68,7 +68,10 @@ detection:
     filter_optional_dell_techhub_repair:
         # Dell TechHub runs "esentutl /p" on its SRUDB copy; the repair scratch files land in the working directory (System32)
         Image|endswith: '\esentutl.exe'
-        TargetFilename|re: '(?i)^C:\\Windows\\System32\\(SRUDB_[0-9a-f]{32}\.INTEG\.RAW|TEMPREPAIR\d+\.EDB)$'
+        TargetFilename|startswith: 'C:\Windows\System32\SRUDB_'
+        TargetFilename|endswith:
+            - '.INTEG.RAW'
+            - '.EDB'
     filter_optional_dell_techhub_copy:
         Image|endswith: '\esentutl.exe'
         TargetFilename|startswith: 'C:\ProgramData\Dell\DTP\DB\SRUDBData\'
