@@ -1,0 +1,39 @@
+title: CVE-2026-41940 cPanel CRLF Injection Session File Access via Auditd
+id: ccf6f929-8577-4f37-a4ac-25174621771b
+related:
+    - id: 984a21f0-4d82-4fdc-a2b7-a0e6a1e51c03
+      type: derived
+    - id: 7aca0427-7e19-4859-af17-40157e2f1f7d
+      type: derived
+    - id: 77964729-4b1b-49e3-a21d-996d335b85d1
+      type: derived
+status: experimental
+description: Detects writes to cPanel session files containing URL-encoded CRLF sequences in the filename as captured by auditd syscall monitoring. In CVE-2026-41940, the CRLF injection causes cpsrvd to write attacker-controlled key=value pairs into session files. Auditd open or write syscalls targeting session paths with encoded CRLF in the filename are a direct artifact of exploitation. Requires auditd configured to monitor /var/cpanel/sessions/ with write syscall auditing enabled.
+references:
+    - https://support.cpanel.net/hc/en-us/articles/40073787579671
+    - https://labs.watchtowr.com/the-internet-is-falling-down-falling-down-falling-down-cpanel-whm-authentication-bypass-cve-2026-41940/
+    - https://www.rapid7.com/blog/post/etr-cve-2026-41940-cpanel-whm-authentication-bypass/
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-41940
+author: MahmoudSwelam
+date: 2026-05-01
+modified: 2026-05-10
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - attack.credential-access
+    - attack.persistence
+    - attack.t1556
+logsource:
+    product: linux
+    service: auditd
+detection:
+    keywords:
+        - '/var/cpanel/sessions/%0d'
+        - '/var/cpanel/sessions/%0a'
+        - '/usr/local/cpanel/sessions/%0d'
+        - '/usr/local/cpanel/sessions/%0a'
+    condition: keywords
+falsepositives:
+    - Security research environments testing CVE-2026-41940 against local instances
+    - Auditd log replay tools that re-process historical session file events
+level: high
