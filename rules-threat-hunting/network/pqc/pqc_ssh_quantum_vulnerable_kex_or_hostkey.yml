@@ -1,0 +1,38 @@
+title: SSH Quantum-Vulnerable Key Exchange or Host Key
+id: cf2c8707-f7cd-46bf-aa6d-27425645d82f
+status: experimental
+description: An SSH session used a classical key-exchange (diffie-hellman-group*,
+  ecdh-*, curve25519 without a PQC hybrid) or an ssh-rsa/ecdsa host key. OpenSSH 9.0+
+  offers the sntrup761x25519 post-quantum hybrid KEX; its absence is a harvest-now-decrypt-later
+  exposure for SSH.
+references:
+- https://csrc.nist.gov/pubs/ir/8547/ipd
+author: TAI Creative LLC
+date: '2026-07-16'
+tags:
+- attack.credential-access
+- attack.t1040
+- attack.lateral-movement
+logsource:
+  product: zeek
+  service: ssh
+detection:
+  selection_kex:
+    kex_alg|contains:
+    - diffie-hellman-group
+    - ecdh-sha2
+    - curve25519-sha256
+  selection_hostkey:
+    host_key_alg|contains:
+    - ssh-rsa
+    - ecdsa-sha2
+  filter_pqc:
+    kex_alg|contains:
+    - sntrup
+    - mlkem
+    - kyber
+  condition: (selection_kex or selection_hostkey) and not filter_pqc
+falsepositives:
+- Environments not yet on OpenSSH 9.0+ PQC hybrid (expected).
+level: medium
+license: DRL-1.1
