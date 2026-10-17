@@ -1,0 +1,36 @@
+title: Potential DLL Sideloading Via AccCheckConsole.EXE
+id: c2b3a9c9-0a66-4e8a-aea2-a4c4f95dd933
+status: experimental
+description: |
+    Detects "AccCheckConsole.exe" (UI Accessibility Checker, a signed Microsoft binary) loading a DLL from a user-writable / non-system
+    location. The utility accepts a user-supplied DLL containing a custom verification routine, which is then loaded into the trusted process
+    context. Adversaries abuse this to proxy execution of an attacker-controlled DLL and bypass application whitelisting.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/AccCheckConsole/
+    - https://gist.github.com/bohops/2444129419c8acf837aedda5f0e7f340
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1574.001
+    - attack.t1127
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\AccCheckConsole.exe'
+        ImageLoaded|endswith: '.dll'
+    filter_main_system:
+        ImageLoaded|contains:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
+            - 'C:\Windows\Microsoft.NET\'
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Legitimate use of the UI Accessibility Checker with verification routine DLLs stored in user directories
+level: medium

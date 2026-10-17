@@ -1,0 +1,30 @@
+title: Potential NTDS.DIT Dump Via Dsdbutil.EXE
+id: 4aefbb19-11bd-4909-ae64-70ca9943369b
+status: experimental
+description: |
+    Detects usage of dsdbutil.exe to create a snapshot or IFM media set of the Active Directory database (NTDS.dit).
+    Threat actors abuse this signed LOLBin on Domain Controllers to obtain domain credential material for offline extraction.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Dsdbutil/
+    - https://pentestlab.blog/tag/dsdbutil/
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.credential-access
+    - attack.t1003.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\dsdbutil.exe'
+        - OriginalFileName: 'dsdbutil.exe'
+    selection_cli:
+        CommandLine|contains:
+            - 'snapshot'
+            - 'create full'
+            - ' ifm'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate Active Directory maintenance or backup snapshots performed by administrators
+level: high
