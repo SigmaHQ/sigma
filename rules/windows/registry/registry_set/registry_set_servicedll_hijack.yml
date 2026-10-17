@@ -9,7 +9,7 @@ references:
     - https://www.hexacorn.com/blog/2013/09/19/beyond-good-ol-run-key-part-4/
 author: frack113
 date: 2022-02-04
-modified: 2024-04-03
+modified: 2026-08-31
 tags:
     - attack.persistence
     - attack.privilege-escalation
@@ -24,8 +24,13 @@ detection:
             - 'ControlSet'
             - '\Services\'
         TargetObject|endswith: '\Parameters\ServiceDll'
-    filter_main_printextensionmanger:
+    filter_main_printextensionmanger_1:
         Details: 'C:\Windows\system32\spool\drivers\x64\3\PrintConfig.dll'
+    filter_main_printextensionmanger_2:
+        Image|endswith: '\regsvr32.exe'
+        TargetObject|endswith: '\Services\PrintNotify\Parameters\ServiceDll'
+        Details|startswith: 'C:\WINDOWS\System32\DriverStore\FileRepository\'
+        Details|endswith: '\arm64\PrintConfig.dll'
     filter_main_domain_controller:
         Image: 'C:\Windows\system32\lsass.exe'
         TargetObject|endswith: '\Services\NTDS\Parameters\ServiceDll'
@@ -40,3 +45,8 @@ falsepositives:
     - Administrative scripts
     - Installation of a service
 level: medium
+simulation:
+    - type: atomic-red-team
+      name: TinyTurla backdoor service w64time
+      technique: T1543.003
+      atomic_guid: ef0581fd-528e-4662-87bc-4c2affb86940
