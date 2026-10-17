@@ -36,9 +36,13 @@ detection:
             - '/sh'
             - '/tcsh'
             - '/zsh'
-        ParentImage|contains: '/python3'
         ParentCommandLine|contains: 'celery'
-    condition: selection
+    selection_parent:
+        - ParentImage|endswith:
+              - '/python'
+              - '/python3'
+        - ParentImage|contains: '/python3.'
+    condition: selection and selection_parent
 falsepositives:
     - Legacy or custom administrative tasks deliberately hardcoded with shell=True or os.system execution inside Celery task functions.
     - Media processing, deployment, or reporting pipelines that intentionally shell out to external tools (e.g. ffmpeg, git) from within a task.
