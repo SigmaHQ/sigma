@@ -1,0 +1,27 @@
+title: OpenAI Codex CLI Approval and Sandbox Bypass Mode
+id: a4a836c2-4612-4a56-ba67-6ac3e1e49b38
+status: experimental
+description: |
+    Detects execution of the OpenAI Codex CLI with command-line options that bypass approval prompts and sandbox restrictions.
+    The "--dangerously-bypass-approvals-and-sandbox" option skips confirmation prompts and executes commands without sandboxing.
+    The "--yolo" option is an alias for the same behavior.
+    This mode is intended for environments that provide an external isolation boundary.
+references:
+    - https://github.com/openai/codex/blob/06f97622f8529feef0d230fc37519c36c6bb2eeb/codex-rs/utils/cli/src/shared_options.rs
+author: Michael Adedeji
+date: 2026-09-26
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith: '\codex.exe'
+    selection_cli:
+        CommandLine|contains:
+            - '--dangerously-bypass-approvals-and-sandbox'
+            - '--yolo'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use in isolated development, testing, or automation environments where approval and sandbox bypass behavior is explicitly intended.
+level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_codex_approval_sandbox_bypass/info.yml
