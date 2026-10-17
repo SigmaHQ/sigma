@@ -1,9 +1,10 @@
-title: Potential System Shell Spawned From Celery Worker Process
+title: Shell Spawned by Celery Worker Process
 id: 904f6442-3b57-4b3f-987c-1559f58ce8d8
 status: experimental
 description: |
     Detects a system shell interpreter being spawned directly by a Celery worker process.
-    This behavior indicates a Python background task execution framework is evaluating raw string input through a shell execution context, which is highly indicative of successful command or prompt injection exploitation against an LLM agent task.
+    This behavior indicates a Python background task execution framework is evaluating raw string input through a shell execution context,
+    which is highly indicative of successful command or prompt injection exploitation against an LLM agent task.
 references:
     - https://docs.celeryq.dev/en/stable/userguide/tasks.html
     - https://genai.owasp.org/llmrisk/llm01-prompt-injection/
@@ -15,7 +16,7 @@ references:
     - https://unit42.paloaltonetworks.com/ai-agent-prompt-injection/
     - https://www.microsoft.com/en-us/security/blog/2026/05/07/prompts-become-shells-rce-vulnerabilities-ai-agent-frameworks
 author: Jennifer Batina
-date: 2026-07-09
+date: 2026-10-17
 tags:
     - attack.execution
     - attack.t1059.004
@@ -27,8 +28,10 @@ detection:
         Image|endswith:
             - '/ash'
             - '/bash'
+            - '/busybox'
             - '/csh'
             - '/dash'
+            - '/fish'
             - '/ksh'
             - '/sh'
             - '/tcsh'
