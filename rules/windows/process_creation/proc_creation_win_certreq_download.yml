@@ -1,0 +1,32 @@
+title: Suspicious CertReq Command to Download
+id: 4480827a-9799-4232-b2c4-ccc6c4e9e12b
+status: experimental
+description: |
+    Detects a suspicious CertReq execution downloading a file.
+    This behavior is often used by attackers to download additional payloads or configuration files.
+    Certreq is a built-in Windows utility used to request and retrieve certificates from a certification authority (CA). However, it can be abused by threat actors for malicious purposes.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Certreq/
+author: Christian Burkard (Nextron Systems)
+date: 2021-11-24
+modified: 2025-10-29
+tags:
+    - attack.command-and-control
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\certreq.exe'
+        - OriginalFileName: 'CertReq.exe'
+    selection_cli_flag_post:
+        CommandLine|contains|windash: '-Post'
+    selection_cli_flag_config:
+        CommandLine|contains|windash: '-config'
+    selection_cli_http:
+        CommandLine|contains: 'http'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high

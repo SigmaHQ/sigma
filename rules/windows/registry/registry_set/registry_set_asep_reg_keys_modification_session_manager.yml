@@ -13,6 +13,7 @@ author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatull
 date: 2019-10-25
 modified: 2023-08-17
 tags:
+    - attack.privilege-escalation
     - attack.persistence
     - attack.t1547.001
     - attack.t1546.009
@@ -33,12 +34,12 @@ detection:
     filter:
         Details: '(Empty)'
     condition: session_manager_base and session_manager and not filter
-fields:
-    - SecurityID
-    - ObjectName
-    - OldValueType
-    - NewValueType
 falsepositives:
     - Legitimate software automatically (mostly, during installation) sets up autorun keys for legitimate reason
     - Legitimate administrator sets up autorun keys for legitimate reason
 level: medium
+simulation:
+    - type: atomic-red-team
+      name: Modify BootExecute Value
+      technique: T1547.001
+      atomic_guid: befc2b40-d487-4a5a-8813-c11085fb5672

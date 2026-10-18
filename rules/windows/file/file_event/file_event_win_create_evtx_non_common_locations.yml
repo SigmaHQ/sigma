@@ -9,10 +9,10 @@ references:
     - https://learn.microsoft.com/en-us/windows/win32/eventlog/eventlog-key
 author: D3F7A5105
 date: 2023-01-02
-modified: 2024-03-26
+modified: 2026-10-13
 tags:
-    - attack.defense-evasion
-    - attack.t1562.002
+    - attack.defense-impairment
+    - attack.t1685.001
 logsource:
     category: file_event
     product: windows
@@ -24,9 +24,10 @@ detection:
         TargetFilename|startswith: 'C:\Windows\System32\winevt\Logs\'
     filter_main_baseimage:
         TargetFilename|startswith: 'C:\ProgramData\Microsoft\Windows\Containers\BaseImages\'
-        TargetFilename|endswith: '\Windows\System32\winevt\Logs\'
+        TargetFilename|contains: '\Windows\System32\winevt\Logs\'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Administrator or backup activity
     - An unknown bug seems to trigger the Windows "svchost" process to drop EVTX files in the "C:\Windows\Temp" directory in the form "<log_name">_<uuid>.evtx". See https://superuser.com/questions/1371229/low-disk-space-after-filling-up-c-windows-temp-with-evtx-and-txt-files
 level: medium
+regression_tests_path: regression_data/rules/windows/file/file_event/file_event_win_create_evtx_non_common_locations/info.yml
