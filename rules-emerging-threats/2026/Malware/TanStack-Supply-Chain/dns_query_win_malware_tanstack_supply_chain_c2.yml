@@ -1,0 +1,31 @@
+title: TanStack Supply-Chain Attack DNS Indicators
+id: ac5a4e3f-7f9d-6abc-d8ea-3b4c5f6a7b8c
+status: experimental
+description: |
+    Detects DNS queries to attacker-controlled infrastructure used by the Mini Shai-Hulud campaign targeting TanStack npm packages along with other packages such as mistralai, uipath and so on.
+    The domain git-tanstack.com (registered May 9, 2026) hosted secondary payloads including transformers.pyz.
+    The filev2.getsession.org endpoint was used for credential exfiltration via the Session protocol.
+references:
+    - https://socket.dev/blog/tanstack-npm-packages-compromised-mini-shai-hulud-supply-chain-attack
+    - https://socket.dev/supply-chain-attacks/mini-shai-hulud
+    - https://safedep.io/mass-npm-supply-chain-attack-tanstack-mistral/
+author: Leonardo Gasparini
+date: 2026-05-12
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+    - attack.exfiltration
+    - attack.t1048
+    - detection.emerging-threats
+logsource:
+    category: dns_query
+    product: windows
+detection:
+    selection_attacker_apex:
+        QueryName: 'git-tanstack.com'
+    selection_session_exfil:
+        QueryName: 'filev2.getsession.org'
+    condition: 1 of selection_*
+falsepositives:
+    - Unknown
+level: medium
