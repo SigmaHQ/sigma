@@ -2,7 +2,7 @@ title: Computer Account Created by User Account - Potential MachineAccountQuota 
 id: 8efa201d-9190-4c25-9a54-37613b742422
 status: experimental
 description: |
-    Detects the creation of a computer (machine) account (Event 4741) where the creator (SubjectUserName) is a regular user account rather than a domain controller or delegated administrator.
+    Detects the creation of a computer (machine) account (Event 4741) where the creator (SubjectUserName) is not a domain controller or one of the delegated administrator / provisioning accounts listed in the placeholder.
     By default the ms-DS-MachineAccountQuota attribute lets any authenticated user create up to 10 computer accounts. Attackers abuse this to stage follow-on attacks: noPac (CVE-2021-42278/42287) sAMAccountName spoofing, Resource-Based Constrained Delegation (RBCD) takeover, and Shadow Credentials. A computer account being created by a normal user is rarely legitimate outside of controlled provisioning workflows.
 references:
     - https://www.crowdstrike.com/blog/how-to-defend-against-samaccountname-spoofing/
@@ -25,8 +25,9 @@ detection:
         SubjectUserName|endswith: '$'
     filter_main_anonymous:
         SubjectUserName: 'ANONYMOUS LOGON'
+    filter_main_delegated_admins:
+        SubjectUserName|expand: '%DomainJoin_Accounts%' # Delegated administrators and provisioning service accounts allowed to join computers to the domain
     condition: selection and not 1 of filter_main_*
 falsepositives:
-    - Approved provisioning or imaging accounts and helpdesk staff who legitimately domain-join machines; baseline and filter these specific SubjectUserName values
-    - SCCM / MDT / Autopilot or other automated deployment service accounts
+    - Legitimate domain joins by accounts not yet added to the placeholder
 level: medium

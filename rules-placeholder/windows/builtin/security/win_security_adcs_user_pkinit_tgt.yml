@@ -1,11 +1,11 @@
-title: Certificate-Based TGT Request for User Account - Potential ADCS ESC1 Abuse
+title: Certificate-Based Kerberos TGT Request For User Account
 id: 456dbc3f-5995-4904-bd9c-7542c4b05701
 status: experimental
 description: |
     Detects a Kerberos TGT request (Event 4768) that was authenticated with an X.509 certificate (PKINIT) for a non-machine (user) account.
-    When AD CS certificate templates allow the enrollee to supply an arbitrary Subject Alternative Name (ESC1), an attacker can request a certificate that impersonates a privileged user and then use that certificate to obtain a Kerberos TGT via PKINIT.
-    The presence of populated certificate fields (CertIssuerName / CertSerialNumber / CertThumbprint) on a TGT request for a user account is a strong indicator of certificate-based impersonation.
-    This complements the existing ESC8/PetitPotam machine-account certificate TGT detection by focusing on user accounts (ESC1 path).
+    A legitimate smart card or certificate-based logon and an AD CS ESC1 abuse (an attacker enrolling a certificate with an arbitrary Subject Alternative Name to impersonate a privileged user, then using it to obtain a TGT via PKINIT) produce the same event.
+    This rule is therefore a baseline template: the placeholder must be populated with the accounts that legitimately authenticate with certificates in the environment before the rule is actionable. Any remaining user PKINIT TGT request should be investigated as potential certificate-based impersonation.
+    This complements the existing ESC8/PetitPotam machine-account certificate TGT detection by focusing on user accounts.
 references:
     - https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf
     - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4768
@@ -36,8 +36,9 @@ detection:
         IpAddress:
             - '::1'
             - '127.0.0.1'
+    filter_main_legit_cert_users:
+        TargetUserName|expand: '%Certificate_Auth_Users%' # Accounts that legitimately log on with smart cards or other certificates
     condition: selection and not 1 of filter_main_*
 falsepositives:
-    - Environments using smart card (PKINIT) logon for interactive users will generate these events legitimately and must be baselined or filtered
-    - Certificate-based authentication for VPN or Wi-Fi (EAP-TLS) where the same accounts are used
-level: high
+    - Legitimate certificate-based logons by accounts not yet added to the placeholder
+level: low
