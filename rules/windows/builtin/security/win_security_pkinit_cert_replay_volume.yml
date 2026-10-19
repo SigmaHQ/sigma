@@ -1,0 +1,33 @@
+title: CVE-2026-69676 PKINIT Replay Volume (One Source, Cert-Rotation Variant)
+id: 4617933b-ad79-4db8-9391-4988026d2ae0
+status: experimental
+description: |
+  Lower-confidence companion to the replay-burst rule. Groups PKINIT cert logons by source
+  address ALONE (dropping CertThumbprint) so it still fires if the attacker rotates the
+  enrolled certificate/principal between requests. Higher FP potential than the per-cert
+  rule; pair with the on-wire repeating-clientDHPublicValue signal (Zeek/Suricata) to
+  confirm. Lab run: 50 PKINIT 4768s from one source in a ~10.7s span, 30 within the tightest
+  10s window.
+references:
+  - https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-69676
+author: Andrew Schwartz (Huntress), @4ndr3w6S
+date: 2026-10-19
+license: DRL-1.1
+tags:
+  - attack.lateral-movement
+  - attack.t1210
+  - cve.2026-69676
+correlation:
+  type: event_count
+  rules:
+    - pkinit_cert_preauth_base
+  group-by:
+    - IpAddress
+  timespan: 10s
+  condition:
+    gte: 20
+falsepositives:
+  - Any single source legitimately performing many cert logons in a window (VDI boot storms,
+    synthetic monitoring, load tests). Allowlist the source, or require the per-cert rule
+    and/or the on-wire DH-reuse signal for alerting.
+level: medium

@@ -1,0 +1,34 @@
+title: CVE-2026-69676 PKINIT Replay Burst (Same Cert, One Source)
+id: 37d9f359-3b84-47b1-a641-9141d7fb7a2b
+status: experimental
+description: |
+  Detects the CVE-2026-69676 Kerberos PKINIT cached-DH use-after-free replay: a high-rate
+  burst of Security-4768 PKINIT cert logons carrying the SAME certificate thumbprint from a
+  single source address across many ephemeral client ports in a tiny window. Grouping by
+  (IpAddress, CertThumbprint) keys the detection on the exploit's own shape. Threshold is
+  gte 20 within 10s; the lab replay burst produced 20 and 30 identical-thumbprint 4768s inside
+  <100ms per certificate (see VALIDATION.md).
+references:
+  - https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-69676
+author: Andrew Schwartz (Huntress), @4ndr3w6S
+date: 2026-10-19
+license: DRL-1.1
+tags:
+  - attack.lateral-movement
+  - attack.t1210
+  - cve.2026-69676
+correlation:
+  type: event_count
+  rules:
+    - pkinit_cert_preauth_base
+  group-by:
+    - IpAddress
+    - CertThumbprint
+  timespan: 10s
+  condition:
+    gte: 20
+falsepositives:
+  - VDI/non-persistent boot storms with cert auth, synthetic-monitoring or health checks
+    that cert-auth in a loop, cert-auth load tests. These are known (IpAddress, CertThumbprint)
+    pairs; allowlist by that pair rather than weakening the threshold.
+level: high
