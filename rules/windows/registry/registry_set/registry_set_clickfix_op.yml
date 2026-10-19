@@ -1,0 +1,40 @@
+title: ClickFix File Operation
+id: 1673de24-0f48-46f2-954d-e5bd4d6bb7b5
+status: test
+description: File operations performed in the Run prompt are pretty rare and the ' in ' and ' do ' keywords identify a clickfix pattern similar to " %f in (f_*) do @if"
+references:
+    - https://x.com/MsftSecIntel/status/2106197481960706155
+    - https://thehackernews.com/2026/10/clickfix-smuggles-payloads-through.html
+author: Josh Nickels
+date: 2026-10-19
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection_regobjectname:
+        TargetObject|endswith: '\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU'
+    selection_regstringValue:
+        Details|contains:
+            - cmd
+            - pwsh
+            - powershell
+            - bash
+            - wsl
+            - wscript
+            - cscript
+    selection_operation:
+        Details|contains:
+            - ' in '
+            - ' do '
+    condition: all of selection_*
+falsepositives:
+    - Legitimate operations in Run prompt
+level: medium
+fields:
+    - ComputerName
+    - RegObjectName
+    - RegStringValue
+    - ContextProcessId
+tags:
+    - attack.execution
+    - attack.t1204
