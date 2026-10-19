@@ -10,6 +10,7 @@ references:
     - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/ee844150(v=ws.11)
 author: heyyanu
 date: 2026-03-26
+modified: 2026-10-19
 tags:
     - attack.execution
     - attack.t1204.002
@@ -28,7 +29,10 @@ detection:
             - 8006 # MSI and Script would have been blocked
             - 8021 # Packaged app execution would have been blocked
             - 8024 # Packaged app deployment would have been blocked
-    condition: selection
+    filter_main_version_dll:
+        FullFilePath: 'C:\Windows\system32\VERSION.dll'
+        EventID: 8003
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Expected during AppLocker policy testing and audit mode deployments
 level: medium
