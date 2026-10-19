@@ -1,0 +1,29 @@
+title: Cisco IOS Login Brute Force Quiet Mode Triggered
+id: 0618441d-3412-46d9-99eb-109f61546994
+status: experimental
+description: |
+    Detects a Cisco IOS device entering quiet mode after exceeding the configured
+    login failure threshold. Quiet mode is only entered once repeated authentication
+    attempts have failed within the configured window, so this event is a high
+    confidence indicator of a brute force attempt against the device management plane
+    rather than a single mistyped password.
+references:
+    - https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/sec_usr_cfg/configuration/15-mt/sec-usr-cfg-15-mt-book/sec-cfg-autoenable.html
+author: Steven Garcia
+date: 2026-10-19
+tags:
+    - attack.credential-access
+    - attack.t1110
+    - attack.t1110.001
+logsource:
+    product: cisco
+    service: aaa
+detection:
+    keywords:
+        - '%SEC_LOGIN-1-QUIET_MODE_ON'
+    condition: keywords
+falsepositives:
+    - An administrator repeatedly mistyping credentials during maintenance, which
+      can trip the threshold without malicious intent
+    - Automation or monitoring systems authenticating with stale credentials
+level: high
