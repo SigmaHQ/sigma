@@ -1,0 +1,129 @@
+title: Linux Suspicious Child Process from Node.js - React2Shell
+id: c70834fa-fb9d-4aa0-9e7d-45ceed36f3f7
+related:
+    - id: 271de298-cc0e-4842-acd8-079a0a99ea65
+      type: similar
+status: experimental
+description: |
+    Detects suspicious child processes spawned from Node.js server processes on Linux systems, potentially indicating remote code execution exploitation such as CVE-2025-55182 (React2Shell).
+    This rule particularly looks for exploitation of vulnerability on Node.js Servers where attackers abuse Node.js child_process module to execute arbitrary system commands.
+    When execSync() or exec() is used, the command line often includes a shell invocation followed by suspicious commands or scripts (e.g., /bin/sh -c <malicious-command>).
+    For other methods, the Image field will show the spawned process directly.
+references:
+    - https://github.com/msanft/CVE-2025-55182
+    - https://nodejs.org/api/child_process.html#class-childprocess
+    - https://gist.github.com/swachchhanda000/a0228130f86a2dedfbcebb415b47f870
+    - https://github.com/nasbench/Misc-Research/blob/2f651ede832ab34027a7ba005b63bb78f1ade378/Other/React-Next-Child-Processes-Notes.md
+author: Swachchhanda Shrawan Poudel (Nextron Systems), Nasreddine Bencherchali
+date: 2025-12-05
+tags:
+    - attack.execution
+    - attack.t1059
+    - attack.initial-access
+    - attack.t1190
+    - detection.emerging-threats
+    - cve.2025-55182
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_parent:
+        ParentImage|endswith: '/node'
+        ParentCommandLine|contains:
+            - '--experimental-https'
+            - '--experimental-next-config-strip-types'
+            - '/node_modules/next'
+            - 'next dev'
+            - 'next start'
+            - 'node_modules/.bin'
+            - 'react-scripts start'
+            - 'start-server.js'
+    selection_generic_child_img:
+        # Observed when child_process.spawn(), child_process.exec(), child_process.execFile(), or child_process.fork() method is used to spawn suspicious processes in exploit
+        - Image|endswith:
+              - '/busybox'
+              - '/cat'
+              - '/curl'
+              - '/dash'
+              - '/dig'
+              - '/head'
+              - '/id'
+              - '/ifconfig'
+              - '/ip'
+              - '/java'
+              - '/less'
+              - '/lua'
+              - '/more'
+              - '/nc'
+              - '/ncat'
+              - '/netcat'
+              - '/netstat'
+              - '/nslookup'
+              - '/perl'
+              - '/ping'
+              - '/python'
+              - '/python2'
+              - '/ruby'
+              - '/socat'
+              - '/tail'
+              - '/wget'
+              - '/whoami'
+        - Image|contains: '/python'
+    selection_generic_child_cli:
+        # Observed when child_process.execSync() is used to spawn suspicious processes
+        # Reference: https://nodejs.org/api/child_process.html#child_processexecsynccommand-options
+        # By default, the cli will look something like `/bin/sh -c .......`
+        CommandLine|contains:
+            - '/dev/tcp/'
+            - '/dev/udp/'
+            - '/etc/hosts'
+            - '/etc/passwd'
+            - '/etc/shadow'
+            - 'base64'
+            - 'cat '
+            - 'curl'
+            - 'dig'
+            - 'ifconfig'
+            - 'IO::Socket::INET'
+            - 'java'
+            - 'less '
+            - 'lua'
+            - 'mkfifo '
+            - 'more'
+            - 'nc '
+            - 'ncat'
+            - 'netcat'
+            - 'netstat'
+            - 'nslookup'
+            - 'perl'
+            - 'php'
+            - 'ping'
+            - 'ps -ef'
+            - 'ps aux'
+            - 'python'
+            - 'rcat'
+            - 'ruby'
+            - 'sh -i 2>&1'
+            - '-c id'
+            - 'socat'
+            - 'uname'
+            - 'wget'
+            - 'whoami'
+    selection_specific_sh:
+        Image|endswith: '/sh'
+    selection_specific_cli:
+        Image|endswith: '-c'
+    filter_main_default_shell_flag:
+        Image|endswith: '-c'
+    condition:
+        selection_parent and
+        (
+            1 of selection_generic_*
+            or
+            (selection_specific_sh and not filter_main_default_shell_flag)
+            or
+            (all of selection_specific_* and selection_generic_child_cli)
+        )
+falsepositives:
+    - Unknown
+level: high

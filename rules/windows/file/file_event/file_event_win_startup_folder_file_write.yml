@@ -10,7 +10,7 @@ references:
     - https://github.com/OTRF/ThreatHunter-Playbook/blob/2d4257f630f4c9770f78d0c1df059f891ffc3fec/docs/evals/apt29/detections/5.B.1_611FCA99-97D0-4873-9E51-1C1BA2DBB40D.md
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2020-05-02
-modified: 2025-10-17
+modified: 2025-12-03
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -22,8 +22,12 @@ detection:
     selection:
         TargetFilename|contains: '\Microsoft\Windows\Start Menu\Programs\StartUp'
     filter_main_update:
-        - Image: 'C:\Windows\System32\wuauclt.exe'
-        - TargetFilename|startswith: 'C:\$WINDOWS.~BT\NewOS\'
+        - Image:
+              - 'C:\Windows\System32\wuauclt.exe'
+              - 'C:\Windows\uus\ARM64\wuaucltcore.exe'
+        - TargetFilename|startswith:
+              - 'C:\$WINDOWS.~BT\NewOS\'
+              - 'C:\$WinREAgent\Scratch\Mount\'
     filter_optional_onenote:
         Image|endswith: '\ONENOTE.EXE'
         TargetFilename|endswith: '\Send to OneNote.lnk'
