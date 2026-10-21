@@ -1,0 +1,41 @@
+title: Potential Autonomous AI Agent Activity Via Known Working Directory
+id: 6f9c5d25-d4ea-40ce-9d50-61259e1f579f
+status: experimental
+description: |
+    Detects process execution with a current working directory under the dot-folder used by the OpenClaw agent family and its copycat ecosystem.
+    Covers the Steinberger rename lineage (Clawdbot, Clawd, Clawbot, Moltbot, Moltbook, OpenClaw) and the copycat projects that adopted the same install convention (Nanobot, NanoClaw, PicoClaw, ZeroClaw, Moltis, AgentZero).
+    The agent stores credentials, sessions, and workspace files under a fixed dot-folder in the user profile, so any process whose CurrentDirectory points into that tree is either the agent itself or a child it spawned (shells, npm, browsers, MCP servers).
+references:
+    - https://github.com/openclaw/openclaw/blob/ea16a5e9e10c5b2be28ed46ea77ba5a7aa787d8c/README.md
+    - https://github.com/HKUDS/nanobot/blob/9ccef018c222b198991d36db8166cfc0c3aa7ea5/README.md
+    - https://github.com/nanocoai/nanoclaw/blob/975a2f0f5b0ea19bbf35fadfd394df35e5341d3a/README.md
+author: David El (0xdavidel)
+date: 2026-05-15
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cwd:
+        CurrentDirectory|contains:
+            - '\.openclaw\'
+            - '\.moltbot\'
+            - '\.moltbook\'
+            - '\.clawdbot\'
+            - '\.clawd\'
+            - '\.clawbot\'
+            - '\.nanobot\'
+            - '\.nanoclaw\'
+            - '\.picoclaw\'
+            - '\.zeroclaw\'
+            - '\.moltis\'
+            - '\.agentzero\'
+    condition: selection_cwd
+falsepositives:
+    - Sanctioned developer or operator use of these agents. Apply a per-host or per-user allowlist filter.
+    - Apple Hermes JavaScript engine (Meta React Native) caches under a .hermes folder on disk and ships with Slack, Discord, Messenger, and many Electron applications. The .hermes folder is intentionally NOT covered by this rule to avoid that false positive. Extend coverage to .hermes only with an Image filter that excludes Electron and node-bundled UI binaries.
+    - Unrelated tooling that squats on one of the dot-folder names. Rare for agent-specific names such as clawdbot or moltbook.
+level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_openclaw_agent_workdir/info.yml
