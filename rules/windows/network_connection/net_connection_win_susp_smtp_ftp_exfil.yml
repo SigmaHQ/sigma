@@ -1,0 +1,32 @@
+﻿title: Suspicious SMTP/FTP Exfiltration
+id: 3cc63bef-15db-4c57-81e9-1785de00f722
+status: experimental
+description: Detects outbound network connections to common exfiltration ports (SMTP/FTP) excluding known email clients.
+references:
+    - https://www.logpoint.com/
+author: YourName
+date: 2026-10-22
+tags:
+    - attack.exfiltration
+    - attack.t1048
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        DestinationPort:
+            - 25
+            - 587
+            - 465
+            - 2525
+            - 20
+            - 21
+    filter_main_email_clients:
+        Image|endswith:
+            - '\outlook.exe'
+            - '\thunderbird.exe'
+            - '\HxTsr.exe'
+    condition: selection and not filter_main_email_clients
+falsepositives:
+    - Legitimate email or FTP clients not in the filter list
+level: medium
