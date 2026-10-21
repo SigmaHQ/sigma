@@ -1,0 +1,47 @@
+title: Hyper-V Virtual Machine Forced Shutdown
+id: a18c0b6c-456a-4c0e-a1b8-9c8e0d5f4e3a
+status: test
+description: |
+    Detects forced shutdown of Hyper-V virtual machines via PowerShell Stop-VM cmdlet.
+    Ransomware operators commonly shut down VMs before encryption to release file locks
+    on VHDX files, enabling successful encryption. This technique was observed in Kyber
+    ransomware (Rapid7, 2026) and other campaigns targeting virtualized environments.
+    The rule focuses on forced shutdown operations (-Force, -TurnOff) and bulk VM
+    shutdown patterns (Get-VM combined with Stop-VM) which are strong indicators of
+    malicious intent.
+    Note: This rule intentionally does not detect Stop-VM -Save (graceful shutdown with
+    state save) to reduce false positives from legitimate VM maintenance. Ransomware
+    typically uses -Force or -TurnOff for immediate impact.
+references:
+    - https://www.rapid7.com/blog/post/tr-kyber-ransomware-double-trouble-windows-esxi-attacks-explained/
+    - https://learn.microsoft.com/en-us/powershell/module/hyper-v/stop-vm
+author: Hunter Wright
+date: 2026-05-29
+tags:
+    - attack.impact
+    - attack.t1489
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+    selection_cmdlet:
+        CommandLine|contains: 'Stop-VM'
+    selection_force:
+        CommandLine|contains:
+            - '-Force'
+            - '-TurnOff'
+    selection_bulk:
+        CommandLine|contains|all:
+            - 'Get-VM'
+            - 'Stop-VM'
+    condition: selection_img and selection_cmdlet and (selection_force or selection_bulk)
+falsepositives:
+    - Legitimate Hyper-V administration and maintenance activities
+    - Automated VM lifecycle management scripts
+    - Disaster recovery testing and failover procedures
+    - Hyper-V Replica planned failover operations
+level: high
