@@ -1,0 +1,38 @@
+title: Dev Tunnel Hosting Or Creation Execution
+id: f2a7c4d9-3b18-4e6a-9c52-8d1e0a7b6f34
+related:
+    - id: 1cb0c6ce-3d00-44fc-ab9c-6d6d577bf20b # DNS Query To Devtunnels Domain
+      type: similar
+    - id: 9501f8e6-8e3d-48fc-a8a6-1089dd5d7ef4 # Net Connection DevTunnels
+      type: similar
+status: experimental
+description: |
+    Detects execution of the Microsoft "devtunnel" CLI to create or host a Dev Tunnel,
+    which exposes a local port or endpoint to the internet through Microsoft infrastructure
+    (*.devtunnels.ms). Adversaries abuse Dev Tunnels for command-and-control, reverse shells
+    and persistent remote access that blends in with trusted Microsoft domains. This rule
+    complements existing network and DNS detections by catching the on-host tunnel setup.
+references:
+    - https://blueteamops.medium.com/detecting-dev-tunnels-16f0994dc3e2
+    - https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/cli-commands
+    - https://cydefops.com/devtunnels-unleashed
+author: Cyber Portfolio
+date: 2026-06-27
+tags:
+    - attack.command-and-control
+    - attack.t1572
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\devtunnel.exe'
+    selection_cli:
+        CommandLine|contains:
+            - ' host'
+            - ' create'
+            - ' port forward'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of Microsoft Dev Tunnels by developers exposing local services for testing.
+level: medium
