@@ -1,0 +1,35 @@
+title: QoS ThrottleRate Modification via PowerShell
+id: c556024c-7e38-4545-8b1b-c09eebf7fe79
+related:
+    - id: 09a2d760-9500-4088-9d9d-f63f88b2e0d7
+      type: similar
+status: experimental
+description: |
+    Detects PowerShell script blocks modifying the ThrottleRate value under the Windows QoS Group Policy registry key.
+    ThrottleRate is a QoS policy setting that can be used to limit the bandwidth of targeted processes.
+    Attackers may use this to throttle network bandwidth of targeted processes (e.g. EDR agents) to near-zero, silencing telemetry without terminating the process.
+references:
+    - https://learn.microsoft.com/en-us/powershell/module/netqos/new-netqospolicy?view=windowsserver2025-ps
+    - https://github.com/TwoSevenOneT/EDRChoker/
+    - https://www.zerosalarium.com/2026/06/edrchoker-choking-telemetry-stream-block-edr.html
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-06-09
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    category: ps_script
+    product: windows
+    definition: Script Block Logging must be enabled
+detection:
+    selection_create_qos_policy:
+        ScriptBlockText|contains:
+            - 'New-NetQosPolicy'
+            - 'Set-NetQosPolicy'
+    selection_throttle_rate:
+        ScriptBlockText|contains: 'ThrottleRateActionBitsPerSecond'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate QoS bandwidth policy management by administrators
+level: medium
+regression_tests_path: regression_data/rules/windows/powershell/powershell_script/posh_ps_qos_throttle_rate_modification/info.yml
