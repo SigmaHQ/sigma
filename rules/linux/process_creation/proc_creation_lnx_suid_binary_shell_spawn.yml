@@ -1,0 +1,50 @@
+title: SUID Binary Spawning a Shell
+id: 1e7af986-229a-4739-a5e8-edfc55ed362c
+status: experimental
+description: |
+    Detects a SUID-root binary that has no legitimate reason to launch a shell doing exactly that.
+    This pattern indicates shellcode or payload execution — e.g. the binary's page cache was poisoned so that running it executes a shell instead of its normal routine.
+references:
+    - https://gtfobins.github.io/
+    - https://xint.io/blog/copy-fail-linux-distributions
+    - https://github.com/theori-io/copy-fail-CVE-2026-31431
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-30
+tags:
+    - attack.privilege-escalation
+    - attack.execution
+    - attack.t1068
+    - attack.t1548.001
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        ParentImage|endswith:
+            - '/passwd'
+            - '/mount'
+            - '/umount'
+            - '/newgrp'
+            - '/gpasswd'
+            - '/chfn'
+            - '/chsh'
+            - '/ping'
+            - '/newuidmap'
+            - '/newgidmap'
+            - '/pkexec'
+            - '/fusermount'
+            - '/fusermount3'
+            - '/expiry'
+        Image|endswith:
+            - '/sh'
+            - '/dash'
+            - '/bash'
+            - '/ksh'
+            - '/zsh'
+            - '/ash'
+            - '/tcsh'
+            - '/csh'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
