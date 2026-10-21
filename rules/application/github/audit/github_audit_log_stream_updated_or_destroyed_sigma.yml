@@ -1,0 +1,27 @@
+title: GitHub - Audit Log Stream Updated or Destroyed
+id: 9f95d7fb-d34c-43b6-a268-90c630d88603
+status: experimental
+description: Detects updates or destruction of GitHub audit log streaming configurations. Audit log streaming sends a continuous feed of audit events to an external destination (e.g. Azure Blob Storage, Amazon S3, Splunk). Unauthorized modifications may indicate a defence evasion attempt to reduce audit log visibility, tamper with SIEM ingestion, or destroy evidence of malicious activity.
+references:
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/audit-log-events-for-your-enterprise
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise
+author: Stamatis Chatzimangou (@_st0pp3r_)
+date: 2026-07-06
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+    - attack.t1685.002
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection:
+        action:
+            - 'audit_log_streaming.update'
+            - 'audit_log_streaming.destroy'
+    condition: selection
+falsepositives:
+    - Authorised administrators performing planned reconfiguration of audit log streaming destinations.
+    - Infrastructure migrations involving changes to the external SIEM or storage endpoint.
+level: medium
