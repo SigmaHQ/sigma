@@ -1,0 +1,43 @@
+title: Contagious Interview Loader Artefacts Or Persistence Created - MacOS
+id: edb79bb9-c386-4905-8a4e-c0b23cee9b81
+status: experimental
+description: |
+    Detects creation of the loader and implant working files that a DPRK "Contagious Interview" dropper chain writes into "~/.vs_cache/",
+    and of the LaunchAgent the stage-3 implant uses for persistence (com.AppleAccountSync.plist) or for its temporary headless-browser cookie dump (com.vs.hc.*).
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/dprk-adopts-etherhiding
+    - https://www.ic3.gov/CSA/2026/260918.pdf
+    - https://www.virustotal.com/gui/file/677b85d56283a7c22f7f32350c6d81a7873c6c6afe1ff6b0d5a9608ba9614068
+    - https://www.virustotal.com/gui/file/761e0adb34e6f89ba43fcd65cf861593bfee9319e38e6175394921309e83a254
+author: Kirill Popov
+date: 2026-10-21
+tags:
+    - attack.execution
+    - attack.t1059.007
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1543.001
+    - detection.emerging-threats
+logsource:
+    product: macos
+    category: file_event
+detection:
+    selection_vs_cache:
+        TargetFilename|contains: '/.vs_cache/'
+        TargetFilename|endswith:
+            - '/main.js'
+            - '/key-agent.js'
+            - '/vs.sid'
+            - '/mmc.pid'
+            - '/mmc.log'
+            - '/log.log'
+    selection_launchagent:
+        TargetFilename|contains: '/Library/LaunchAgents/'
+        TargetFilename|endswith:
+            - '/com.AppleAccountSync.plist'
+            - '/com.vs.hc.chrome.plist'
+            - '/com.vs.hc.brave.plist'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high
