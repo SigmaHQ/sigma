@@ -1,0 +1,35 @@
+title: Potentially Suspicious Ephemeral Container Added To Pod
+id: 4a38317e-0f0e-469e-ad06-a3bfcf686bab
+status: test
+description: |
+    Detects the addition of an ephemeral container to a running pod through the
+    "pods/ephemeralcontainers" subresource. Ephemeral containers cannot be
+    removed or restarted, which makes them useful for interactive debugging but
+    equally useful for executing commands, inspecting file systems or
+    establishing persistence inside an existing workload without creating a
+    new pod or modifying the workload definition.
+references:
+    - https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/
+    - https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container
+    - https://microsoft.github.io/Threat-Matrix-for-Kubernetes/techniques/Exec%20into%20container/
+author: Himanshu Jha
+date: 2026-10-21
+tags:
+    - attack.execution
+    - attack.t1609
+
+logsource:
+    category: application
+    product: kubernetes
+    service: audit
+detection:
+    selection:
+        verb:
+            - 'update'
+            - 'patch'
+        objectRef.resource: 'pods'
+        objectRef.subresource: 'ephemeralcontainers'
+    condition: selection
+falsepositives:
+    - Legitimate interactive debugging with "kubectl debug". Investigate the identity performing the request and whether the target pod and namespace match an approved debugging workflow.
+level: medium
