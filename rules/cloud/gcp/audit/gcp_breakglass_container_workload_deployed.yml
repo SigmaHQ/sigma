@@ -7,19 +7,20 @@ references:
     - https://cloud.google.com/binary-authorization
 author: Bryan Lim
 date: 2024-01-12
+modified: 2026-10-21
 tags:
     - attack.privilege-escalation
     - attack.t1548
 logsource:
     product: gcp
-    service: gcp.audit
+    service: auditlog
 detection:
     selection:
-        data.protoPayload.resource.type: 'k8s_cluster'
-        data.protoPayload.logName:
+        resource.type: 'k8s_cluster'
+        logName:
             - 'cloudaudit.googleapis.com/activity'
             - 'cloudaudit.googleapis.com%2Factivity'
-        data.protoPayload.methodName: 'io.k8s.core.v1.pods.create'
+        protoPayload.methodName: 'io.k8s.core.v1.pods.create'
     keywords:
         - 'image-policy.k8s.io/break-glass'
     condition: selection and keywords
