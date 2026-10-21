@@ -1,0 +1,41 @@
+title: GitHub - Sensitive API Route Enumeration
+id: 8b842053-a0c0-4daa-92db-5523d65cec52
+status: experimental
+description: Detects access of sensitive organization API routes potentially indicating enumeration of organization resources and permissions.
+references:
+    - https://detect.fyi/detecting-githound-enumeration-via-the-github-api-81e4a73c7ead
+    - https://github.com/SpecterOps/GitHound
+    - https://specterops.io/blog/2026/03/18/introducing-attack-path-analysis-for-github-in-bloodhound-enterprise/
+author: Stamatis Chatzimangou (@_st0pp3r)
+date: 2026-10-20
+tags:
+    - attack.discovery
+    - attack.t1087
+    - attack.t1526
+    - attack.collection
+    - attack.t1213.003
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. The option "Enable API Request Events" should be selected in the audit log settings. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection_action:
+        Action: api.request
+    selection_routes:
+        Route|contains:
+            - /graphql
+            - /organizations/
+    selection_sensitive_routes:
+        Route|contains:
+            - /organization-roles/
+            - /actions/secrets
+            - /custom-repository-roles
+            - /repos
+            - /secret-scanning/alerts
+            - /actions/permissions
+            - /actions/variables
+            - /teams
+    condition: selection_action and selection_routes and selection_sensitive_routes
+falsepositives:
+    - Legitimate automation managing many organization resources by accessing the API
+level: medium
