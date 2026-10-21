@@ -1,0 +1,38 @@
+title: NetSupport Client Dropped Into SettingSync ResCache Masquerade Path
+id: 0cc5995a-2fc4-431a-aebb-9c4849cbbf63
+status: experimental
+description: |
+    Detects a portable NetSupport Manager client (client32.ini, Service.exe, NSM.LIC, PCICL32.DLL, the nsm-launch.vbs launcher or the implant's nsm-state.json) written below
+    "%LOCALAPPDATA%\Microsoft\Windows\SettingSync\Caches\{GUID}\Win32\ResCache\", the masquerade path used by the "ss_nsm" ("Take PC") command of a DPRK "Contagious Interview" Node.js implant.
+    Legitimate Windows settings-sync caches do not contain NetSupport components.
+references:
+    - https://www.ic3.gov/CSA/2026/260918.pdf
+    - https://www.virustotal.com/gui/file/761e0adb34e6f89ba43fcd65cf861593bfee9319e38e6175394921309e83a254
+    - https://www.virustotal.com/gui/file/06aa951ad5384f9af7cbfa10692181cf622effa8d3840d62e3c1f37072465c04
+author: Kirill Popov
+date: 2026-10-21
+tags:
+    - attack.command-and-control
+    - attack.t1219.002
+    - attack.stealth
+    - attack.t1036.005
+    - detection.emerging-threats
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|contains|all:
+            - '\Microsoft\Windows\SettingSync\Caches\'
+            - '\Win32\ResCache\'
+        TargetFilename|endswith:
+            - '\client32.ini'
+            - '\Service.exe'
+            - '\NSM.LIC'
+            - '\PCICL32.DLL'
+            - '\nsm-launch.vbs'
+            - '\nsm-state.json'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
