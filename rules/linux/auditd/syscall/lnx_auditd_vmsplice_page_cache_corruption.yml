@@ -1,0 +1,45 @@
+title: Suspicious Linux Vmsplice Syscall by Non-Root User - DirtyFrag Page Cache Corruption
+id: 474b415a-7c2e-4d8f-a319-6b4f0e8d2c71
+status: experimental
+description: |
+    Detects invocation of the vmsplice() syscall by a non-root user. vmsplice transfers data
+    from user memory into a pipe without copying and has near-zero legitimate usage in
+    typical production environments. It is a critical primitive in the Dirty Frag exploit
+    and similar page cache corruption attacks where the attacker uses vmsplice to write
+    controlled data into a pipe that is subsequently spliced into a read-only page-cached file
+    (e.g., a SUID binary), achieving local privilege escalation. The Dirty Frag exploit
+    manipulates the Linux XFRM (IPsec) subsystem to trigger ESP decryption into a splice pipe,
+    corrupting the page cache of SUID binaries.
+    Validated against live Dirty Frag exploit execution producing 48 vmsplice calls in 7 seconds
+    from a single non-root PID.
+references:
+    - https://man7.org/linux/man-pages/man2/vmsplice.2.html
+    - https://github.com/V4bel/dirtyfrag
+    - https://www.openwall.com/lists/oss-security/2026/05/07/8
+    - https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md
+author: Gene Kazimiarovich
+date: 2026-05-08
+tags:
+    - attack.privilege-escalation
+    - attack.t1068
+logsource:
+    product: linux
+    service: auditd
+    definition: |
+        Required auditd configuration:
+        auditctl -a always,exit -F arch=b64 -S vmsplice -F uid!=0 -k vmsplice_nonroot
+detection:
+    selection:
+        type: 'SYSCALL'
+        SYSCALL: 'vmsplice'
+    filter_main_root:
+        uid: 0
+    filter_main_legitimate:
+        exe|endswith:
+            - '/tee'
+            - '/coreutils'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - GNU coreutils tee command using vmsplice for zero-copy pipe I/O
+    - Custom high-performance data pipeline tools using vmsplice for zero-copy transfers
+level: high
