@@ -1,0 +1,36 @@
+title: Potential AI Agent Prompt Injection - Base64 Encoded Instruction Override In URL Query
+id: a814751e-4500-46d7-b5ef-5ac607075b62
+status: experimental
+description: |
+    Detects a Base64-encoded instruction-override phrase in the query string of a request to an LLM agent endpoint.
+    Encoding the phrase evades the keyword filtering in front of the prompt while the model still decodes and follows it, so an agent can be told to discard its own instructions.
+references:
+    - https://github.com/Agent-Threat-Rule/agent-threat-rules/tree/33fbca7605acccb7f4166498aa4eb44abdf9a8ce/rules/prompt-injection
+    - https://kai-greshake.de/posts/inject-my-pdf/
+author: Adam Lin
+date: 2026-05-09
+tags:
+    - attack.stealth
+    - attack.t1027
+    - detection.emerging-threats
+logsource:
+    category: webserver
+    definition: 'Requirements: access logs of an MCP or AI agent HTTP endpoint must be collected, with the prompt carried in the query string. A prompt sent in a POST body is not visible to this log source.'
+detection:
+    selection:
+        cs-uri-query|contains:
+            # "ignore previous instructions", the three Base64 alignments
+            - 'aWdub3JlIHByZXZpb3VzIGluc3RydWN0aW9u'
+            - 'SWdub3JlIHByZXZpb3VzIGluc3RydWN0aW9u'
+            - 'bm9yZSBwcmV2aW91cyBpbnN0cnVjdGlv'
+            - 'Z25vcmUgcHJldmlvdXMgaW5zdHJ1Y3Rpb25z'
+            # "disregard prior instructions", the three Base64 alignments
+            - 'ZGlzcmVnYXJkIHByaW9yIGluc3RydWN0aW9u'
+            - 'c3JlZ2FyZCBwcmlvciBpbnN0cnVjdGlv'
+            - 'aXNyZWdhcmQgcHJpb3IgaW5zdHJ1Y3Rpb25z'
+    condition: selection
+falsepositives:
+    - Security tooling that submits encoded test payloads through a query string
+    - Authorized red-team or AI safety evaluation traffic
+    - Documentation or research content about prompt injection that is itself Base64 encoded and passed through a query string
+level: medium
