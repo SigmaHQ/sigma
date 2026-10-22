@@ -5,9 +5,10 @@ description: Detects suspicious sub processes of web server processes
 references:
     - https://www.acunetix.com/blog/articles/web-shells-101-using-php-introduction-web-shells-part-2/
     - https://media.defense.gov/2020/Jun/09/2002313081/-1/-1/0/CSI-DETECT-AND-PREVENT-WEB-SHELL-MALWARE-20200422.PDF
+    - https://www.huntress.com/blog/php2shell-leaked-critical-php-vulnerabilities
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2021-10-15
-modified: 2026-08-19
+modified: 2026-10-22
 tags:
     - attack.persistence
     - attack.t1505.003
@@ -17,12 +18,21 @@ logsource:
 detection:
     selection_parent_general:
         ParentImage|endswith:
+            - '/apache'
+            - '/apache2'
+            - '/caddy'
+            - '/gunicorn'
             - '/httpd'
             - '/lighttpd'
             - '/nginx'
-            - '/apache2'
             - '/node'
-            - '/caddy'
+            - '/nodejs'
+            - '/passenger'
+            - '/php-cgi'
+            - '/php-fpm'
+            - '/tomcat'
+            - '/unicorn'
+            - '/uwsgi'
     selection_parent_tomcat:
         ParentCommandLine|contains|all:
             - '/bin/java'
@@ -31,23 +41,56 @@ detection:
         ParentCommandLine|contains|all:
             - '/bin/java'
             - 'websphere'
-    selection_child_processes:
+    selection_child_shell:
         Image|endswith:
-            - '/whoami'
-            - '/ifconfig'
-            - '/ip'
-            - '/bin/uname'
-            - '/bin/cat'
-            - '/bin/crontab'
-            - '/hostname'
-            - '/iptables'
-            - '/netstat'
-            - '/pwd'
-            - '/route'
+            - '/ash'
+            - '/bash'
+            - '/busybox'
+            - '/csh'
+            - '/dash'
+            - '/ksh'
+            - '/sh'
+            - '/tcsh'
+            - '/zsh'
+        CommandLine|contains:
+            - '-c "id'
+            - ';id'
+            - 'cat /etc/'
+            - 'crontab'
+            - 'curl '
+            - 'hostname'
+            - 'id;'
+            - 'id"'
+            - 'ifconfig'
+            - 'iptables'
+            - 'perl'
+            - 'python'
+            - 'ruby'
+            - 'uname'
+            - 'wget '
+            - 'whoami'
+    selection_child_processes:
+        - Image|endswith:
+              - '/bin/cat'
+              - '/bin/crontab'
+              - '/uname'
+              - '/curl'
+              - '/hostname'
+              - '/ifconfig'
+              - '/ip'
+              - '/iptables'
+              - '/netstat'
+              - '/pwd'
+              - '/route'
+              - '/wget'
+              - '/whoami'
+              - '/perl'
+              - '/ruby'
+        - Image|contains: '/python'
     filter_optional_ip_neigh:
         ParentImage|endswith: '/node'
         CommandLine|contains: 'ip neigh show'
-    condition: 1 of selection_parent_* and selection_child_processes and not 1 of filter_optional_*
+    condition: 1 of selection_parent_* and 1 of selection_child_* and not 1 of filter_optional_*
 falsepositives:
     - Web applications that invoke Linux command line tools
 level: high
