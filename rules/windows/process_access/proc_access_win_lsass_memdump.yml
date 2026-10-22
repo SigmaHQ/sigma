@@ -11,7 +11,7 @@ references:
     - https://research.splunk.com/endpoint/windows_possible_credential_dumping/
 author: Samir Bousseaden, Michael Haag
 date: 2019-04-03
-modified: 2024-03-02
+modified: 2026-06-29
 tags:
     - attack.credential-access
     - attack.t1003.001
@@ -49,7 +49,9 @@ detection:
             - '|UNKNOWN('
         GrantedAccess: '0x103800'
     filter_optional_sysmon:
-        SourceImage|endswith: ':\Windows\Sysmon64.exe'
+        SourceImage|endswith:
+            - ':\Windows\Sysmon64.exe'
+            - ':\Windows\Sysmon64a.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
