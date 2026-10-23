@@ -1,0 +1,27 @@
+title: Azure AD User Created
+id: 03950f63-4c08-469e-b50c-43dcb83b34ee
+status: test
+description: Detects the creation of a user account in Microsoft Entra ID (Azure AD) through the 'Add user' directory audit operation. Adversaries who obtain administrative access may create a cloud account to maintain persistent access to the tenant (MITRE ATT&CK T1136.003), sometimes as a first step before assigning the new account privileged roles.
+references:
+    - https://attack.mitre.org/techniques/T1136/003/
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities#core-directory
+    - https://learn.microsoft.com/en-us/entra/architecture/security-operations-user-accounts
+related:
+    - id: ebbeb024-5b1d-4e16-9c0c-917f86c708a7
+      type: similar
+author: 'Haroon Arshad'
+date: 2026-10-23
+tags:
+    - attack.persistence
+    - attack.t1136.003
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        operationName: 'Add user'
+    condition: selection
+falsepositives:
+    - Legitimate user provisioning by administrators, for example during employee onboarding.
+    - HR-driven or SCIM provisioning services also create users with the 'Add user' operation; if they generate noise, exclude the known provisioning service principals.
+level: medium
