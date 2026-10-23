@@ -1,22 +1,37 @@
-title: Apache Segmentation Fault
+title: Apache Worker Child Segmentation Fault
 id: 1da8ce0b-855d-4004-8860-7d64d42063b1
 status: test
-description: Detects a segmentation fault error message caused by a crashing apache worker process
+description: |
+    Detects an Apache worker process crashing with a segmentation fault. While this can
+    indicate a legitimate PHP or Apache module crash, it has also been observed as the only
+    visible artifact during exploitation of memory corruption vulnerabilities such as
+    CVE-2026-109618/9 (php2shell), where no corresponding PHP error log entry is written.
 references:
     - http://www.securityfocus.com/infocus/1633
+    - https://jackalsyn.com/posts/php-up-2026.html
+    - https://github.com/ikow/php2shell-poc
 author: Florian Roth (Nextron Systems)
 date: 2017-02-28
-modified: 2021-11-27
+modified: 2026-10-22
 tags:
+    - attack.initial-access
     - attack.impact
+    - attack.t1190
     - attack.t1499.004
+    - cve.2026-109618
+    - cve.2026-109619
 logsource:
     service: apache
-    definition: 'Requirements: Must be able to collect the error.log file'
+    definition: |
+        Requirements:
+            Apache error log ingestion required.
+            Default paths:
+                - /var/log/apache2/error.log (Debian/Ubuntu)
+                - /var/log/httpd/error_log (RHEL/CentOS).
 detection:
     keywords:
-        - 'exit signal Segmentation Fault'
+        - 'exit signal Segmentation fault'
     condition: keywords
 falsepositives:
-    - Unknown
+    - Legitimate PHP or Apache module crashes unrelated to exploitation (e.g. PHP extension bugs)
 level: high
