@@ -1,0 +1,44 @@
+title: Systemd Timer Creation
+id: a2652f12-1b19-4860-aa20-619bbc872830
+status: test
+description: Detects the creation of systemd timer unit files (.timer) in system unit directories by processes other than package managers. Adversaries abuse systemd timers for persistence and scheduled execution (MITRE ATT&CK T1053.006), since a timer runs its paired service automatically with root privileges.
+references:
+- https://attack.mitre.org/techniques/T1053/006/
+- https://pberba.github.io/security/2022/01/30/linux-threat-hunting-for-persistence-systemd-timers-cron/
+related:
+- id: 1bac86ba-41aa-4f62-9d6b-405eac99b485
+  type: similar
+author: 'Haroon Arshad'
+date: 2026-10-22
+tags:
+- attack.persistence
+- attack.privilege-escalation
+- attack.t1053.006
+logsource:
+  product: linux
+  service: auditd
+detection:
+  path:
+    type: 'PATH'
+    nametype: 'CREATE'
+  timer:
+    name|endswith: '.timer'
+  dirs:
+    name|startswith:
+    - '/etc/systemd/system/'
+    - '/usr/lib/systemd/system/'
+    - '/run/systemd/system/'
+  filter_pkg_managers:
+    exe:
+    - '/usr/bin/dnf'
+    - '/usr/bin/yum'
+    - '/usr/bin/apt'
+    - '/usr/bin/apt-get'
+    - '/usr/bin/dpkg'
+    - '/usr/bin/rpm'
+    - '/usr/bin/zypper'
+    - '/usr/bin/pacman'
+  condition: path and timer and dirs and not filter_pkg_managers
+falsepositives:
+- Admin work like manual timer installs outside a package manager (tune with an allowlist if this is common in the environment).
+level: medium
