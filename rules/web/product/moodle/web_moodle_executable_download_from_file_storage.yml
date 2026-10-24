@@ -1,0 +1,48 @@
+title: Executable Or Script File Served From Moodle File Storage
+id: 98afeaf3-7305-42d9-8ea9-a9c968d903e7
+status: experimental
+description: |
+    Detects successful downloads of executable or script file types through Moodle's file serving
+    endpoints. Course files, assignment submissions and draft areas accept arbitrary uploads from any
+    enrolled user, which makes a Moodle site an attractive and highly trusted distribution point for
+    malware aimed at other members of the institution.
+references:
+    - https://docs.moodle.org/dev/File_API
+    - https://docs.moodle.org/en/Site_security_settings
+author: Sanket Taware (@sankettaware16)
+date: 2026-07-31
+tags:
+    - attack.execution
+    - attack.t1204.002
+logsource:
+    category: webserver
+detection:
+    selection_endpoint:
+        cs-uri-stem|contains:
+            - '/pluginfile.php'
+            - '/draftfile.php'
+            - '/tokenpluginfile.php'
+            - '/webservice/pluginfile.php'
+    selection_extension:
+        cs-uri-stem|endswith:
+            - '.bat'
+            - '.chm'
+            - '.cmd'
+            - '.exe'
+            - '.hta'
+            - '.jar'
+            - '.lnk'
+            - '.msi'
+            - '.ps1'
+            - '.scr'
+            - '.vbe'
+            - '.vbs'
+            - '.wsf'
+    selection_status:
+        sc-status: 200
+    condition: all of selection_*
+falsepositives:
+    - Programming, systems or security courses that distribute compiled binaries, JAR files or scripts as teaching material
+    - Software packaged as a course resource by teaching staff
+    - Assignment briefs that require students to submit compiled artefacts
+level: medium
