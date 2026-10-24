@@ -8,6 +8,7 @@ references:
     - https://docs.aws.amazon.com/IAM/latest/APIReference/API_DeleteSAMLProvider.html
 author: Ivan Saakov
 date: 2024-12-19
+modified: 2026-10-08
 tags:
     - attack.stealth
     - attack.t1078.004
@@ -20,11 +21,14 @@ logsource:
     product: aws
     service: cloudtrail
 detection:
-    selection:
+    selection_event:
         eventSource: 'iam.amazonaws.com'
         eventName: 'DeleteSAMLProvider'
-        status: 'success'
-    condition: selection
+    selection_status_success:
+        errorCode: 'Success'
+    selection_status_null:
+        errorCode: null
+    condition: selection_event and 1 of selection_status_*
 falsepositives:
     - Automated processes using tools like Terraform may trigger this alert.
     - Legitimate administrative actions by authorized system administrators could cause this alert. Verify the user identity, user agent, and hostname to ensure they are expected.
