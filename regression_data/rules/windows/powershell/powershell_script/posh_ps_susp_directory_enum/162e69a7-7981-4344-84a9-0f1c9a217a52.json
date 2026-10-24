@@ -1,0 +1,52 @@
+{
+  "Event": {
+    "#attributes": {
+      "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event"
+    },
+    "System": {
+      "Provider": {
+        "#attributes": {
+          "Name": "Microsoft-Windows-PowerShell",
+          "Guid": "A0C1853B-5C40-4B15-8766-3CF1C58F985A"
+        }
+      },
+      "EventID": 4104,
+      "Version": 1,
+      "Level": 3,
+      "Task": 2,
+      "Opcode": 15,
+      "Keywords": "0x0",
+      "TimeCreated": {
+        "#attributes": {
+          "SystemTime": "2026-08-08T07:22:36.1672726Z"
+        }
+      },
+      "EventRecordID": 202685,
+      "Correlation": {
+        "#attributes": {
+          "ActivityID": "A14CD191-26F9-0000-62C7-59A1F926DD01"
+        }
+      },
+      "Execution": {
+        "#attributes": {
+          "ProcessID": 4336,
+          "ThreadID": 4636
+        }
+      },
+      "Channel": "Microsoft-Windows-PowerShell/Operational",
+      "Computer": "SigmaCatchVm",
+      "Security": {
+        "#attributes": {
+          "UserID": "S-1-5-21-4246997345-1000708036-2014123355-1001"
+        }
+      }
+    },
+    "EventData": {
+      "MessageNumber": 1,
+      "MessageTotal": 1,
+      "ScriptBlockText": "& {New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR\nGet-ChildItem -Path HKCR:\\CLSID -Name | Select -Skip 1 > $env:temp\\clsids.txt\nForEach($CLSID in Get-Content \"$env:temp\\clsids.txt\")\n{try{write-output \"$($Position)-$($CLSID)\"\nwrite-output \"------------\"| out-file $env:temp\\T1592.002Test1.txt -append\nwrite-output $($CLSID)| out-file $env:temp\\T1592.002Test1.txt -append\n$handle=[activator]::CreateInstance([type]::GetTypeFromCLSID($CLSID))\n$handle | get-member -erroraction silentlycontinue | out-file $env:temp\\T1592.002Test1.txt -append\n$position += 1} catch{}}}",
+      "ScriptBlockId": "15706b7d-5167-4e51-89ff-48bb2d56fc96",
+      "Path": ""
+    }
+  }
+}
