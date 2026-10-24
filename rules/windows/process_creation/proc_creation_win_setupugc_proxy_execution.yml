@@ -1,0 +1,29 @@
+title: Suspicious Proxy Execution Via SetupUGC
+id: 5868223f-f84e-4a20-91b8-b3289daab2cc
+status: experimental
+description: Detects potential proxy execution via setupugc.exe, a Windows deployment binary, outside of normal Windows Setup context.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Setupugc/
+author: Archit Singh
+date: 2026-07-18
+tags:
+    - attack.stealth
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_image:
+        Image|endswith: '\setupugc.exe'
+    selection_command:
+        CommandLine|contains:
+            - ' specialize'
+            - ' auditUser'
+    filter_main_setup:
+        ParentImage|endswith:
+            - '\setup.exe'
+            - '\setuphost.exe'
+    condition: all of selection_* and not filter_main_setup
+falsepositives:
+    - Windows deployment or setup operations that use setupugc.exe outside of the expected parent process tree
+level: high
