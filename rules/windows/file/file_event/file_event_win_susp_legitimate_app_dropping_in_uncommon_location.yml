@@ -11,6 +11,7 @@ references:
     - https://lolbas-project.github.io/#/download
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-12-10
+modified: 2026-10-14
 tags:
     - attack.stealth
     - attack.t1218
@@ -64,7 +65,19 @@ detection:
             - '\Start Menu\Programs\Startup\'
             - '\Users\Default\'
             - '\Videos\'
-    condition: all of selection_*
+    filter_optional_dell_techhub_repair:
+        # Dell TechHub runs "esentutl /p" on its SRUDB copy; the repair scratch files land in the working directory (System32)
+        Image|endswith: '\esentutl.exe'
+        TargetFilename|startswith:
+            - 'C:\Windows\System32\SRUDB_'
+            - 'C:\Windows\System32\TEMPREPAIR'
+        TargetFilename|endswith:
+            - '.INTEG.RAW'
+            - '.EDB'
+    filter_optional_dell_techhub_copy:
+        Image|endswith: '\esentutl.exe'
+        TargetFilename|startswith: 'C:\ProgramData\Dell\DTP\DB\SRUDBData\'
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high
