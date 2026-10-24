@@ -1,0 +1,38 @@
+title: HackTool - Defendnot Execution
+id: 0aaa9689-9f38-491d-bd4d-a9af6eb43138
+related:
+    - id: 50b159ba-a147-40f7-9d11-561e724b8a2e
+      type: similar
+status: experimental
+description: |
+    Detects the execution of the hacktool Defendnot. Defendnot is a hacktool that abuses Microsoft undocumented WSC (Windows Security Center) API
+    to disable Windows Defender by registering itself as a fake antivirus product. Threat actors often use these kind of tools to bypass security measures.
+references:
+    - https://github.com/es3n1n/defendnot/blob/525176a37721ead27d3f9f77f59b58abfc305988/README.md
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-09-27
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|contains: 'defendnot'
+        - CommandLine|contains:
+              - 'defendnot'
+              - 'https://dnot.sh/'
+        - Hashes|contains:
+              - 'IMPHASH=1FAAED26690A9455A795E2215661726F'
+              - 'IMPHASH=304786466DE25780347A9DCFAF381EF7'
+              - 'IMPHASH=55B10396EA722770E51BC288E62179DB'
+              - 'IMPHASH=59D65F5EFACBDB1AA2A6CF745B07C058'
+              - 'IMPHASH=6CEDEC3562FEF2DC2F959A1D0BF54DB8'
+              - 'IMPHASH=75002197E0D24AAF0B8C6A1BF68513D6'
+              - 'IMPHASH=7EC4023C85149450AB388F0837192FE0'
+              - 'IMPHASH=CA4A3E08E9410A6AEF018424C64C2641'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
