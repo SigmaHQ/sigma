@@ -1,0 +1,41 @@
+title: BigDiskBuster-Like Buster-File Creation in TEMP
+id: 15755e6b-a54d-4a6e-9773-554c724f8a63
+status: experimental
+description: |
+    Detects the creation of GUID-braced files in user TEMP directories.
+    This corresponds to the buster-file stage of the BigDiskBuster technique, where hidden files sized to all free disk space are created to cause Windows Defender platform and signature updates to fail due to disk exhaustion.
+references:
+    - https://github.com/DevCop95/BDB-Guardian
+    - https://github.com/MSNightmare/BigDiskBuster
+author: DevCop95
+date: 2026-09-20
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|re: '\\AppData\\Local\\Temp\\\{[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\}$'
+    filter_main_generic:
+        Image:
+            - 'C:\Windows\System32\taskhost.exe'
+            - 'C:\Windows\SysWOW64\taskhost.exe'
+    filter_optional_teamviewer:
+        Image|endswith:
+            - '\TeamViewer\tv_x64.exe'
+            - '\TeamViewer\tv_w32.exe'
+    filter_optional_vscode:
+        Image|contains: '\.vscode\extensions\'
+        Image|endswith: '\cpptools.exe'
+    filter_optional_dataset:
+        # This filter is for the Sigma baseline dataset and can be removed in production environments
+        Image|startswith: 'C:\Users\'
+        Image|contains: '\AppData\Local\Temp\'
+        Image|endswith: '\target.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Software installers staging temporary payloads using GUID-braced names
+    - Developer test suites creating GUID-named temporary fixtures
+level: medium
