@@ -1,12 +1,16 @@
 title: Remote Access Tool - ScreenConnect Installation Execution
 id: 75bfe6e6-cd8e-429e-91d3-03921e1d7962
 status: test
-description: Detects ScreenConnect program starts that establish a remote access to a system.
+description: |
+    Detects ScreenConnect program starts that establish a remote access to a system.
+    The selection matches the four parameters present in every observed ScreenConnect access
+    launch string: the session type (e=Access&), the guest role (y=Guest&), the relay port (&p=)
+    and the session key (&k=). The optional custom-properties parameter (&c=) is not required.
 references:
     - https://www.anomali.com/blog/probable-iranian-cyber-actors-static-kitten-conducting-cyberespionage-campaign-targeting-uae-and-kuwait-government-agencies
 author: Florian Roth (Nextron Systems)
 date: 2021-02-11
-modified: 2024-02-26
+modified: 2026-10-04
 tags:
     - attack.persistence
     - attack.initial-access
@@ -20,7 +24,6 @@ detection:
             - 'e=Access&'
             - 'y=Guest&'
             - '&p='
-            - '&c='
             - '&k='
     condition: selection
 falsepositives:
