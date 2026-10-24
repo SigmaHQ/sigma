@@ -1,16 +1,20 @@
-title: Script Interpreter Execution From Suspicious Folder
+title: Script Interpreter CommandLine With Reference To Suspicious Directory
 id: 1228c958-e64e-4e71-92ad-7d429f4138ba
 status: test
 description: |
-    Detects suspicious script execution from suspicious directories or folders accessible by environment variables that may indicate malware activity.
-    Script interpreters (cscript, wscript, mshta, powershell) executing from folders like Temp, Public, or user profile directories may suggest attempts to evade detection or execute malicious scripts.
+    Detects script interpreter processes (cscript, wscript, mshta) or processes with suspicious scripting flags
+    whose CommandLine references a suspicious directory such as Temp, Public, or common user profile folders.
+    Note that the suspicious directory check applies to the full CommandLine string and does not distinguish
+    the role of the referenced path. This means the rule may fire when the interpreter or script itself
+    resides in a suspicious location, but can also trigger when such a path appears in any other argument
+    (e.g. an output file or log destination).
 references:
     - https://www.virustotal.com/gui/file/91ba814a86ddedc7a9d546e26f912c541205b47a853d227756ab1334ade92c3f
     - https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/shuckworm-russia-ukraine-military
     - https://learn.microsoft.com/en-us/windows/win32/shell/csidl
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2022-02-08
-modified: 2026-02-17
+modified: 2026-09-30
 tags:
     - attack.execution
     - attack.t1059
@@ -84,4 +88,4 @@ detection:
 falsepositives:
     - Various legitimate software have been observed to use similar techniques for installation or update purposes;thus, it is recommended to review and tune filters for your environment to reduce false positives before deploying to production.
 level: high
-regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_susp_script_exec_from_env_folder/info.yml
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_script_interpreter_susp_dir_cmdline/info.yml
