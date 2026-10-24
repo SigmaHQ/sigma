@@ -5,9 +5,11 @@ description: Detects passwords dumps from Keychain
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1555.001/T1555.001.md
     - https://gist.github.com/Capybara/6228955
-author: Tim Ismilyaev, oscd.community, Florian Roth (Nextron Systems)
+    - https://www.trendmicro.com/en_us/research/25/i/an-mdr-analysis-of-the-amos-stealer-campaign.html
+    - https://securelist.com/macsync-new-version/121383/
+author: Tim Ismilyaev, oscd.community, Florian Roth (Nextron Systems), Yana Ivanov
 date: 2020-10-19
-modified: 2021-11-27
+modified: 2026-10-10
 tags:
     - attack.credential-access
     - attack.t1555.001
@@ -20,10 +22,18 @@ detection:
         CommandLine|contains:
             - 'find-certificate'
             - ' export '
+            - 'find-generic-password'
+            - 'find-internet-password'
+            - 'set-generic-password-partition-list'
+            - 'set-internet-password-partition-list'
     selection2:
         CommandLine|contains:
             - ' dump-keychain '
             - ' login-keychain '
+    selection3:
+        CommandLine|contains:
+            - 'Library/Keychains/login.keychain'
+            - 'Library/Keychains/System.keychain'
     condition: 1 of selection*
 falsepositives:
     - Legitimate administration activities
