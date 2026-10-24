@@ -1,0 +1,44 @@
+title: Microsoft Office Application Loading Task Scheduler DLL
+id: 8d1e674c-5c03-4be1-949c-4b85a472dc16
+status: experimental
+description: |
+    Detects a Microsoft Office application loading taskschd.dll, which exposes COM interfaces for managing Windows Scheduled Tasks.
+    This load is an early precursor to scheduled task creation or modification and has been frequently observed in macro-enabled
+    malicious documents attempting to establish persistence.
+references:
+    - https://github.com/saksham-17/detection-lab/blob/cbc25dfe1e5eda0c4e5a7d66b6d3bbd27829e158/T1053.005-scheduled-task/tests/test5-task-scheduler-via-VBA/report.md
+author: Saksham Bhattarai
+date: 2026-10-19
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1053.005
+    - attack.execution
+    - attack.t1204.002
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection_dll:
+        - ImageLoaded|endswith: '\taskschd.dll'
+        - OriginalFileName: 'taskschd.dll'
+    selection_exe:
+        Image|endswith:
+            - '\eqnedt32.exe'
+            - '\excel.exe'
+            - '\fltldr.exe'
+            - '\graph.exe'
+            - '\msaccess.exe'
+            - '\mspub.exe'
+            - '\onenote.exe'
+            - '\onenoteim.exe'
+            - '\onenotem.exe'
+            - '\outlook.exe'
+            - '\powerpnt.exe'
+            - '\visio.exe'
+            - '\winproj.exe'
+            - '\winword.exe'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate add-ins or automation scripts that use Office applications to manage scheduled tasks (rare in most environments)
+level: medium
