@@ -6,7 +6,7 @@ references:
     - https://twitter.com/mrd0x/status/1481630810495139841?s=12
 author: Tim Shelton, Florian Roth (Nextron Systems), Yassine Oukessou
 date: 2022-01-13
-modified: 2024-04-04
+modified: 2026-10-13
 tags:
     - attack.stealth
     - attack.t1218.011
@@ -49,6 +49,12 @@ detection:
             - ':\Windows\Installer\'
             - '.tmp'
             - 'zzzzInvokeManagedCustomActionOutOfProc'
+    filter_main_streamci:
+        # Windows streaming-device class installer, run by svchost (DeviceInstall) during driver setup
+        # e.g. rundll32.exe streamci,StreamingDeviceSetup {eeab7790-c514-11d1-b42b-00805fc1270e},asyncmac,{...}
+        Image: 'C:\Windows\System32\rundll32.exe'
+        ParentImage: 'C:\Windows\System32\svchost.exe'
+        CommandLine|contains: ' streamci,StreamingDeviceSetup {'
     filter_optional_EdgeUpdate:
         ParentCommandLine|contains|all:
             - ':\Users\'
