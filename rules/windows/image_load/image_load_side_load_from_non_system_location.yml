@@ -8,9 +8,10 @@ references:
     - https://blog.cyble.com/2022/07/27/targeted-attacks-being-carried-out-via-dll-sideloading/ # iphlpapi.dll
     - https://github.com/XForceIR/SideLoadHunter/blob/cc7ef2e5d8908279b0c4cee4e8b6f85f7b8eed52/SideLoads/README.md # XForceIR (SideLoadHunter Project), Chris Spehn (research WFH Dridex)
     - https://www.hexacorn.com/blog/2023/12/26/1-little-known-secret-of-runonce-exe-32-bit/
+    - https://www.sophos.com/en-us/blog/finding-minhook-in-a-sideloading-attack-and-sweden-too # SystemSettings.dll
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-08-14
-modified: 2025-12-03
+modified: 2026-07-10
 tags:
     - attack.persistence
     - attack.privilege-escalation
@@ -331,6 +332,7 @@ detection:
             - '\staterepository.core.dll'
             - '\structuredquery.dll'
             - '\sxshared.dll'
+            - '\systemsettings.dll'
             - '\systemsettingsthresholdadminflowui.dll'
             - '\tapi32.dll'
             - '\tbs.dll'
@@ -458,7 +460,7 @@ detection:
             - 'C:\Windows\SystemTemp\'
             - 'C:\Windows\SysWOW64\'
             - 'C:\Windows\WinSxS\'
-            - 'C:\Windows\SyChpe32\' # “hybrid” binaries containing x86-to-ARM stubs to improve the x86 emulation performance
+            - 'C:\Windows\SyChpe32\' # "hybrid" binaries containing x86-to-ARM stubs to improve the x86 emulation performance
     filter_main_windows_temp:
         ImageLoaded|startswith: 'C:\Windows\Temp\'
         Image|startswith:
@@ -476,6 +478,8 @@ detection:
     filter_main_directx:
         ImageLoaded|startswith: 'C:\Program Files\WindowsApps\Microsoft.DirectXRuntime_'
         ImageLoaded|endswith: '\d3dx9_43.dll'
+    filter_main_systemsettings:
+        ImageLoaded: 'C:\Windows\ImmersiveControlPanel\SystemSettings.dll'
     filter_optional_exchange:
         ImageLoaded|startswith: 'C:\Program Files\Microsoft\Exchange Server\'
         ImageLoaded|endswith: '\mswb7.dll'
@@ -495,8 +499,8 @@ detection:
             - 'C:\Windows\System32\backgroundTaskHost.exe'
         ImageLoaded|startswith: 'C:\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
     filter_optional_dell_wldp:
-        Image|startswith: 'C:\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
-        Image|endswith: '\wldp.dll'
+        ImageLoaded|startswith: 'C:\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
+        ImageLoaded|endswith: '\wldp.dll'
     filter_optional_checkpoint:
         Image|startswith:
             - 'C:\Program Files\CheckPoint\'
