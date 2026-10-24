@@ -1,0 +1,33 @@
+title: Suspicious Executable Created In AOMEI Backupper Tmphtml Directory
+id: d18188bb-42c7-4c37-8a50-b3c865c5508d
+status: experimental
+description: |
+    Detects a file creation event for any executable inside the "tmphtml" staging
+    directory beneath the AOMEI Backupper installation path, where the creating process
+    is Backupper.exe. The application stages popup resources here before relocating them
+    to html\; a genuine promotional bundle contains no executables, so an .exe written
+    to this path indicates a tampered bundle.
+references: 
+    - https://www.manageengine.com/threat-analysis-lab/aomei-backupper-supply-chain-compromise.html
+author: Veeramani
+date: 2026-08-29
+tags:
+    - attack.initial-access
+    - attack.t1195.002
+    - attack.stealth
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_process:
+        Image|contains: '\AOMEI\AOMEI Backupper\'
+        Image|endswith: '\Backupper.exe'
+    selection_file:
+        TargetFilename|contains|all:
+            - '\AOMEI\AOMEI Backupper\'
+            - '\tmphtml\'
+        TargetFilename|endswith: '.exe'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high

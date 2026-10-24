@@ -1,0 +1,32 @@
+title: Suspicious AOMEI ABNotify Child Process From Html Directory
+id: 3768e7d0-ba38-48fa-a630-d25bb50438de
+status: experimental
+description: |
+    Detects ABNotify.exe, running from the standard AOMEI Backupper installation path,
+    spawning any executable located in the html\ rendering hierarchy. This directory is
+    intended for rendering assets, not executables; a child process launched from here
+    indicates a hijacked upgrade workflow triggered through the AOMEI notification agent
+    with no user interaction.
+references: 
+    - https://www.manageengine.com/threat-analysis-lab/aomei-backupper-supply-chain-compromise.html
+author: Veeramani
+date: 2026-06-11
+tags:
+    - attack.stealth
+    - attack.t1036.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|contains: '\AOMEI\AOMEI Backupper\'
+        ParentImage|endswith: '\ABNotify.exe'
+    selection_child:
+        Image|contains|all:
+            - '\AOMEI\AOMEI Backupper\'
+            - '\html\'
+        Image|endswith: '.exe'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high
