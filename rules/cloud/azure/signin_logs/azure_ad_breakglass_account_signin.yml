@@ -1,0 +1,32 @@
+---
+title: Azure Break-Glass Account Sign-in
+id: 1717850b-3834-4486-85fb-2df230245ebe
+status: test
+description: |
+    Detects a sign-in to Microsoft Entra ID (Azure AD) by an emergency-access ('break-glass') account, matched by common break-glass naming patterns. Break-glass accounts are intentionally excluded from Conditional Access per Microsoft's privileged-access guidance, so any use of one -- successful or failed -- is worth investigating as potential use of a valid account (MITRE ATT&CK T1078). The account names in this rule are a starting point: replace 'BreakGlass' and 'EmergencyAccess' with the exact emergency-access account names used in your tenant if they differ.
+references:
+    - https://attack.mitre.org/techniques/T1078/
+    - https://learn.microsoft.com/en-us/entra/architecture/security-operations-privileged-accounts
+    - https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/security-emergency-access
+author: 'Haroon Arshad'
+date: 2026-10-24
+tags:
+    - attack.privilege-escalation
+    - attack.persistence
+    - attack.initial-access
+    - attack.stealth
+    - attack.t1078
+logsource:
+    product: azure
+    service: signinlogs
+detection:
+    selection:
+        UserPrincipalName|contains:
+            - 'BreakGlass'
+            - 'EmergencyAccess'
+    condition: selection
+falsepositives:
+    - Legitimate emergency use of the break-glass account during a real Conditional Access or identity-provider outage (rare by design; confirm through the tenant's own incident records).
+    - Disaster-recovery drills or scheduled break-glass tests; consider excluding known test windows or the documented test accounts.
+level: high
+---
