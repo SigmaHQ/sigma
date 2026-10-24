@@ -1,0 +1,34 @@
+title: TanStack Supply-Chain Attack File Creation Indicators - Windows
+id: 8a3f2c1e-5d7b-4e9a-b6c8-1f2a3d4e5f6a
+status: experimental
+description: Detects file creation indicators associated with the Mini Shai-Hulud supply-chain campaign targeting TanStack npm packages and others such as mistralai, uipath, etc reported on early May 2026.
+references:
+    - https://socket.dev/blog/tanstack-npm-packages-compromised-mini-shai-hulud-supply-chain-attack
+    - https://socket.dev/supply-chain-attacks/mini-shai-hulud
+    - https://safedep.io/mass-npm-supply-chain-attack-tanstack-mistral/
+author: Leonardo Gasparini
+date: 2026-05-12
+tags:
+    - attack.initial-access
+    - attack.t1195.002
+    - attack.execution
+    - attack.t1059.007
+    - attack.persistence
+    - attack.t1554
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_malware_files:
+        TargetFilename|endswith:
+            - '\router_init.js'
+            - '\tanstack_runner.js'
+    selection_persistence_claude_vscode:
+        TargetFilename|endswith:
+            - '\.claude\router_runtime.js'
+            - '\.vscode\router_runtime.js'
+    condition: 1 of selection_*
+falsepositives:
+    - Unknown
+level: medium
