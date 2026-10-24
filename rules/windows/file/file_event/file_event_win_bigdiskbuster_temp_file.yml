@@ -17,8 +17,17 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetFilename|re: '\\Temp\\\{[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\}$'
-    condition: selection
+        TargetFilename|re: '\\AppData\\Local\\Temp\\\{[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\}$'
+    filter_main_generic:
+        Image:
+            - 'C:\Windows\System32\taskhost.exe'
+            - 'C:\Windows\SysWOW64\taskhost.exe'
+    filter_optional_dataset:
+        # This filter is for the Sigma baseline dataset and can be removed in production environments
+        Image|startswith: 'C:\Users\'
+        Image|contains: '\AppData\Local\Temp\'
+        Image|endswith: '\target.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Software installers staging temporary payloads using GUID-braced names
     - Developer test suites creating GUID-named temporary fixtures
