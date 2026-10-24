@@ -20,8 +20,10 @@ logsource:
     category: image_load
     product: windows
 detection:
-    selection:
-        ImageLoaded|endswith: '\taskschd.dll'
+    selection_dll:
+        - ImageLoaded|endswith: '\taskschd.dll'
+        - OriginalFileName: 'taskschd.dll'
+    selection_exe:
         Image|endswith:
             - '\eqnedt32.exe'
             - '\excel.exe'
@@ -37,7 +39,7 @@ detection:
             - '\visio.exe'
             - '\winproj.exe'
             - '\winword.exe'
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - Legitimate add-ins or automation scripts that use Office applications to manage scheduled tasks (rare in most environments)
 level: medium
