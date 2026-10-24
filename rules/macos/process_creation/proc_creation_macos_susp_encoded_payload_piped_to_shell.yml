@@ -1,0 +1,45 @@
+title: Suspicious Encoded Payload Piped To Shell - macOS
+id: b9a60caf-969e-4033-9513-2f097adee039
+status: experimental
+description: |
+    Detects a command line that downloads content with curl, decodes it with base64 or gunzip, and pipes the result into a shell interpreter.
+    This chain is used by macOS ClickFix campaigns, where a user is socially engineered into pasting a prepared command into Terminal, and by the MacSync and AMOS infostealer infection chains.
+    The decode step is what separates this from legitimate installer one-liners, which fetch and execute without decoding.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/08/18/hunting-macsync-stealer-infrastructure-through-behavioral-pivots/
+    - https://securelist.com/macsync-new-version/121383/
+    - https://hunt.io/blog/macos-clickfix-applescript-terminal-phishing
+author: Yana Ivanov
+date: 2026-10-10
+tags:
+    - attack.execution
+    - attack.command-and-control
+    - attack.t1059.004
+    - attack.t1105
+    - attack.t1027
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection_download:
+        CommandLine|contains: 'curl'
+    selection_decode:
+        CommandLine|contains:
+            - 'base64 -d'
+            - 'base64 -D'
+            - 'base64 --decode'
+            - 'gunzip'
+            - 'gzip -d'
+            - 'xxd -r'
+    selection_execute:
+        CommandLine|contains:
+            - '| sh'
+            - '|sh'
+            - '| bash'
+            - '|bash'
+            - '| zsh'
+            - '|zsh'
+    condition: all of selection_*
+falsepositives:
+    - Installation scripts that fetch a compressed archive and pipe it through a shell, which is uncommon but not unheard of in developer tooling
+level: high
