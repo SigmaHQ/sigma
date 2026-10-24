@@ -1,0 +1,32 @@
+title: Windows Script Host Or Scriptlet Runtime Loaded By Explorer
+id: ae8719a3-b4ce-44f3-91a7-5dfba1f39f87
+related:
+    - id: a077d7ab-3c9c-41d9-a1e7-db2c78cabe1e
+      type: similar
+status: experimental
+description: |
+    Detects explorer.exe loading "wshom.ocx" (WScript.Shell) or "scrobj.dll" (the scriptlet runtime).
+    Explorer has no reason to host script objects. This happens when a COM or TypeLib hijack makes Explorer run a ".sct" scriptlet, which then typically calls WScript.Shell to start the payload.
+references:
+    - https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661
+author: Tim Shelton (HAWK.io)
+date: 2026-10-13
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1546.015
+    - attack.execution
+    - attack.t1059.007
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\explorer.exe'
+        ImageLoaded|endswith:
+            - '\scrobj.dll'
+            - '\wshom.ocx'
+    condition: selection
+falsepositives:
+    - Third-party shell extensions that host script objects inside Explorer
+level: high
