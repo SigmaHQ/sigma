@@ -6,13 +6,15 @@ related:
 status: test
 description: |
     Detects PowerShell scripts that utilize native PowerShell Identity modules to request Kerberos tickets.
-    This behavior is typically seen during a Kerberos or silver ticket attack. A successful execution will output the SPNs for the endpoint in question.
+    This behavior is typically seen during a Kerberoasting or silver ticket attack. A TGS request is issued by
+    the KerberosRequestorSecurityToken constructor, resulting tickets are cached in LSA and become
+    extractable by other tools later on.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1558.003/T1558.003.md#atomic-test-4---request-a-single-ticket-via-powershell
     - https://learn.microsoft.com/en-us/dotnet/api/system.identitymodel.tokens.kerberosrequestorsecuritytoken?view=netframework-4.8.1
 author: frack113
 date: 2021-12-28
-modified: 2025-11-18
+modified: 2026-09-14
 tags:
     - attack.credential-access
     - attack.t1558.003
@@ -22,11 +24,9 @@ logsource:
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
     selection:
-        ScriptBlockText|contains|all:
-            - 'System.IdentityModel.Tokens.KerberosRequestorSecurityToken'
-            - '.GetRequest()'
+        ScriptBlockText|contains: 'System.IdentityModel.Tokens.KerberosRequestorSecurityToken'
     condition: selection
 falsepositives:
-    - Unknown
+    - Legitimate Kerberos authentication development and troubleshooting scripts
 level: high
 regression_tests_path: regression_data/rules/windows/powershell/powershell_script/posh_ps_request_kerberos_ticket/info.yml
