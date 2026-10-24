@@ -1,0 +1,26 @@
+title: Azazel Ransom Note Creation - Linux
+id: dd37c267-b3a1-4903-8dd6-9d95c87ceb48
+status: experimental
+description: |
+    Detects creation of the ransom note used by the Azazel extortion operation, an affiliate of The Gentlemen ransomware that conducted independent extortion against more than two dozen organizations and published victims on its own leak site.
+    CloudSEK documented the note being written to /root and /home/ubuntu, and the same extortion message being placed into system login surfaces including /etc/motd, the SSH banner via sshd_config, the PostgreSQL cluster_name parameter and a pgAdmin template, so that administrators encounter it on login.
+    This rule detects the note filename only. The login surface modifications are not detected here because configuration management tooling rewrites those files legitimately.
+references:
+    - https://www.cloudsek.com/blog/caught-in-4k-the-gentlemen-files
+author: Yana Ivanov
+date: 2026-10-11
+tags:
+    - attack.impact
+    - attack.t1657
+    - attack.t1491.001
+    - detection.emerging-threats
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection:
+        TargetFilename|endswith: 'ATTENTION_SENSITIVE_INFORMATION.txt'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
