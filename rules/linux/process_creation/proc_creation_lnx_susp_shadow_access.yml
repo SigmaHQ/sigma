@@ -1,0 +1,33 @@
+title: Suspicious Shadow File Access via Standard Utilities
+id: e996fae2-3045-4569-9dfe-c45c0c268c5c
+status: test
+description: Detects standard text and file inspection utilities accessing shadow files to extract password hashes or inspect local credentials.
+references:
+    - https://attack.mitre.org/techniques/T1003/008/
+author: David Akanno (@davidakanno56-bit)
+date: 2026-10-05
+tags:
+    - attack.credential_access
+    - attack.t1003.008
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_file:
+        CommandLine|contains:
+            - '/etc/shadow'
+            - '/etc/gshadow'
+    selection_tools:
+        Image|endswith:
+            - '/cat'
+            - '/head'
+            - '/tail'
+            - '/more'
+            - '/less'
+            - '/grep'
+            - '/awk'
+    condition: all of selection_*
+falsepositives:
+    - Administrative user audit scripts
+    - Backup utilities running under authorized service accounts
+level: medium
