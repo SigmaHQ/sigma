@@ -1,0 +1,36 @@
+title: LockScreenContentServer Execution From Uncommon Folder
+id: b1727dfa-1d70-4a70-b626-00aa3864ed95
+related:
+    - id: 4fc0deee-0057-4998-ab31-d24e46e0aba4
+      type: similar
+status: experimental
+description: |
+    Detects execution of the legitimate Microsoft binary LockScreenContentServer.exe
+    from outside expected Windows directories. Threat actors associated with the
+    TerminalFix campaign copied the binary alongside a malicious dui70.dll under
+    ProgramData to perform DLL sideloading.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/08/28/terminalfix-campaign-deploys-reverse-tunnel-through-multistage-intrusion/
+    - https://www.microsoft.com/en-us/security/blog/2025/08/21/think-before-you-clickfix-analyzing-the-clickfix-social-engineering-technique/
+author: Nazar Diachok (@Diablo-research)
+date: 2026-09-14
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1574.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith: '\LockScreenContentServer.exe'
+        - OriginalFileName: 'LockScreenContentServer.exe'
+    filter_main_legitimate_path:
+        Image|contains:
+            - ':\Windows\System32\'
+            - ':\Windows\WinSxS\'
+            - ':\Windows\SystemApps\'
+    condition: selection and not filter_main_legitimate_path
+falsepositives:
+    - Legitimate administrative or security testing that copies the binary outside default Windows folders
+level: high
