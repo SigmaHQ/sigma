@@ -19,7 +19,14 @@ logsource:
 detection:
     selection:
         TargetImage|endswith: '\explorer.exe'
-    condition: selection
+    filter_main_etw_notification:
+        SourceImage|endswith:
+            - '\svchost.exe'
+            - '\Sysmon.exe'
+            - '\Sysmon64.exe'
+        StartModule|endswith: '\ntdll.dll'
+        StartFunction: 'EtwpNotificationThread'
+    condition: selection and not 1 of filter_main_*
 
 falsepositives:
     - Legitimate software performing DLL injection into explorer.exe
