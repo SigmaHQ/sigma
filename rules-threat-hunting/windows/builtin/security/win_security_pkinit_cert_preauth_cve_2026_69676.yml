@@ -1,0 +1,39 @@
+title: Kerberos PKINIT Certificate Pre-Authentication - Potential CVE-2026-69676 Replay
+id: 0d2b9a3e-6c1f-4e7a-9a1a-5f1e9c6b7a01
+status: experimental
+description: |
+    Surfaces PKINIT (certificate / smartcard) Kerberos AS-REQ logons via Security Event 4768.
+    A single such event is normal, so this is a threat-hunting rule intended for volume and
+    burst aggregation rather than a standalone alert. CVE-2026-69676 is a Windows Kerberos KDC
+    PKINIT cached Diffie-Hellman use-after-free; exploitation produces a high-rate burst of 4768
+    PKINIT certificate logons carrying the same CertThumbprint from a single source address
+    across many ephemeral client ports inside a sub-second window.
+    Hunting guidance: aggregate matches by (IpAddress, CertThumbprint); twenty or more within
+    ten seconds from one source is the exploit shape. Group by IpAddress alone as a lower
+    confidence variant that survives certificate rotation. See references for the matching
+    event_count correlation thresholds.
+references:
+    - https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-69676
+author: Andrew Schwartz (Huntress)
+date: 2026-10-19
+tags:
+    - attack.lateral-movement
+    - attack.t1210
+    - cve.2026-69676
+    - detection.threat-hunting
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4768
+        PreAuthType:
+            - 15   # PA-PK-AS-REQ-OLD
+            - 16   # PA-PK-AS-REQ (PKINIT)
+    filter_main_empty_cert:
+        CertThumbprint: null
+    condition: selection and not filter_main_empty_cert
+falsepositives:
+    - Smartcard and certificate logons are legitimate, and a single PKINIT 4768 is normal. Alert only on volume or burst (twenty or more identical IpAddress and CertThumbprint pairs within ten seconds from one source).
+    - Known chatty certificate-authentication sources such as VDI boot storms, synthetic monitoring, and load tests. Allowlist these by their (IpAddress, CertThumbprint) pair rather than lowering the threshold.
+level: medium
