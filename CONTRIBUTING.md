@@ -32,7 +32,7 @@ git checkout -b your-feature-branch
    python tests/test_rules.py
    ```
 
-   3.3. **Sigma CLI validation** - runs schema and validation checks using [Sigma CLI](https://github.com/SigmaHQ/sigma-cli). Run this if you have `sigma` installed:
+   3.3. **Sigma CLI validation** - runs schema and validation checks using Sigma CLI. Run this if you have the [sigma-cli](https://github.com/SigmaHQ/sigma-cli) and [pySigma-validators-sigmahq](https://github.com/SigmaHQ/pySigma-validators) Python packages installed:
 
    ```bash
    sigma check --fail-on-error --fail-on-issues --validation-config tests/sigma_cli_conf.yml rules/ rules-emerging-threats/ rules-threat-hunting/ rules-compliance/

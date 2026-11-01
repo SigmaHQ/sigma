@@ -10,7 +10,7 @@ references:
     - https://github.com/Wh04m1001/SysmonEoP
 author: Nasreddine Bencherchali (Nextron Systems), frack113
 date: 2023-11-23
-modified: 2025-03-06
+modified: 2026-09-15
 tags:
     - attack.privilege-escalation
     - attack.execution
@@ -36,7 +36,12 @@ detection:
             - 'AUTHORI'
             - 'AUTORI'
         LogonId: '0x3e7'
-    condition: all of selection_*
+    filter_main_svchost:
+        ParentImage|endswith: '\svchost.exe'
+    filter_main_silcollector:
+        ParentImage|endswith: '\cmd.exe'
+        ParentCommandLine: 'C:\Windows\system32\cmd.exe /d /c C:\Windows\system32\silcollector.cmd configure'
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
 level: medium
