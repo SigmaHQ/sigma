@@ -4,7 +4,10 @@ related:
     - id: dd3ee8cc-f751-41c9-ba53-5a32ed47e563
       type: similar
 status: test
-description: Detects the shell open key manipulation (exefile and ms-settings) used for persistence and the pattern of UAC Bypass using fodhelper.exe, computerdefaults.exe, slui.exe via registry keys (e.g. UACMe 33 or 62)
+description: |
+    Detects manipulation of shell open command registry keys such as "ms-settings" and "exefile",
+    which are commonly abused to achieve UAC bypass (e.g. via fodhelper.exe) or establish persistence
+    through file association hijacking.
 references:
     - https://github.com/hfiref0x/UACME
     - https://winscripting.blog/2017/05/12/first-entry-welcome-and-uac-bypass/
@@ -12,7 +15,7 @@ references:
     - https://tria.ge/211119-gs7rtshcfr/behavioral2 [Lokibot sample from Nov 2021]
 author: Christian Burkard (Nextron Systems)
 date: 2021-08-30
-modified: 2022-01-13
+modified: 2026-08-27
 tags:
     - attack.persistence
     - attack.privilege-escalation
@@ -22,20 +25,26 @@ logsource:
     category: registry_event
     product: windows
 detection:
-    selection1:
+    selection_1:
         EventType: SetValue
         TargetObject|endswith: 'Classes\ms-settings\shell\open\command\SymbolicLinkValue'
         Details|contains: '\Software\Classes\{'
-    selection2:
+    selection_2:
         TargetObject|endswith: 'Classes\ms-settings\shell\open\command\DelegateExecute'
-    selection3:
+    selection_3:
         EventType: SetValue
         TargetObject|endswith:
             - 'Classes\ms-settings\shell\open\command\(Default)'
             - 'Classes\exefile\shell\open\command\(Default)'
-    filter_sel3:
+    filter_main_empty:
         Details: '(Empty)'
-    condition: selection1 or selection2 or (selection3 and not filter_sel3)
+    filter_main_default_com:
+        Details:
+            - '{4813071a-41ad-44a2-9835-886d2f63ca30}'
+            - '{A56A841F-E974-45C1-8001-7E3F8A085917}'
+            - '{4ED3A719-CEA8-4BD9-910D-E252F997AFC2}'
+            - '{BFEC0C93-0B7D-4F2C-B09C-AFFFC4BDAE78}'
+    condition: 1 of selection_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high

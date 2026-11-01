@@ -1,0 +1,36 @@
+title: TanStack Supply-Chain Attack Execution Indicators - Linux
+id: 3c6f5e4a-8d0b-6abc-d9e2-4f7a6b8c9d0e
+status: experimental
+description: |
+    Detects process execution indicators associated with the Mini Shai-Hulud supply-chain campaign targeting TanStack npm packages and others such as mistralai and uipath reported on early May 2026.
+    The preinstall hook runs setup.mjs, which downloads a platform-specific Bun runtime.
+references:
+    - https://socket.dev/blog/tanstack-npm-packages-compromised-mini-shai-hulud-supply-chain-attack
+    - https://socket.dev/supply-chain-attacks/mini-shai-hulud
+    - https://safedep.io/mass-npm-supply-chain-attack-tanstack-mistral/
+author: Leonardo Gasparini
+date: 2026-05-12
+tags:
+    - attack.execution
+    - attack.t1059.007
+    - attack.t1059.006
+    - attack.t1204.002
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_bun_runner:
+        Image|endswith: '/bun'
+        CommandLine|contains|all:
+            - 'bun'
+            - 'run'
+            - 'tanstack_runner.js'
+    selection_pypi_payload:
+        # observed on guardrails-ai@0.10.1 compromise
+        Image|contains: '/python3'
+        CommandLine|contains: '/tmp/transformers.pyz'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high
