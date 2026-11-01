@@ -18,12 +18,12 @@ logsource:
     product: linux
     service: auditd
 detection:
-    path:
+    selection_path:
         type: 'PATH'
         nametype: 'CREATE'
-    timer:
+    selection_timer:
         name|endswith: '.timer'
-    dirs:
+    selection_dirs:
         name|startswith:
             - '/etc/systemd/system/'
             - '/usr/lib/systemd/system/'
@@ -38,7 +38,7 @@ detection:
             - '/usr/bin/rpm'
             - '/usr/bin/zypper'
             - '/usr/bin/pacman'
-    condition: path and timer and dirs and not filter_pkg_managers
+    condition: all of selection_* and not filter_pkg_managers
 falsepositives:
     - Admin work like manual timer installs outside a package manager (tune with an allowlist if this is common in the environment).
 level: medium
