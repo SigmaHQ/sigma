@@ -6,21 +6,24 @@ related:
     - id: 999bff6d-dc15-44c9-9f5c-e1051bfc86e1
       type: similar
 status: test
-description: Detects suspicious powershell download cradle using nslookup. This cradle uses nslookup to extract payloads from DNS records
+description: |
+    Detects suspicious powershell download cradle using nslookup.
+    This cradle uses nslookup to extract payloads from DNS records
 references:
     - https://twitter.com/Alh4zr3d/status/1566489367232651264
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-09-05
-modified: 2022-12-19
+modified: 2026-10-13
 tags:
-    - attack.stealth
+    - attack.command-and-control
+    - attack.t1071.004
 logsource:
     category: process_creation
     product: windows
 detection:
     selection_img:
-        - Image|contains: '\nslookup.exe'
-        - OriginalFileName: '\nslookup.exe'
+        - Image|endswith: '\nslookup.exe'
+        - OriginalFileName: 'nslookup.exe'
     selection_cmd:
         ParentImage|endswith:
             - '\powershell.exe'
@@ -28,6 +31,7 @@ detection:
         CommandLine|contains:
             - ' -q=txt '
             - ' -querytype=txt '
+            - ' -type=txt'
     condition: all of selection_*
 falsepositives:
     - Unknown

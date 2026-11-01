@@ -1,0 +1,28 @@
+title: TanStack Supply-Chain Attack Execution Indicators - Windows
+id: 9b4f3d2e-6e8c-5fab-c7d9-2a3b4e5f6a7b
+status: experimental
+description: Detects process execution indicators associated with the Mini Shai-Hulud supply-chain campaign targeting TanStack npm packages and others such as mistralai, uipath reported on early May 2026.
+references:
+    - https://socket.dev/blog/tanstack-npm-packages-compromised-mini-shai-hulud-supply-chain-attack
+    - https://socket.dev/supply-chain-attacks/mini-shai-hulud
+    - https://safedep.io/mass-npm-supply-chain-attack-tanstack-mistral/
+author: Leonardo Gasparini
+date: 2026-05-12
+tags:
+    - attack.execution
+    - attack.t1059.007
+    - attack.t1204.002
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\bun.exe'
+        CommandLine|contains|all:
+            - 'run'
+            - 'tanstack_runner.js'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
