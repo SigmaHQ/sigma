@@ -9,6 +9,7 @@ references:
     - https://twitter.com/malmoeb/status/1570814999370801158
 author: frack113
 date: 2022-09-16
+modified: 2026-10-14
 tags:
     - attack.discovery
     - attack.t1083
@@ -18,10 +19,8 @@ logsource:
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
     selection_action:
-        ScriptBlockText|contains:
-            - ls
-            - get-childitem
-            - gci
+        # Whole words only: as plain substrings, 'ls' and 'gci' also match words such as 'false' or 'credentials'
+        ScriptBlockText|re|i: '\b(?:get-childitem|gci|ls|dir)\b'
     selection_recurse:
         ScriptBlockText|contains: '-recurse'
     selection_file:
@@ -33,3 +32,4 @@ detection:
 falsepositives:
     - Unknown
 level: medium
+regression_tests_path: regression_data/rules/windows/powershell/powershell_script/posh_ps_sensitive_file_discovery/info.yml
