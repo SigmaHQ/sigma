@@ -1,18 +1,19 @@
-title: Local System Accounts Discovery - Linux
+title: Local System Accounts Discovery Attempt - Linux
 id: b45e3d6f-42c6-47d8-a478-df6bd6cf534c
 status: test
 description: |
-    Detects enumeration of local system accounts.
-    This information can help adversaries determine which local accounts exist on a system to aid in follow-on behavior.
+    Detects attempts to enumerate local user accounts via common Linux utilities and sensitive file access.
+    Adversaries may read files such as /etc/passwd, /etc/shadow, and /etc/sudoers, or use tools like getent,
+    id, who, and finger to identify accounts and privilege levels on a compromised system.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1087.001/T1087.001.md
     - https://my.f5.com/manage/s/article/K589
     - https://man.freebsd.org/cgi/man.cgi?pwd_mkdb
     - https://man7.org/linux/man-pages/man1/getent.1.html
     - https://linux.die.net/man/1/finger
-author: Alejandro Ortuno, nasbench, oscd.community, CheraghiMilad
+author: Alejandro Ortuno, oscd.community, CheraghiMilad
 date: 2020-10-08
-modified: 2026-10-06
+modified: 2026-11-03
 tags:
     - attack.discovery
     - attack.t1087.001
@@ -41,7 +42,6 @@ detection:
             - '/tail'
             - '/vi'
             - '/vim'
-    selection_read_files:
         CommandLine|contains:
             - '/etc/passwd'
             - '/etc/shadow'
@@ -67,7 +67,7 @@ detection:
     selection_ypcat:
         Image|endswith: '/ypcat'
         CommandLine|contains: 'passwd'
-    condition: selection_lastlog or selection_root_string or (selection_read_utilities and selection_read_files) or selection_id or selection_lsof or selection_getent or selection_who or selection_ypcat
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate administration activities
 level: low

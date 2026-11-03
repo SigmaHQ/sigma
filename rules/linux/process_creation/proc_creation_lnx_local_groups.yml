@@ -1,15 +1,16 @@
-title: Local Groups Discovery - Linux
+title: Local Groups Discovery Attempt - Linux
 id: 676381a6-15ca-4d73-a9c8-6a22e970b90d
 status: test
 description: |
-    Detects enumeration of local system groups and permission settings.
-    Adversaries may attempt to find local system groups to determine which groups exist on a system and which users are members of those groups to aid in follow-on behavior.
+    Detects attempts to enumerate local groups and group membership via common Linux utilities and sensitive file access.
+    Adversaries may read files such as /etc/group and /etc/gshadow, or use tools like getent and groups to identify
+    group memberships and privilege assignments on a compromised system.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1069.001/T1069.001.md
     - https://man7.org/linux/man-pages/man1/getent.1.html
-author: Ömer Günal, Alejandro Ortuno, nasbench, oscd.community
+author: Ömer Günal, Alejandro Ortuno, oscd.community
 date: 2020-10-11
-modified: 2026-07-03
+modified: 2026-11-03
 tags:
     - attack.discovery
     - attack.t1069.001
@@ -33,7 +34,6 @@ detection:
             - '/tail'
             - '/vi'
             - '/vim'
-    selection_read_files:
         CommandLine|contains:
             - 'group'
             - 'gshadow'
@@ -45,7 +45,7 @@ detection:
     selection_ypcat:
         Image|endswith: '/ypcat'
         CommandLine|contains: 'group'
-    condition: selection_groups or (selection_read_utilities and selection_read_files) or selection_getent or selection_ypcat
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate administration activities
 level: low
