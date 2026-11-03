@@ -1,0 +1,44 @@
+title: Uncommon Notification Package Loaded By SAM
+id: 33cf5be9-c737-4143-b1b4-d95d140ad081
+related:
+    - id: b7966f4a-b333-455b-8370-8ca53c229762 # Process creation - password filter registered via reg.exe
+      type: similar
+status: experimental
+description: |
+    Detects the Security Account Manager (SAM) loading a notification package (password filter DLL) that is not shipped with Windows.
+    Password filters receive every new password in clear text when a password is set or changed, so a malicious filter can capture credentials.
+references:
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4614
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-security-system-extension
+    - https://learn.microsoft.com/en-us/windows/win32/secmgmt/installing-and-registering-a-password-filter-dll
+    - https://learn.microsoft.com/en-us/archive/blogs/tedhardy/detecting-password-filter-changes
+author: 'Bartosz Siedlikowski @bsiedlikowski'
+date: 2026-11-03
+tags:
+    - attack.persistence
+    - attack.credential-access
+    - attack.defense-impairment
+    - attack.t1556.002
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: The Security System Extension audit subcategory needs to be enabled to log Event ID 4614'
+detection:
+    selection:
+        EventID: 4614
+    filter_main_inbox_packages:
+        NotificationPackageName:
+            - 'KDCPW'
+            - 'KDCSVC'
+            - 'rassfm'
+            - 'scecli'
+            - 'WDIGEST'
+    filter_optional_failover_clustering:
+        NotificationPackageName: 'ClusAuthMgr'
+    filter_optional_entra_password_protection:
+        # Microsoft Entra Password Protection DC agent
+        NotificationPackageName: 'AzureADPasswordProtectionPFD.dll'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Legitimate third-party password filters, e.g. Lithnet Password Protection or Microsoft Identity Manager PCNS
+level: medium

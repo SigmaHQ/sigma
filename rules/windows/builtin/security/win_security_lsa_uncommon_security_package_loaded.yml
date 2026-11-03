@@ -1,0 +1,47 @@
+title: Uncommon Security Support Provider Loaded By LSA
+id: 9dd0b7d3-9f32-4fd0-bf7e-cd38a159d1ff
+related:
+    - id: eeb30123-9fbd-4ee8-aaa0-2e545bbed6dc # Registry - SSP added to the LSA configuration
+      type: similar
+status: experimental
+description: |
+    Detects the Local Security Authority (LSA) loading a security package (SSP) that is not shipped with Windows.
+    Security packages are loaded into lsass.exe at startup or at runtime via AddSecurityPackage and have access to the credentials of logged-on users.
+references:
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4622
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-security-system-extension
+    - https://learn.microsoft.com/en-us/windows/win32/secauthn/restrictions-around-registering-and-installing-a-security-package
+author: 'Bartosz Siedlikowski @bsiedlikowski'
+date: 2026-11-03
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1547.005
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: The Security System Extension audit subcategory needs to be enabled to log Event ID 4622'
+detection:
+    selection:
+        EventID: 4622
+    filter_main_inbox_packages:
+        # Value format is '<DLL path> : <package name>'. The package name is set by the package itself and can contain any text,
+        # so the DLL path is matched with startswith instead of contains
+        SecurityPackageName|startswith:
+            - '?:\Windows\system32\cloudAP.DLL :'
+            - '?:\Windows\system32\kerberos.DLL :'
+            - '?:\Windows\system32\lsasrv.dll :'
+            - '?:\Windows\system32\msv1_0.DLL :'
+            - '?:\Windows\system32\negoexts.DLL :'
+            - '?:\Windows\system32\pku2u.DLL :'
+            - '?:\Windows\system32\schannel.DLL :'
+            - '?:\Windows\system32\sfapm.dll :'
+            - '?:\Windows\system32\tspkg.DLL :'
+            - '?:\Windows\system32\wdigest.DLL :'
+    filter_optional_failover_clustering:
+        SecurityPackageName|startswith: '?:\Windows\system32\ClusAuthMgr.DLL :'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Legitimate third-party security packages
+    - Security packages added in newer Windows versions
+level: medium
