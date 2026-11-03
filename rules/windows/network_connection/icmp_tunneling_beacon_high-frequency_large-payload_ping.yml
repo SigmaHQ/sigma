@@ -1,0 +1,24 @@
+title: ICMP Tunneling Beacon (high-frequency/large-payload ping)
+id: e3a74e58-802f-5794-1b4d-718186cde251
+status: experimental
+description: Detects ICMP tunneling via high-frequency or large-payload ping traffic.
+references:
+    - https://entroprism.net
+author: Entroprism (Beijing Yijun Foreign Trade Co., Ltd.)
+date: 2026/11/03
+tags:
+    - attack.t1095
+    - detection.threat_hunting
+logsource:
+    product: windows
+    category: network_connection
+detection:
+  selection_high_freq:
+    DestinationPort: 0
+    Protocol: 'icmp'
+  selection_large:
+    ResponseBytes|gt: 200
+  condition: selection_high_freq and selection_large
+level: high
+falsepositives:
+  - legitimate network monitoring or path MTU discovery
