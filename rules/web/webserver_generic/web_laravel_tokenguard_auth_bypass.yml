@@ -1,6 +1,6 @@
 title: Laravel TokenGuard Authentication Bypass Attempt
 id: a8c63e00-bd4b-4742-9dc5-d4c1b0de3679
-status: test
+status: experimental
 description: |
     Detects exploitation attempts against Laravel's TokenGuard authentication bypass (CVE-2026-114509).
     TokenGuard does not validate the credential type before the database lookup: sending api_token as an
@@ -21,9 +21,8 @@ logsource:
 detection:
     selection:
         cs-uri-query|contains:
-            - 'api_token%5B'
-            - 'api_token['
             - 'api_token%5b'
+            - 'api_token['
     condition: selection
 falsepositives:
     - Legitimate API clients erroneously submitting the token as an array parameter (rare)
