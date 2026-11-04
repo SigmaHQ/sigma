@@ -1,0 +1,46 @@
+title: Fastjson AutoType Denylist Bypass Via JDK Classes In Web Request
+id: 7c45d854-eba3-45aa-8e21-142286eab737
+status: test
+description: |
+    Detects a Fastjson autoType payload whose @type points at java.lang.Class or
+    java.lang.AutoCloseable. Neither class is a gadget on its own, which is exactly why
+    they are used: they slip past the autoType denylist and only hand over to a dangerous
+    class in a second step.
+
+    - java.lang.Class abuses the class cache in TypeUtils. The cache is consulted before
+      the denylist is applied, so a Class reference can pull a previously loaded gadget
+      back in. Publicly documented against 1.2.25 through 1.2.47, and it did not need
+      autoTypeSupport to be enabled.
+    - java.lang.AutoCloseable abuses the expectClass check, publicly documented against
+      1.2.48 through 1.2.68.
+
+    Both chains belong to the long series of autoType bypasses that alibaba closed in
+    1.2.83. Seeing either string next to @type in a request is almost never legitimate.
+
+    Note on log sources: this rule needs request body content (ModSecurity / Coraza audit
+    logs, nginx `$request_body`, Apache mod_dumpio, or a WAF recording POST bodies). A
+    plain Common Log Format line only carries the URI.
+references:
+    - https://github.com/alibaba/fastjson/wiki/security_update_20220523
+    - https://github.com/alibaba/fastjson/wiki/enable_autotype
+    - https://nvd.nist.gov/vuln/detail/CVE-2022-25845
+author: yliucherish
+date: 2026-11-05
+tags:
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    category: webserver
+detection:
+    selection_autotype:
+        - '@type'
+        - '%40type'
+    selection_denylist_bypass:
+        - 'java.lang.Class'
+        - 'java.lang.AutoCloseable'
+    condition: selection_autotype and selection_denylist_bypass
+falsepositives:
+    - Applications that deliberately serialise Class or AutoCloseable references through
+      Fastjson. Uncommon and strongly discouraged, but it exists in old internal services.
+    - Vulnerability scanners and authorised penetration tests against own assets
+level: high
