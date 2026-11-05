@@ -1,0 +1,89 @@
+name: "Label inactive PRs"
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # Daily at 06:00 UTC.
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  label-inactive:
+    if: github.repository_owner == 'SigmaHQ'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      INACTIVE_DAYS: 30
+    steps:
+      - name: Add "Inactive" to PRs stalled on author input
+        run: |
+          set -euo pipefail
+          cutoff=$(date -u -d "${INACTIVE_DAYS} days ago" +%F)
+          echo "Cutoff: no activity before ${cutoff}"
+
+          # List open PRs through the REST API and filter client-side:
+          # the search index (label: and updated: qualifiers) is eventually
+          # consistent and can transiently return 0 for queries that should
+          # match, so it must not drive this workflow.
+          stalled=""
+          page=1
+          while :; do
+            json=$(gh api "repos/${GITHUB_REPOSITORY}/pulls?state=open&per_page=100&page=${page}")
+            count=$(jq 'length' <<<"${json}")
+            for pr in $(jq -r --arg cutoff "${cutoff}" '
+              [.[]
+               | select(.labels | map(.name) | index("Author Input Required"))
+               | select(.labels | map(.name) | index("Inactive") | not)
+               | select(.updated_at < $cutoff)
+               | .number] | .[]' <<<"${json}"); do
+              stalled="${stalled} ${pr}"
+            done
+            [ "${count}" -lt 100 ] && break
+            page=$((page + 1))
+          done
+
+          for pr in $stalled; do
+            echo "Adding Inactive to #${pr}"
+            gh pr edit "${pr}" --add-label "Inactive" || echo "skipping #${pr}"
+          done
+
+      - name: Remove "Inactive" from PRs that became active again
+        run: |
+          set -euo pipefail
+
+          # PRs that no longer wait on author input: drop Inactive at once.
+          # PRs still waiting on author input: drop Inactive only if there was
+          # real activity after the label was added — adding the label itself
+          # updates updated_at, so updated_at alone cannot be the criterion.
+          cleared=""
+          stalled=""
+          page=1
+          while :; do
+            json=$(gh api "repos/${GITHUB_REPOSITORY}/pulls?state=open&per_page=100&page=${page}")
+            count=$(jq 'length' <<<"${json}")
+            for pr in $(jq -r '.[] | select(.labels | map(.name) | index("Inactive")) | .number' <<<"${json}"); do
+              if jq -e --argjson n "${pr}" '.[] | select(.number == $n) | [.labels[].name] | index("Author Input Required") | not' <<<"${json}" > /dev/null; then
+                cleared="${cleared} ${pr}"
+              else
+                stalled="${stalled} ${pr}"
+              fi
+            done
+            [ "${count}" -lt 100 ] && break
+            page=$((page + 1))
+          done
+
+          for pr in $cleared; do
+            echo "Removing Inactive from #${pr} (no longer waiting on author input)"
+            gh pr edit "${pr}" --remove-label "Inactive" || echo "skipping #${pr}"
+          done
+
+          for pr in $stalled; do
+            added=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${pr}/timeline?per_page=100" \
+              --jq '[.[] | select(.event == "labeled" and .label.name == "Inactive")] | last // empty | .created_at')
+            updated=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${pr}" --jq .updated_at)
+            if [ -n "${added}" ] && [[ "${updated}" > "${added}" ]]; then
+              echo "Removing Inactive from #${pr} (activity after labelling)"
+              gh pr edit "${pr}" --remove-label "Inactive" || echo "skipping #${pr}"
+            fi
+          done
