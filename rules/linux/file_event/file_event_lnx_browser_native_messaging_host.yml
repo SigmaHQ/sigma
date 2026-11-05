@@ -1,0 +1,51 @@
+title: Potential Suspicious Browser Native Messaging Host
+    File Creation on Linux
+id: 564ca037-6cd4-459e-94d6-ad725dad1f6b
+status: experimental
+description: |
+    Detects the creation of native messaging host manifest files
+    in browser-specific directories on Linux. Native messaging
+    allows browser extensions to communicate with local binaries
+    via stdin/stdout, which can be abused to execute arbitrary
+    commands and escape the browser sandbox.
+references:
+    - https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging
+    - https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/native-messaging
+    - https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_manifests
+    - https://github.com/praetorian-inc/ChromeAlone
+author: PersonalRules
+date: 2026-04-23
+tags:
+    - attack.persistence
+    - attack.t1176.001
+    - attack.execution
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection_chrome_system:
+        TargetFilename|contains: '/etc/opt/chrome/native-messaging-hosts/'
+    selection_chrome_user:
+        TargetFilename|contains: '/.config/google-chrome/NativeMessagingHosts/'
+    selection_chromium_system:
+        TargetFilename|contains: '/etc/chromium/native-messaging-hosts/'
+    selection_chromium_user:
+        TargetFilename|contains: '/.config/chromium/NativeMessagingHosts/'
+    selection_edge_system:
+        TargetFilename|contains: '/etc/opt/edge/native-messaging-hosts/'
+    selection_edge_user:
+        TargetFilename|contains: '/.config/microsoft-edge/NativeMessagingHosts/'
+    selection_firefox_system:
+        TargetFilename|contains:
+            - '/usr/lib/mozilla/native-messaging-hosts/'
+            - '/usr/lib64/mozilla/native-messaging-hosts/'
+    selection_firefox_user:
+        TargetFilename|contains: '/.mozilla/native-messaging-hosts/'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate browser extensions installing native messaging
+      hosts (password managers, screen readers, etc.)
+    - Package managers (apt, yum, dnf) installing browser
+      extension packages
+    - Browser updates that register new native messaging hosts
+level: medium
