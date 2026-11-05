@@ -1,0 +1,49 @@
+title: HackTool - Coercer Tools Execution - Linux
+id: 4c3b2a1f-0e9d-8c7b-6a5f-4e3d2c1b0a9e
+related:
+    - id: 09310cc2-c9b1-4a12-8496-fad1376436c8
+      type: similar
+status: experimental
+description: |
+    Detects execution of DFSCoerce and Coercer, tools that abuse the MS-DFSNM and other
+    RPC interfaces to coerce Windows hosts into authenticating to an attacker-controlled
+    machine via NTLM. The captured authentication can be relayed (e.g. via ntlmrelayx)
+    or cracked offline.
+references:
+    - https://github.com/n00py/Outpacket#7-auth-coercion
+    - https://github.com/p0dalirius/Coercer
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-21
+tags:
+    - attack.credential-access
+    - attack.collection
+    - attack.t1187
+    - attack.t1557.001
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_coerce_img:
+        Image|contains:
+            - '/dfscoerce'
+            - '/coercer'
+            - '/ShadowCoerce'
+            - '/CredCoerce'
+    selection_coerce_cli:
+        CommandLine|contains|all:
+            - 'Coerce'
+            - '-u'
+            - '-p'
+    selection_python_img:
+        - Image|contains: '/python'
+        - OriginalFileName|contains: 'python'
+    selection_python_cli:
+        CommandLine|contains:
+            - 'dfscoerce'
+            - 'Coercer'
+            - 'ShadowCoerce'
+            - 'CredCoerce'
+    condition: 1 of selection_coerce_* or all of selection_python_*
+falsepositives:
+    - Unlikely
+level: high
