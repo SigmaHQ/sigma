@@ -1,0 +1,30 @@
+title: AWS IAM Policy Version With Wildcard Actions Set As Default
+id: d28e2544-ee98-4fc7-9e6c-76dea63616d6
+status: experimental
+description: |
+    Detects the creation of a new default version of an IAM managed policy that allows all actions ("*") or all IAM actions ("iam:*").
+    An identity that holds iam:CreatePolicyVersion on a policy attached to itself can overwrite that policy with an administrator version in a single call, a well-known AWS privilege escalation path.
+    Production policies are rarely rewritten to full wildcards, so the combination of a new default version and a wildcard action is worth a prompt review.
+references:
+    - https://rhinosecuritylabs.com/aws/aws-privilege-escalation-methods-mitigation/
+    - https://docs.aws.amazon.com/IAM/latest/APIReference/API_CreatePolicyVersion.html
+    - https://github.com/splunk/attack_data/tree/master/datasets/attack_techniques/T1078/aws_create_policy_version
+author: Anthony Bayate Jr.
+date: 2026-10-21
+tags:
+    - attack.privilege-escalation
+    - attack.persistence
+    - attack.t1098.003
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: 'iam.amazonaws.com'
+        eventName: 'CreatePolicyVersion'
+        requestParameters.setAsDefault: 'true'
+        requestParameters.policyDocument|re: '"Action"\s*:\s*(\[[^\]]*)?"(\*|iam:\*)"'
+    condition: selection
+falsepositives:
+    - Administrators intentionally (re)writing break-glass or sandbox administrator policies
+level: high
