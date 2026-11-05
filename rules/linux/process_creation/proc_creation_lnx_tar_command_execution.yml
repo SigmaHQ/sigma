@@ -1,0 +1,28 @@
+title: Potential Command Execution Via Tar Checkpoint Or To-Command
+id: 06b92d88-4846-4b13-bde5-7119a5118aef
+status: experimental
+description: |
+    Detects the use of the "tar" utility with the "--checkpoint-action" or "--to-command" options.
+    These options allow "tar" to execute arbitrary commands and are abused for privilege escalation (e.g. via "sudo tar"), to break out of restricted environments, or through tar wildcard injection where crafted file names are expanded by the shell and interpreted by "tar" as command-line options.
+references:
+    - https://gtfobins.github.io/gtfobins/tar/
+    - https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html
+    - https://www.exploit-db.com/papers/33930
+author: Defa Mulya Pratama
+date: 2026-10-07
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '/tar'
+        CommandLine|contains:
+            - '--checkpoint-action'
+            - '--to-command'
+    condition: selection
+falsepositives:
+    - Unlikely. The "--checkpoint-action" and "--to-command" options are rarely used in legitimate automation and should be investigated.
+level: high
