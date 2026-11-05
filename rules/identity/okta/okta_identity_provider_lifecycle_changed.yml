@@ -1,0 +1,31 @@
+title: Okta Identity Provider Updated, Activated, Deactivated or Deleted
+id: 2071359e-e298-448f-8473-783ba9f2b304
+status: experimental
+description: |
+    Detects when an existing Okta identity provider (IdP) is updated, activated, deactivated or deleted.
+    Attackers with admin access can modify or re-activate an existing identity provider to impersonate users (cross-tenant impersonation), and delete it afterwards to remove traces.
+    Creation of a new identity provider is covered by rule 969c7590-8c19-4797-8c1b-23155de6e7ac.
+    The "system.idp.lifecycle.update" event includes change details showing what was modified.
+references:
+    - https://developer.okta.com/docs/reference/api/event-types/
+    - https://sec.okta.com/articles/2023/08/cross-tenant-impersonation-prevention-and-detection
+author: Dorel Sandor
+date: 2026-10-29
+tags:
+    - attack.privilege-escalation
+    - attack.defense-impairment
+    - attack.t1484.002
+logsource:
+    product: okta
+    service: okta
+detection:
+    selection:
+        eventType:
+            - 'system.idp.lifecycle.update'
+            - 'system.idp.lifecycle.activate'
+            - 'system.idp.lifecycle.deactivate'
+            - 'system.idp.lifecycle.delete'
+    condition: selection
+falsepositives:
+    - Legitimate administrative changes to an identity provider, such as rotating its signing certificate or updating its configuration.
+level: medium
