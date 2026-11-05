@@ -1,0 +1,47 @@
+title: Suspicious Makecab/Diantz File Staging Or Ingress
+id: fb7ca7da-88f7-49db-a1ea-fe9a83f47602
+status: experimental
+description: |
+    Detects suspicious execution of "makecab.exe" or "diantz.exe" to package sensitive system files (e.g. Active Directory database, registry hives, browser user data, memory dumps) or to perform remote file ingress via UNC/WebDAV paths.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Makecab/
+    - https://lolbas-project.github.io/lolbas/Binaries/Diantz/
+    - https://byis.github.io/post/makecab/
+author: Danish
+date: 2026-09-30
+tags:
+    - attack.collection
+    - attack.exfiltration
+    - attack.t1560.001
+    - attack.command-and-control
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_tools:
+        - Image|endswith:
+              - '\makecab.exe'
+              - '\diantz.exe'
+        - OriginalFileName:
+              - 'MakeCab.exe'
+              - 'diantz.exe'
+    selection_unc:
+        CommandLine|contains:
+            - '\\\\'
+            - '//'
+    selection_sensitive:
+        CommandLine|contains:
+            - '\config\SAM'
+            - '\config\SYSTEM'
+            - '\config\SECURITY'
+            - '\ntds.dit'
+            - '\Microsoft\Credentials'
+            - '\Google\Chrome\User Data'
+            - '\Local State'
+            - '.dmp'
+            - '.dump'
+    condition: selection_tools and (selection_unc or selection_sensitive)
+falsepositives:
+    - Administrative backups of system hives or Active Directory databases using legacy cabinet packaging utilities like makecab or diantz are exceptionally rare and typically superseded by modern backup mechanisms or PowerShell scripts.
+level: high
