@@ -1,0 +1,36 @@
+title: Kerberos TGT Issued for kadmin/changepw SPN
+id: c7d2b4f8-3a5e-4c1b-9f6d-2e8a0b4c7d3f
+status: experimental
+description: |
+    Detects a successful Kerberos TGT request (AS-REQ/AS-REP, Event 4768) where the target
+    service is "kadmin/changepw". In Windows-native environments, password changes go through
+    NTLM or LDAP — a successful AS-REQ to the kadmin/changepw SPN from a Windows host means
+    the KDC issued a usable ticket, indicating offensive Kerberos tooling such as Rubeus
+    ("asktgt /changepw"), Impacket, or custom exploit code. Known techniques leveraging this
+    primitive include ResetNightmare (CVE-2026-27912) and other Kerberos Change Password
+    protocol abuses. A successfully issued ticket is a high-confidence indicator; the attacker
+    already holds a credential capable of invoking the Kerberos Change Password protocol.
+references:
+    - https://github.com/semperis-community/resetnightmare
+    - https://github.com/GhostPack/Rubeus
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4768
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-12
+tags:
+    - attack.credential-access
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1558
+    - attack.t1212
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Advanced Audit Policy "Audit Kerberos Authentication Service" must be enabled'
+detection:
+    selection:
+        EventID: 4768
+        ServiceName: 'kadmin/changepw'
+    condition: selection
+falsepositives:
+    - Non-Windows Kerberos clients (Linux, macOS, MIT Kerberos) performing standard RFC 3244 Kerberos password changes against the Windows DC
+level: high

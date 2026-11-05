@@ -1,0 +1,38 @@
+title: Kerberos Pre-Authentication Failure Targeting Kadmin/changepw SPN
+id: b5e3a1f7-2d8c-4b6e-a0f4-9c7d1e3b5a2f
+status: experimental
+description: |
+    Detects a Kerberos pre-authentication failure (Event 4771) where the target service is
+    "kadmin/changepw". This event fires when a client attempts an AS-REQ to the Kerberos
+    Change Password SPN but the KDC rejects it at the pre-authentication stage — common
+    during reconnaissance, credential guessing, or exploit attempts where the attacker has
+    not yet obtained valid credentials or a correct ticket. In Windows-native environments,
+    password changes go through NTLM or LDAP, so any direct AS-REQ to kadmin/changepw is
+    anomalous. Known techniques leveraging this SPN include ResetNightmare (CVE-2026-27912)
+    and other Kerberos Change Password protocol abuses. Lower confidence than a successful
+    4768 event but useful for early-stage detection and baselining.
+references:
+    - https://github.com/semperis-community/resetnightmare
+    - https://github.com/GhostPack/Rubeus
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4771
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-12
+tags:
+    - attack.credential-access
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1558
+    - attack.t1212
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Advanced Audit Policy "Audit Kerberos Authentication Service" must be enabled'
+detection:
+    selection:
+        EventID: 4771
+        ServiceName: 'kadmin/changepw'
+    condition: selection
+falsepositives:
+    - Non-Windows Kerberos clients (Linux, macOS, MIT Kerberos) performing standard RFC 3244 Kerberos password changes against the Windows DC
+    - Misconfigured Kerberos clients or password change tooling retrying after transient failures
+level: medium
