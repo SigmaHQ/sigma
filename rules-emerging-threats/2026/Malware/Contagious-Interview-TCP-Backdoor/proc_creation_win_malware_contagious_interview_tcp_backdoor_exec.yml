@@ -1,0 +1,33 @@
+title: Contagious Interview TCP Backdoor Detached Command Execution
+id: dfe0a3c9-c250-45f7-9c1f-34a6ea329da1
+status: experimental
+description: |
+    Detects the command line built by the Contagious Interview Node.js TCP backdoor for its "ss_exec" tasking.
+    Node.js child_process.exec on Windows wraps the command as "cmd.exe /d /s /c", and the implant prepends 'start /b cmd /c "cd /d "<dir>" && <command>"' so that the operator command runs detached in the requested working directory.
+references:
+    - https://n4uu.github.io/2026/raw-tcp-backdoor-cleverstack/
+author: n4uu
+date: 2026-11-05
+tags:
+    - attack.execution
+    - attack.t1059.003
+    - attack.t1059.007
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\node.exe'
+    selection_img:
+        - Image|endswith: '\cmd.exe'
+        - OriginalFileName: 'Cmd.Exe'
+    selection_cli:
+        CommandLine|contains|all:
+            - ' /d /s /c '
+            - 'start /b cmd /c '
+            - 'cd /d '
+    condition: all of selection_*
+falsepositives:
+    - Node.js tooling that starts background shells in a specific working directory this way. Rare in practice; baseline before alerting.
+level: medium
