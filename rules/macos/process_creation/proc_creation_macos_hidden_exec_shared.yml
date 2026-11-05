@@ -1,0 +1,24 @@
+title: Potential Hidden Executable Run From Shared
+id: d6db13e8-542c-4683-97bf-f9e6dc3d966d
+status: experimental
+description: |
+    Detects the execution of a hidden file (name starting with a dot) located in the /Users/Shared
+    directory. Masquerading an executable as a dot-file in a shared location is a technique observed
+    in the BlueNoroff macOS intrusion set (TA444) and reduces its visibility in a casual listing.
+references:
+    - https://www.huntress.com/blog/inside-bluenoroff-web3-intrusion-analysis
+author: Stuart Ashenbrenner
+date: 2026-09-30
+tags:
+    - attack.stealth
+    - attack.t1036.005
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection:
+        Image|re: '^/Users/Shared/\.[a-zA-Z0-9._-]{1,255}$'
+    condition: selection
+falsepositives:
+    - Legitimate scripts or installers that hide files in /Users/Shared
+level: medium

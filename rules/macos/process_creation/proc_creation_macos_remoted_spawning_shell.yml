@@ -1,0 +1,43 @@
+title: Suspicious Remoted Spawning Shell
+id: 4f03f395-a192-468f-8e4e-9cb8efd97b80
+status: experimental
+description: |
+    Detects the 'remoted' binary, a binary masquerading by living in the Library directory, spawning
+    a shell or osascript in order to execute an AppleScript payload. This technique was reported by
+    TA444 in the BlueNoroff macOS intrusion set.
+references:
+    - https://www.huntress.com/blog/inside-bluenoroff-web3-intrusion-analysis
+    - https://atomicredteam.io/execution/T1059.004/
+author: Stuart Ashenbrenner
+date: 2026-09-30
+tags:
+    - attack.execution
+    - attack.t1059.004
+    - attack.stealth
+    - attack.t1036.005
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    parent_process:
+        ParentImage|startswith: '/Library/WebServer'
+        ParentImage|endswith: '/remoted'
+    process:
+        Image|endswith:
+            - '/sh'
+            - '/bash'
+            - '/zsh'
+            - '/osascript'
+    condition: parent_process and process
+falsepositives:
+    - Legitimate administration scripts shipped by a remoted web server in /Library/WebServer
+level: high
+simulation:
+    - type: atomic-red-team
+      name: AppleScript
+      technique: T1059.002
+      atomic_guid: 3600d97d-81b9-4171-ab96-e4386506e2c2
+    - type: atomic-red-team
+      name: Execute a process from a directory masquerading as the current parent directory
+      technique: T1036.005
+      atomic_guid: 812c3ab8-94b0-4698-a9bf-9420af23ce24
