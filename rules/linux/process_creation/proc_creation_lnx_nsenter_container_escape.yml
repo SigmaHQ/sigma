@@ -1,0 +1,30 @@
+title: Nsenter Escape to Host Namespace
+id: b48ed9ae-609f-4c0f-a1ac-c687aa1ee11b
+status: experimental
+description: |
+    Detects the use of nsenter to enter the host process and mount namespaces from
+    within a container. This is a common container escape technique used to break
+    out of a container and execute commands on the underlying host.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1611/T1611.md
+author: Gideon Opukeme
+date: 2026-10-18
+tags:
+    - attack.privilege-escalation
+    - attack.t1611
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: '/nsenter'
+    selection_host_ns:
+        CommandLine|contains:
+            - '--mount=/proc/1/ns/'
+            - '--net=/proc/1/ns/'
+            - '-t 1'
+            - '--target 1'
+    condition: selection_img and selection_host_ns
+falsepositives:
+    - Administrators using nsenter to debug or manage containers from the host
+level: high
