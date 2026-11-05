@@ -1,0 +1,32 @@
+title: SSH Authorized Keys Made Immutable
+id: 93e19118-a707-468d-affb-691892eed63c
+status: experimental
+description: Detects use of the chattr utility to add immutable or append-only attributes to an SSH authorized_keys file. Threat actors may use this after planting a public key to make their persistence harder to remove.
+references:
+    - https://isc.sans.edu/diary/30950
+    - https://www.akamai.com/blog/security-research/dhpcd-cryptominer-hid-four-years
+    - https://man7.org/linux/man-pages/man1/chattr.1.html
+author: Mark C (Atlas SOC Lab)
+date: 2026-08-14
+tags:
+    - attack.defense-impairment
+    - attack.t1222.002
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_tool_image:
+        Image|endswith: '/chattr'
+    selection_tool_commandline:
+        CommandLine|contains: 'chattr '
+    selection_target:
+        CommandLine|contains: '/.ssh/authorized_keys'
+    selection_attribute_addition:
+        CommandLine|contains:
+            - ' +i'
+            - ' +a'
+    condition: 1 of selection_tool_* and selection_target and selection_attribute_addition
+falsepositives:
+    - Administrators intentionally protecting approved SSH authorized_keys files
+    - Configuration-management or hardening tools applying immutable file attributes
+level: medium
