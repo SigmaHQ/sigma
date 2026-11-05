@@ -8,6 +8,7 @@ references:
     - https://github.com/FalconForceTeam/FalconFriday/blob/a9219dfcfd89836f34660223f47d766982bdce46/Discovery/ADWS_Connection_from_Unexpected_Binary-Win.md
 author: '@kostastsale'
 date: 2024-01-26
+modified: 2026-11-05
 tags:
     - attack.discovery
     - attack.t1087
@@ -21,13 +22,20 @@ detection:
     filter_main_dsac:
         Image: 'C:\Windows\system32\dsac.exe'
     filter_main_ms_monitoring_agent:
-        Image: 'C:\Program Files\Microsoft Monitoring Agent\'
+        Image|startswith: 'C:\Program Files\Microsoft Monitoring Agent\'
     filter_main_powershell:
-        Image|startswith:
+        Image:
+            - 'C:\Program Files\PowerShell\7-preview\pwsh.exe'
             - 'C:\Program Files\PowerShell\7\pwsh.exe'
-            - 'C:\Program Files\PowerShell\7-preview\pwsh.ex'
-            - 'C:\Windows\System32\WindowsPowerShell\'
-            - 'C:\Windows\SysWOW64\WindowsPowerShell\'
+            - 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe'
+            - 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
+            - 'C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell_ise.exe'
+            - 'C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe'
+    filter_main_pwsh_preview:
+        Image|contains:
+            - 'C:\Program Files\WindowsApps\Microsoft.PowerShellPreview'
+            - '\AppData\Local\Microsoft\WindowsApps\Microsoft.PowerShellPreview'
+        Image|endswith: '\pwsh.exe'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - ADWS is used by a number of legitimate applications that need to interact with Active Directory. These applications should be added to the allow-listing to avoid false positives.
