@@ -1,0 +1,26 @@
+title: Volume Image Creation Via Disk2vhd
+id: 7b5668f7-e7d9-4845-a935-18aa6ce9ff40
+status: experimental
+description: |
+    Detects execution of the Sysinternals Disk2vhd tool, which clones a live volume into a VHD/VHDX. Adversaries abuse it to obtain an
+    offline copy of a system volume (e.g. a Domain Controller's C: containing NTDS.dit and the SAM/SYSTEM hives) for offline credential extraction.
+references:
+    - https://learn.microsoft.com/en-us/sysinternals/downloads/disk2vhd
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.credential-access
+    - attack.collection
+    - attack.t1003.003
+    - attack.t1005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith: '\disk2vhd.exe'
+        - OriginalFileName: 'Disk2Vhd.exe'
+    condition: selection
+falsepositives:
+    - Legitimate virtual machine migration or backup by administrators
+level: medium
