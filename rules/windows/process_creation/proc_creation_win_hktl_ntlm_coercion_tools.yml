@@ -1,0 +1,61 @@
+title: Potential NTLM Authentication Coercion Tool Execution
+id: bfda903c-f36f-432b-ae0f-fba97afc34a8
+related:
+    - id: 5589ab4f-a767-433c-961d-c91f3f704db1
+      type: similar
+status: experimental
+description: |
+    Detects execution of tools that perform NTLM authentication coercion by abusing Windows RPC interfaces.
+    These tools force a target machine (typically a Domain Controller) to authenticate outbound to an attacker-controlled listener using its machine account credentials, enabling NTLM relay attacks and potential full domain compromise.
+    Covered tools and techniques:
+    - DFSCoerce: abuses the MS-DFSNM (Distributed File System Namespace Management) RPC interface.
+    - ShadowCoerce: abuses the MS-FSRVP (File Server Remote VSS Protocol) RPC interface.
+    - Coercer: a meta-tool by p0dalirius that automates coercion via multiple RPC interfaces (MS-DFSNM, MS-FSRVP, MS-RPRN, MS-EFSRPC, MS-ICPR, and others).
+    - WSPCoerce: abuses the MS-WSP (Windows Search Protocol) RPC interface.
+    This rule detects the *coercion phase* (forcing authentication) and complements existing rules covering the *relay phase* (ntlmrelayx, Responder, Impacket).
+    Note: DFSCoerce and PrinterBug remain unpatched on default Windows Server 2019/2022 configurations as of 2026, as Microsoft does not classify forced authentication as a vulnerability when credentials are required.
+references:
+    - https://github.com/Wh04m1001/DFSCoerce
+    - https://blog.redteam-pentesting.de/2025/windows-coercion/
+    - https://github.com/p0dalirius/Coercer
+    - https://github.com/ShutdownRepo/ShadowCoerce
+    - https://github.com/RedTeamPentesting/wspcoerce
+    - https://lyrie.ai/research/research/ntlm-relay-2026-defensive-playbook
+author: Ashish Pulivarthy (ashish-cybersec)
+date: 2026-07-03
+tags:
+    - attack.credential-access
+    - attack.t1187
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|contains:
+            - 'DFSCoerce'
+            - 'dfscoerce'
+            - 'ShadowCoerce'
+            - 'shadowcoerce'
+            - 'WSPCoerce'
+            - 'wspcoerce'
+    selection_cli:
+        CommandLine|contains:
+            - 'DFSCoerce.py'
+            - 'dfscoerce.py'
+            - 'ShadowCoerce.py'
+            - 'shadowcoerce.py'
+            - 'WSPCoerce.py'
+            - 'wspcoerce.py'
+    selection_coercer_img:
+        Image|contains: 'coercer'
+    selection_coercer_cli:
+        CommandLine|contains:
+            - 'coercer coerce'
+            - 'coercer scan'
+            - 'coercer fuzz'
+            - '-m coerce'
+            - 'from coercer'
+    condition: 1 of selection_img or 1 of selection_cli or (selection_coercer_img and 1 of selection_coercer_cli)
+falsepositives:
+    - Unlikely. These tool names and command patterns have no legitimate use in production environments.
+level: high
