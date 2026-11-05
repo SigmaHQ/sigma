@@ -1,0 +1,30 @@
+title: Potential Print Processor Persistence Via Registry
+id: 54f43364-0af7-4bc4-abf7-5d1d63fb88a1
+status: experimental
+description: |
+    Detects the registration of a new print processor through the "Print Processors" registry key.
+    Print processors are DLLs that are loaded by the print spooler service (spoolsv.exe), which runs as SYSTEM. Adversaries may abuse this mechanism to execute malicious DLLs for persistence and/or privilege escalation.
+references:
+    - https://www.welivesecurity.com/2020/05/21/no-game-over-winnti-group/
+    - https://learn.microsoft.com/en-us/windows/win32/printdocs/addprintprocessor
+author: ialivrd
+date: 2026-10-22
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1547.012
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains|all:
+            - '\Control\Print\Environments\'
+            - '\Print Processors\'
+    filter_main_winprint:
+        Image|endswith: '\spoolsv.exe'
+        Details|endswith: 'winprint.dll'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Legitimate installation of third-party printer software that registers its own print processor
+level: high
