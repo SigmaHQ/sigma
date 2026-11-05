@@ -1,0 +1,39 @@
+title: Git Pack or Proxy Program Override - MacOS
+id: 07a6e448-bb76-4b68-8102-6484c21ea4fc
+related:
+    - id: 4aa2611d-1286-4694-b2d7-6070c33f86b6
+      type: similar
+    - id: c2aa5eed-954c-4b1a-9e52-2ebb0afcf4d8
+      type: similar
+status: experimental
+description: |
+    Detects Git being told to run a caller-supplied program in place of one of the helpers it normally starts for itself.
+    The "--upload-pack" and "--receive-pack" options, their "remote.<name>.uploadpack" and "remote.<name>.receivepack" configuration equivalents, "uploadpack.packObjectsHook" and "core.gitProxy" each name a program that Git executes while moving objects to or from a repository.
+    Against a local path or a local clone that program runs on the host issuing the command, which turns an otherwise ordinary looking Git invocation into command execution.
+references:
+    - https://git-scm.com/docs/git-config
+    - https://git-scm.com/docs/git-clone
+    - https://git-scm.com/docs/git-push
+author: David Burkett (@signalblur)
+date: 2026-08-11
+tags:
+    - attack.execution
+    - attack.t1059.004
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection:
+        Image|endswith: '/git'
+        CommandLine|contains:
+            - '--receive-pack'
+            - '--upload-pack'
+            - '.receivepack'
+            - '.uploadpack'
+            - 'core.gitProxy'
+            - 'uploadpack.packObjectsHook'
+    condition: selection
+falsepositives:
+    - Connecting to a server that keeps Git outside the default path, which is the documented reason to pass "--upload-pack" or "--receive-pack".
+    - A proxy program configured for the deprecated "git://" protocol in an environment that still restricts direct outbound connections.
+level: medium

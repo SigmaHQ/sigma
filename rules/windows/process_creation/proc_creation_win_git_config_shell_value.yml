@@ -1,0 +1,62 @@
+title: Shell Command in Git Configuration Value - Windows
+id: b179883a-72e1-4807-a157-811e26dfa6ae
+related:
+    - id: f1a78b88-269b-408f-b2b4-bfb7a8750107
+      type: similar
+    - id: b6c7f0a4-8cdb-45c3-aec9-7e1b12940be7
+      type: similar
+status: experimental
+description: |
+    Detects a Git configuration key set on the command line to a value that invokes a shell or a scripting interpreter.
+    Git runs the values of keys such as core.pager, core.fsmonitor, core.editor, diff.external and sequence.editor as commands during ordinary operations, and treats a credential.helper or alias value beginning with an exclamation mark as a shell snippet, so one "-c key=value" pair turns a routine Git command into command execution.
+    Windows records the command line as a single string, so the quoting around such a value is preserved and is matched here alongside the bare form.
+    Git for Windows also ships a POSIX shell, which is why the Unix interpreter spellings are matched next to the native ones.
+references:
+    - https://git-scm.com/docs/git-config
+    - https://www.vulncheck.com/advisories/hermes-webui-rce-via-git-configuration-injection
+author: David Burkett (@signalblur)
+date: 2026-08-11
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\git.exe'
+    selection_config_key:
+        CommandLine|contains:
+            - 'alias.'
+            - 'core.alternateRefsCommand'
+            - 'core.editor'
+            - 'core.fsmonitor'
+            - 'core.pager'
+            - 'core.sshCommand'
+            - 'credential.helper'
+            - 'diff.external'
+            - 'filter.'
+            - 'pager.'
+            - 'sequence.editor'
+    selection_shell_value:
+        CommandLine|contains:
+            - '/dev/tcp/'
+            - '=!'
+            - '="!'
+            - "='!"
+            - 'cmd /c'
+            - 'cmd.exe /c'
+            - 'nc -e'
+            - 'perl -e'
+            - 'powershell -'
+            - 'powershell.exe -'
+            - 'pwsh -'
+            - 'python -c'
+            - 'python3 -c'
+            - 'ruby -e'
+            - 'sh -c'
+    condition: all of selection_*
+falsepositives:
+    - A shell based credential helper set inline, such as the AWS CodeCommit helper, whose value legitimately begins with an exclamation mark.
+    - A Git command whose arguments quote both a configuration key and a shell invocation, such as a commit message that describes this behaviour.
+level: high
