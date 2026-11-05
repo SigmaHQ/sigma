@@ -1,0 +1,37 @@
+title: PHP File Served From Moodle Upload Or Static Content Path
+id: 28b7d590-3fb1-4cca-b67b-c74ee2dc904d
+status: experimental
+description: |
+    Detects a successful request for a .php file located under a Moodle directory that should only ever
+    serve uploaded content or static assets. Moodle deliberately stores uploaded files outside the web
+    root and serves them through pluginfile.php, so a PHP file answering with 200 from one of these
+    paths means either the data directory has been exposed to the web server or a script has been
+    written into the document root - both of which are consistent with a web shell.
+    A 200 response for anything under the Moodle data directory is a serious misconfiguration in its own
+    right and should be investigated even if the file is not PHP.
+references:
+    - https://docs.moodle.org/en/Security_recommendations
+    - https://docs.moodle.org/dev/File_API
+author: Sanket Taware (@sankettaware16)
+date: 2026-07-31
+tags:
+    - attack.persistence
+    - attack.t1505.003
+logsource:
+    category: webserver
+detection:
+    selection_extension:
+        cs-uri-stem|endswith: '.php'
+    selection_path:
+        cs-uri-stem|contains:
+            - '/moodledata/'
+            - '/filedir/'
+            - '/pix/'
+            - '/userpix/'
+            - '/repository/draftfiles/'
+    selection_status:
+        sc-status: 200
+    condition: all of selection_*
+falsepositives:
+    - A theme or plugin that ships a PHP file under a pix directory - verify against the plugin source before excluding
+level: high
