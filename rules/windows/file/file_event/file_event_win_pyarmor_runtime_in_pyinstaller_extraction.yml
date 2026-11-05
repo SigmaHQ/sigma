@@ -1,0 +1,41 @@
+title: Potential PyArmor Obfuscated PyInstaller Payload Extraction
+id: 677086ae-fcc3-4202-93b0-61932ab8ad36
+status: experimental
+description: |
+    Detects the PyArmor runtime extension being written into a PyInstaller one-file extraction
+    directory. PyInstaller unpacks to a _MEI prefixed folder at runtime, and the presence of
+    pyarmor_runtime inside that folder means the bundled Python bytecode was deliberately
+    obfuscated before packaging. The combination is common in commodity Python malware and rare
+    in software an enterprise buys or builds.
+references:
+    - https://bazaar.abuse.ch/sample/d97ea10d1dbfe2a69e0d2387e8985635b20628495918abd54c4b052c0acf05b1/
+    - https://tria.ge/260817-ktkv8swgra
+related:
+    - id: 27cf3735-02a9-4c63-91fc-2a03e651f8cf
+      type: similar
+    - id: fc5cd64c-4e5f-46f3-b402-557f3128c842
+      type: similar
+author: David Clayton - CTI @ thetechcollective
+date: 2026-08-17
+tags:
+    - attack.stealth
+    - attack.t1027.002
+    - stp.2
+logsource:
+    category: file_event
+    product: windows
+    definition: 'Requires file creation logging, from Sysmon EventID 11 or equivalent EDR file telemetry, with Temp paths not excluded by the Sysmon configuration'
+detection:
+    selection_pyinstaller_extraction:
+        TargetFilename|contains: '\_MEI'
+    selection_pyarmor_runtime:
+        TargetFilename|contains: 'pyarmor_runtime'
+    condition: all of selection_*
+fields:
+    - TargetFilename
+    - Image
+    - User
+falsepositives:
+    - Commercial or internal Python applications distributed as PyInstaller bundles with PyArmor licence protection applied. This is the main expected source of noise and is most likely on developer and engineering estates.
+    - Security or automation tooling packaged by a third party using the same build chain.
+level: medium
