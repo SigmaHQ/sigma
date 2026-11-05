@@ -1,0 +1,36 @@
+title: Linux TLS Reverse Shell via OpenSSL
+id: b2e9d4f7-8c1a-4e63-b5d2-3f7a1c8e6b40
+status: experimental
+description: |
+    Detects execution of openssl with the s_client subcommand combined with
+    -connect and shell indicators. Attackers use openssl to establish encrypted
+    reverse shells that bypass simple cleartext detection of tools like netcat.
+    The technique typically involves mkfifo or /dev/tcp alongside openssl to
+    create a bidirectional encrypted channel to an attacker-controlled listener.
+references:
+    - https://gtfobins.github.io/gtfobins/openssl/
+    - https://www.revshells.com/
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.execution
+    - attack.t1059.004
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: '/openssl'
+    selection_subcmd:
+        CommandLine|contains: 's_client'
+    selection_shell:
+        CommandLine|contains:
+            - '/bin/sh'
+            - '/bin/bash'
+            - '/bin/zsh'
+            - 'bash -i'
+            - 'sh -i'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely in production systems; security testing with explicit authorization
+level: high

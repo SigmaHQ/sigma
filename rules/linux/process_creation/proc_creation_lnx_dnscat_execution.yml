@@ -1,0 +1,35 @@
+title: Linux DNS Tunneling C2 via Dnscat
+id: f6c1d4b8-8a5e-4d07-f9b6-7e2c5a1d4f80
+status: experimental
+description: |
+    Detects execution of dnscat or dnscat2, a post-exploitation tool that
+    establishes an encrypted command-and-control channel using DNS queries
+    and responses. DNS traffic is permitted in most network environments and
+    is rarely inspected, making dnscat an effective covert channel for C2
+    communication, data exfiltration, and remote command execution that
+    bypasses traditional network security controls.
+references:
+    - https://github.com/iagox86/dnscat2
+    - https://www.sans.org/blog/dns-data-exfiltration-what-is-it-and-how-do-you-stop-it/
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.command-and-control
+    - attack.t1071.004
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith:
+            - '/dnscat'
+            - '/dnscat2'
+    selection_cmd:
+        CommandLine|contains:
+            - 'dnscat'
+            - 'dnscat2'
+    condition: 1 of selection_*
+falsepositives:
+    - Authorized red team exercise using dnscat for adversary simulation
+    - Security research in an isolated lab environment
+level: high

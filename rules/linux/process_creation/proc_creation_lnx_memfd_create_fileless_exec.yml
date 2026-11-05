@@ -1,0 +1,35 @@
+title: Linux Fileless Execution via Memfd Create
+id: c6e2d7a5-8f3b-4c97-d5e6-7a4f9b3c2d60
+status: experimental
+description: |
+    Detects execution of processes whose image path contains the memfd: prefix,
+    indicating the binary was loaded from an anonymous in-memory file created
+    via the memfd_create syscall rather than from disk. This is a common
+    fileless malware technique that allows execution of payloads without writing
+    to the filesystem, evading file-based antivirus and integrity monitoring.
+    Legitimate use of memfd_create occurs in specific container runtimes and
+    JIT compilers but is rare in production server workloads.
+references:
+    - https://man7.org/linux/man-pages/man2/memfd_create.2.html
+    - https://magisterquis.github.io/2018/03/31/in-memory-only-elf-execution.html
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.stealth
+    - attack.t1620
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|startswith: 'memfd:'
+    filter_known_legit:
+        ParentImage|endswith:
+            - '/runc'
+            - '/containerd-shim'
+            - '/nvidia-container-runtime'
+    condition: selection and not filter_known_legit
+falsepositives:
+    - Container runtimes using memfd_create for legitimate process bootstrapping
+    - JIT compilers or language runtimes that use anonymous memory execution
+level: high
