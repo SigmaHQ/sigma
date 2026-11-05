@@ -1,0 +1,48 @@
+title: Suspicious Child Process Of PIX Engine Host
+id: 25d754af-71d9-45f4-a485-42af98e081f0
+related:
+    - id: 2ead58ff-53ba-443c-ba82-87c0ec698b1f # Ntsd suspicious child
+      type: similar
+status: experimental
+description: |
+    Detects "WinPixEngineHost.exe", the launcher component of Microsoft PIX on Windows, spawning a shell or a common LOLBIN as a child process.
+    Attackers can abuse "pixtool.exe launch" to proxy execution of arbitrary binaries through this signed developer tool.
+    The target process is started by "WinPixEngineHost.exe" rather than by "pixtool.exe" itself, so this rule monitors the engine host as the parent.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Pixtool/
+author: Aditi Nagpure
+date: 2026-10-27
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1127
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\WinPixEngineHost.exe'
+    selection_child:
+        - Image|endswith:
+              - '\cmd.exe'
+              - '\cscript.exe'
+              - '\mshta.exe'
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\regsvr32.exe'
+              - '\rundll32.exe'
+              - '\wscript.exe'
+        - OriginalFileName:
+              - 'Cmd.Exe'
+              - 'cscript.exe'
+              - 'MSHTA.EXE'
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+              - 'REGSVR32.EXE'
+              - 'RUNDLL32.EXE'
+              - 'wscript.exe'
+    condition: all of selection_*
+falsepositives:
+    - Developers using PIX to capture a script host or shell-launched application
+level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_pix_enginehost_susp_child_process/info.yml
