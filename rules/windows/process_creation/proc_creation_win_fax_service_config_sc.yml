@@ -1,0 +1,27 @@
+title: Fax Service Binary Path Modified via Sc.exe
+id: fac43a5a-8428-4671-aea4-ecdd443ee6dc
+status: experimental
+description: Detects attempts to modify the Fax service binary path using sc.exe.
+references:
+    - https://www.atomicredteam.io/docs/atomics/T1543.003
+author: Saksham Bhattarai
+date: 2026-10-27
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1543.003
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_image:
+        Image|endswith: '\sc.exe'
+    selection_command:
+        CommandLine|contains|all:
+            - 'config'
+            - 'Fax'
+            - 'binPath'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate service administration
+level: high
