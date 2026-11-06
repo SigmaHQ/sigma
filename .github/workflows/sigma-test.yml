@@ -78,3 +78,32 @@ jobs:
       shell: /usr/bin/bash {0}  # Use bash without -e to enable exit code manipulation
       run: |
         grep -rh "^id: " rules* deprecated unsupported | sort | uniq -c | grep -vE "^\s+1 id: "; exit $(( $? ^ 1 ))
+
+  deleted-id-reuse-check:
+    runs-on: ubuntu-latest
+    needs: yamllint
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        submodules: true
+    - name: Check for deleted rule ID reuse
+      shell: /usr/bin/bash {0}  # Use bash without -e to enable exit code manipulation
+      run: |
+        base=$(git merge-base origin/master HEAD)
+        deleted=$(git diff --name-status "$base" HEAD \
+          -- 'rules/**' 'rules-compliance/**' 'rules-dfir/**' 'rules-emerging-threats/**' \
+          'rules-placeholder/**' 'rules-threat-hunting/**' 'deprecated/**' 'unsupported/**' \
+          | awk -F'\t' '$1 == "D" {print $2}')
+        [ -z "$deleted" ] && exit 0
+        status=0
+        while IFS= read -r f; do
+          [ -z "$f" ] && continue
+          id=$(git show "$base:$f" | grep -m1 -E '^id: ' | sed 's/^id: *//')
+          [ -z "$id" ] && continue
+          hits=$(grep -rlE "^id: ${id}[[:space:]]*$" rules* unsupported/ 2>/dev/null)
+          if [ -n "$hits" ]; then
+            echo "id ${id} of deleted rule ${f} is reused by: ${hits}"
+            status=1
+          fi
+        done <<< "$deleted"
+        exit "$status"
