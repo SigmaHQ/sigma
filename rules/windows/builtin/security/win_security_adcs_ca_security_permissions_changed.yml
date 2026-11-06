@@ -9,6 +9,7 @@ references:
     - https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf
     - https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation
     - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4882
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4891
 author: elhoim
 date: 2026-10-15
 tags:
@@ -23,9 +24,13 @@ logsource:
             (1) CA\AuditFilter must have the relevant bits set (e.g. "certutil -setreg CA\AuditFilter 127" followed by a CertSvc restart).
             (2) The "Audit Certification Services" subcategory must be enabled (auditpol /set /subcategory:"Certification Services" /success:enable).
 detection:
-    selection:
+    selection_permissions:
         EventID: 4882 # The security permissions for Certificate Services changed
-    condition: selection
+    selection_config_entry:
+        # Writing the CA "Security" configuration entry through ICertAdmin2::SetConfigEntry (e.g. scripted ACL changes) logs 4891 instead of 4882
+        EventID: 4891 # A configuration entry changed in Certificate Services
+        Entry: 'Security'
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate changes to CA roles and permissions by PKI administrators
 level: medium
