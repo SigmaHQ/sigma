@@ -1,0 +1,26 @@
+﻿---
+title: YOOtheme Pro Suspicious Webshell Creation
+id: b405fad6-2c60-4dad-895e-0820e3022df2
+status: experimental
+description: >
+    Detects creation of PHP files matching the specific webshell filename
+    pattern reported during exploitation of CVE-2026-102785 affecting
+    YOOtheme Pro.
+references:
+    - https://github.com/PaloAltoNetworks/Unit42-timely-threat-intel/blob/main/2026-10-26-exploitation-of-CVE-2026-102785.txt
+    - https://github.com/advisories/GHSA-8w8j-f6ph-29mm
+author: Saksham Bhattarai
+date: 2026-10-27
+tags:
+    - attack.persistence
+    - attack.t1505.003
+logsource:
+    category: file_event
+    product: linux
+detection:
+    selection:
+        TargetFilename|re: '(?i)(?:^|/)wp-content/uploads/yt[0-9a-f]{7}\.php$'
+    condition: selection
+falsepositives:
+    - Legitimate files matching the reported naming pattern
+level: high

@@ -1,0 +1,38 @@
+---
+title: YOOtheme Pro Webshell Suspicious Command Execution
+id: 2d1f3c03-ef50-439e-800b-3d5f5525a21a
+status: experimental
+description: >
+    Detects command execution patterns associated with webshell activity
+    reported during exploitation of CVE-2026-102785, including command
+    interpreter execution of reconnaissance commands and scanner markers.
+references:
+    - https://github.com/PaloAltoNetworks/Unit42-timely-threat-intel/blob/main/2026-10-26-exploitation-of-CVE-2026-102785.txt
+author: Saksham Bhattarai
+date: 2026-10-27
+tags:
+    - attack.execution
+    - attack.t1059.003
+    - attack.t1505.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith:
+            - '\httpd.exe'
+            - '\httpd-ssl.exe'
+            - '\php-cgi.exe'
+            - '\w3wp.exe'
+    selection_child:
+        Image|endswith: '\cmd.exe'
+    selection_command:
+        CommandLine|contains:
+            - 'echo YTS'
+            - 'uname -a'
+            - 'whoami'
+            - 'crossdomain.xml'
+    condition: selection_parent and selection_child and selection_command
+falsepositives:
+    - Web applications legitimately invoking command interpreters
+level: high
