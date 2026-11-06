@@ -1,0 +1,35 @@
+title: Suspicious LiteLLM Python Startup Hook File Creation
+id: a75418a9-e119-4ab7-8b47-c5c824b584d4
+status: experimental
+description: |
+    Detects creation of known Python startup-hook filenames associated with
+    the compromised LiteLLM 1.107.0 package inside "site-packages". The
+    malicious "cook.pth" file contains an executable "import cook" statement
+    that Python processes during ordinary site initialization, allowing the
+    bundled credential collector to run without the victim ever importing
+    LiteLLM directly.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/10/23/inside-the-litellm-1-107-0-supply-chain-compromise-credential-theft-through-python-startup-hooks/
+author: Gangadhar
+date: 2026-10-27
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1546.018
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_path:
+        TargetFilename|contains: '\site-packages\'
+    selection_name:
+        TargetFilename|endswith:
+            - '\cook.pth'
+            - '\cook.py'
+            - '\sitecustomize.py'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate packages using sitecustomize.py for environment customization
+    - Unrelated Python packages that happen to contain a file named cook.py
+    - Administrative Python environment customization
+level: high
