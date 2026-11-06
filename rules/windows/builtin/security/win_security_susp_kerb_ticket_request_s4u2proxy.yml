@@ -1,0 +1,35 @@
+title: Suspicious Kerberos Ticket Request - S4U2Proxy
+id: f7b3d9a2-5c48-4e17-9b6d-3a8f2c1e7054
+status: experimental
+description: |
+    Detects Kerberos service ticket requests (event 4769) carrying the Ok-as-delegate ticket option
+    together with a populated TransmittedServices field, which indicates that constrained delegation
+    was used to obtain a ticket for a backend service. S4U2Proxy lets a service account trusted for
+    delegation request a service ticket to another SPN on behalf of a user without that user's
+    credentials. Abuse requires control of a delegation-trusted service account, and the set of
+    reachable SPNs is bounded by the msDS-AllowedToDelegateTo attribute unless resource-based
+    constrained delegation is abused.
+references:
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4769
+    - https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/bde93b0e-f3c9-4ddf-9f44-e1453be7af5a
+    - https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview
+    - https://github.com/rseclabs/Impacket-Wiki/blob/1015c16a471289903fffd46822772a455ef51ced/02_kerberos_attacks/getST.md
+author: Louise Lalanne
+date: 2026-09-30
+tags:
+    - attack.credential-access
+    - attack.lateral-movement
+    - attack.t1558.003
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4769
+        TicketOptions: '0x40820010'
+    filter_exclude:
+        TransmittedServices: '-'
+    condition: selection and not filter_exclude
+falsepositives:
+    - Legitimate constrained delegation configured in the environment
+level: high
