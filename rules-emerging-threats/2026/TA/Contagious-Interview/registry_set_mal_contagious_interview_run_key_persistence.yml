@@ -1,0 +1,43 @@
+title: Contagious Interview Implant Run Key Persistence
+id: 228eadd9-591b-411c-949d-8baeb92df78d
+status: experimental
+description: |
+    Detects the HKCU Run values registered by the components of a DPRK "Contagious Interview" chain.
+    The Node.js implant uses "reg.exe add" to set "Microsoft Realtime Aggregator" to "wscript.exe <home>\.vs_cache\main.vbs" for itself
+    and "SettingSyncResCache" to "wscript.exe <...>\Win32\ResCache\nsm-launch.vbs" for the NetSupport client it installs;
+    the native PrintHost.exe collector sets "PrintSpoolHost" to its own path with "--background".
+    On the operator self-delete command (ss_del) the implant deletes its own value and the names "NvidiaDriverUpdate", "VScode.Update.Publisher" and "Microsoft Realtime Agreegator" (likely earlier builds); the misspelt one is kept here.
+references:
+    - https://www.ic3.gov/CSA/2026/260918.pdf
+    - https://www.virustotal.com/gui/file/761e0adb34e6f89ba43fcd65cf861593bfee9319e38e6175394921309e83a254
+    - https://www.virustotal.com/gui/file/365315e31354b811f8ea537417ff4e0938862a409be434c9a3ff821d57dff384
+author: Kirill Popov
+date: 2026-10-21
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1547.001
+    - attack.execution
+    - attack.t1059.005
+    - detection.emerging-threats
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection_key:
+        TargetObject|contains: '\Software\Microsoft\Windows\CurrentVersion\Run\'
+    selection_value:
+        TargetObject|endswith:
+            - '\SettingSyncResCache'
+            - '\Microsoft Realtime Aggregator'
+            - '\Microsoft Realtime Agreegator'
+            - '\PrintSpoolHost'
+    selection_details:
+        Details|contains:
+            - '\.vs_cache\main.vbs'
+            - '\Win32\ResCache\nsm-launch.vbs'
+            - '\Microsoft\Windows\PrintHost\PrintHost.exe'
+    condition: selection_key and (selection_value or selection_details)
+falsepositives:
+    - Unlikely
+level: high

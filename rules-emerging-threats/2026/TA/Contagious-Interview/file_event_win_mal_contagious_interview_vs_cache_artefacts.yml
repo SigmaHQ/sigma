@@ -1,0 +1,39 @@
+title: Contagious Interview Loader Artefacts Created In User .vs_cache Folder - Windows
+id: d6953403-deb1-4849-882f-5456813dde8d
+status: experimental
+description: |
+    Detects creation of the loader and implant working files that a DPRK "Contagious Interview" dropper chain writes into a ".vs_cache" folder in the user profile.
+    The stage-1 dropper writes main.js (the EtherHiding loader), package.json, source and main.vbs there and relaunches through "wscript.exe //B main.vbs";
+    the stage-3 implant later writes key-agent.js, vs.sid, mmc.pid and log.log, and the MMC wallet backdoor writes mmc.log, into the same folder.
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/dprk-adopts-etherhiding
+    - https://www.ic3.gov/CSA/2026/260918.pdf
+    - https://www.virustotal.com/gui/file/677b85d56283a7c22f7f32350c6d81a7873c6c6afe1ff6b0d5a9608ba9614068
+    - https://www.virustotal.com/gui/file/761e0adb34e6f89ba43fcd65cf861593bfee9319e38e6175394921309e83a254
+author: Kirill Popov
+date: 2026-10-21
+tags:
+    - attack.execution
+    - attack.t1059.007
+    - attack.t1059.005
+    - attack.command-and-control
+    - attack.t1105
+    - detection.emerging-threats
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|contains: '\.vs_cache\'
+        TargetFilename|endswith:
+            - '\main.js'
+            - '\main.vbs'
+            - '\key-agent.js'
+            - '\vs.sid'
+            - '\mmc.pid'
+            - '\mmc.log'
+            - '\log.log'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
