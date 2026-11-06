@@ -1,0 +1,32 @@
+title: cmd.exe Command Line Referencing the MSBuild Property-Function Escape Variable
+id: 51df8698-b5d5-47dc-a203-663aaf752cce
+status: experimental
+description: |
+    Detects command lines referencing MSBUILDENABLEALLPROPERTYFUNCTIONS=1 - an
+    environment gate that unlocks MSBuild property functions such as
+    $([System.IO.File]::ReadAllText(...)) and $([System.AppDomain]::CurrentDomain.Load(...)),
+    which PavinLoader (fake solution "CatalogIngestor") abuses to read an encoded payload
+    from Resources.resx and load it as an in-memory assembly. The observed incident set
+    the variable inside build.cmd (not visible on the command line), so this rule targets
+    variants that set it inline.
+references:
+    - https://github.com/fotedev/pavinloader-easeus-campaign
+    - https://attack.mitre.org/techniques/T1127/001/
+author: fotedev
+date: 2026-10-29
+tags:
+    - attack.execution
+    - attack.defense-impairment
+    - attack.t1127.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\cmd.exe'
+    selection_env:
+        CommandLine|contains: 'MSBUILDENABLEALLPROPERTYFUNCTIONS=1'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate build systems that enable all MSBuild property functions inline (rare; review the invoking script)
+level: high
