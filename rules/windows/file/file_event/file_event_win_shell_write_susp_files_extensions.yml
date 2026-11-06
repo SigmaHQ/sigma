@@ -9,7 +9,7 @@ references:
     - Internal Research
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-08-12
-modified: 2025-10-07
+modified: 2026-10-26
 tags:
     - attack.stealth
     - attack.t1036
@@ -77,6 +77,15 @@ detection:
             - 'C:\Program Files\WindowsApps\Microsoft.PowerShellPreview'
             - 'C:\Program Files (x86)\WindowsApps\Microsoft.PowerShellPreview'
         TargetFilename|endswith: '.ps1'
+    filter_main_appx_windows_update:
+        # AppX deployment and Windows Update (UUS) stage package scripts in folders only TrustedInstaller / SYSTEM can write
+        Image:
+            - 'C:\Windows\system32\svchost.exe'
+            - 'C:\Windows\SysWOW64\svchost.exe'
+        TargetFilename|startswith:
+            - 'C:\Program Files\WindowsApps\'
+            - 'C:\Program Files (x86)\WindowsApps\'
+            - 'C:\Windows\SoftwareDistribution\Download\'
     condition: 1 of selection_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
