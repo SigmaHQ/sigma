@@ -1,0 +1,77 @@
+title: SSRF Probe Targeting Internal Resources Via URL Parameter - Webserver
+id: 177c2ccd-33d0-4333-bd7c-cf655d2cee91
+status: experimental
+description: |
+    Detects requests that carry a URL pointing at a private, loopback, link-local or cloud-metadata
+    address inside a query parameter (url=, uri=, target=, redirect=, fetch=, webhook= and similar).
+    Public request-proxy / preview-fetcher / payment-proxy endpoints (the x402 "public proxy" pattern
+    being a recent example) accept a caller-supplied URL and fetch it server-side; attackers probe
+    them for SSRF by passing addresses like http://169.254.169.254/latest/meta-data or
+    http://localhost/admin. The same indicator catches generic open-redirect and crawler-abuse probes.
+references:
+    - https://owasp.org/www-community/attacks/Server_Side_Request_Forgery
+    - https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Request%20Forgery
+author: kosoyyagent
+date: 2026-10-25
+tags:
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    category: webserver
+detection:
+    selection_proto:
+        cs-uri-query|contains:
+            - '://'
+            - '%3a%2f%2f'
+    selection_target:
+        cs-uri-query|contains:
+            # Cloud metadata / link-local
+            - '169.254.169.254'
+            - '169.254.170.2'
+            - 'metadata.google.internal'
+            - 'metadata.internal'
+            # Loopback spellings
+            - '://localhost'
+            - '://127.'
+            - '://0.0.0.0'
+            - '%2f%2flocalhost'
+            - '%2f%2f127.'
+            - '[::1]'
+            - '[0:0:0:0:0:0:0:1]'
+            - '0x7f000001'
+            - '2130706433' # 127.0.0.1 as decimal dword
+            - '0177.0.0.1' # 127.0.0.1 octal
+            # RFC1918
+            - '://10.'
+            - '://192.168.'
+            - '://172.16.'
+            - '://172.17.'
+            - '://172.18.'
+            - '://172.19.'
+            - '://172.20.'
+            - '://172.21.'
+            - '://172.22.'
+            - '://172.23.'
+            - '://172.24.'
+            - '://172.25.'
+            - '://172.26.'
+            - '://172.27.'
+            - '://172.28.'
+            - '://172.29.'
+            - '://172.30.'
+            - '://172.31.'
+            # CGNAT carrier NAT range often holds internal services
+            - '://100.64.'
+            # IPv6 ULA / link-local
+            - '://[fc'
+            - '://[fd'
+            - '://[fe80'
+            # Reserved hostnames
+            - '.internal/'
+            - '.local/'
+            - '.localhost/'
+    condition: selection_proto and selection_target
+falsepositives:
+    - Internal-only applications that legitimately proxy requests to private addresses; restrict to public-facing vhosts in the pipeline or tune the param names if needed
+    - Network-management dashboards embedding internal URLs in query parameters
+level: high
