@@ -1,0 +1,35 @@
+title: MSBuild Exec Task Temporary Batch File Executed Via Cmd
+id: b72c244c-bd8e-4d1e-8479-b20eed07256d
+status: experimental
+description: |
+    Detects 'cmd.exe' being launched by 'MSBuild.exe' to run a temporary 'tmp*.exec.cmd' batch file.
+    This is the artefact MSBuild creates when the 'Exec' task runs, which is how Visual Studio Pre-build and Post-build events and custom project targets execute commands.
+    This is normal during software builds, but a malicious or trojanized project/solution file can use the same mechanism to run arbitrary commands when a developer builds it.
+    Use this rule to hunt for unexpected build-event execution, for example on non-development hosts, or review the child processes of the matched 'cmd.exe'.
+references:
+    - https://learn.microsoft.com/en-us/visualstudio/msbuild/exec-task
+    - https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES/blob/master/Execution/execution_evasion_visual_studio_prebuild_event.evtx
+author: Abdulrahman Al-Gharbi
+date: 2026-10-11
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1127
+    - detection.threat-hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\MSBuild.exe'
+    selection_cmd:
+        - Image|endswith: '\cmd.exe'
+        - OriginalFileName: 'Cmd.Exe'
+    selection_script:
+        CommandLine|contains|all:
+            - '\Temp\tmp'
+            - '.exec.cmd'
+    condition: all of selection_*
+falsepositives:
+    - Any legitimate build that uses an MSBuild 'Exec' task or a Visual Studio Pre-build/Post-build event. This is common on developer workstations and build servers, so baseline those hosts first.
+level: low
