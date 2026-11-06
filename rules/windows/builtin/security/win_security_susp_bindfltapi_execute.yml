@@ -1,0 +1,55 @@
+title: Potential Process Accessing Bindfltapi DLL
+id: 7a3f9c12-0b7e-4d3a-9a8e-0f6c2b45d7e1
+status: experimental
+description: |
+    Detects processes obtaining execute access to bindfltapi.dll, the user-mode API layer used to
+    manipulate the Bind Filter minifilter driver. Legitimate tooling such as Store apps, Windows
+    Sandbox or Windows containers relies on it, and system processes load it routinely, which is why
+    they are filtered out. Any other process opening bindfltapi.dll with execute access is a strong
+    indicator that a bind link is being created to redirect a trusted file or DLL path, a technique
+    documented by EDR-Redir and Bitdefender Labs to blind EDR sensors and neutralise AMSI.
+references:
+    - https://www.zerosalarium.com/2025/11/EDR-Redir-V2-Blind-EDR-With-Fake-Program-Files.html
+    - https://ipurple.team/2025/12/01/bind-link-edr-tampering
+    - https://github.com/TwoSevenOneT/EDR-Redir
+    - https://www.bitdefender.com/en-gb/blog/businessinsights/bind-link-abuses-windows-feature-edr-evasion-technique
+author: Vladan Sekulic
+date: 2026-09-30
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1574.001
+logsource:
+    product: windows
+    service: security
+    definition: |
+        Requirements: The advanced audit policy setting "Object Access > Audit File System" must be
+        configured for Success. Audit events are only generated for objects carrying a system access
+        control list (SACL) granting the audited access, so bindfltapi.dll needs a SACL entry for
+        everyone with the Execute right. Enable the subcategory with:
+        auditpol /set /subcategory:"File System" /success:enable
+detection:
+    selection:
+        EventID: 4663
+        ObjectType: 'File'
+        ObjectName|endswith: '\bindfltapi.dll'
+    exec_mask:
+        AccessMask: '0x20'
+    exec_text:
+        AccessList|contains:
+            - 'Execute'
+            - '%%4421'
+    filter:
+        ProcessName|endswith:
+            - '\svchost.exe'
+            - '\services.exe'
+            - '\lsass.exe'
+            - '\explorer.exe'
+            - '\tiworker.exe'
+            - '\TrustedInstaller.exe'
+            - '\MsMpEng.exe'
+            - '\dllhost.exe'
+    condition: selection and (exec_mask or exec_text) and not filter
+falsepositives:
+    - Store (UWP) apps, Windows Sandbox or Windows containers accessing bindfltapi.dll
+level: medium
