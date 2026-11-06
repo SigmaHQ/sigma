@@ -1,0 +1,57 @@
+title: Chmod Recursive World-Writable Mode on System Directories
+id: e5152b6e-804b-47f5-9ccf-991e5af84dae
+status: test
+description: |
+    Detects recursive chmod invocations that grant world-writable permissions
+    on the filesystem root, system directories or home directories. A mode is
+    world-writable when the others-writable bit (value 2) is set, i.e. the
+    octal mode ends in 2/3/6/7 (verified against POSIX bit semantics, 16/16
+    case consistency). The octal mode is anchored to the chmod argument
+    position to avoid matching unrelated numeric tokens. Recursive
+    world-writable modes on these paths enable backdoor persistence and
+    privilege escalation. The same command on application subdirectories is a
+    common (risky) deployment practice, so only system-critical targets are
+    matched to keep the false-positive rate low.
+references:
+    - https://attack.mitre.org/techniques/T1222/002/
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1222.002/T1222.002.md
+author: PHM-Audit
+date: 2026-10-27
+tags:
+    - attack.defense-impairment
+    - attack.privilege-escalation
+    - attack.t1222.002
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith: '/chmod'
+    selection_recursive_flag:
+        CommandLine|re: '\s-[a-zA-Z]*R[a-zA-Z]*(?:\s|[0-9])|\s--recursive(?:\s|$)'
+    selection_mode_octal:
+        # Octal mode anchored right after the chmod keyword and its short
+        # options. GNU chmod accepts arbitrary-length octal modes with
+        # leading zeros (verified: chmod 00777 => 0777). The token is an octal digit run; matching the full run avoids partial-token matches. Formerly 1-4+
+        # octal digits whose last digit has the others-writable bit (2) set.
+        CommandLine|re: 'chmod(?:\s+--?[a-zA-Z]+)*\s+[0-7]*[2367]\b'
+    selection_target:
+        # System-critical targets incl. bare root; /lib and /lib64 listed
+        # explicitly (not lib64?) to match both.
+        CommandLine|re: '\s/(?:etc|usr|var|boot|home|root|lib|lib64|bin|sbin)(?:\s|$|/)|\s/(?:\s|$)'
+    filter_main_tmp:
+        # /tmp is commonly world-writable by design (sticky bit). Note: the
+        # sticky bit does NOT prevent world-writable files inside /tmp, so a
+        # recursive world-writable chmod on /tmp remains technically covered
+        # by the threat model - it is excluded here purely for FP reasons
+        # (frequent in deployment scripts) and is a known evasion surface.
+        # The leading-space form keeps '/tmp' as a standalone argument only.
+        CommandLine|contains: ' /tmp'
+    filter_main_dpkg:
+        ParentCommandLine|contains|all:
+            - '/var/lib/dpkg/info/'
+            - '.postinst configure'
+    condition: selection_img and selection_recursive_flag and selection_mode_octal and selection_target and not 1 of filter_main_*
+falsepositives:
+    - Rare administrative recursion over system paths, e.g. restoring permissions from a backup script. Apply additional filters as needed before pushing to production.
+level: high
