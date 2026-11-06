@@ -1,0 +1,41 @@
+title: Azure Cross-Tenant Access Partner Settings Modified
+id: 9165ed37-723b-4235-816d-4ddac04fb3b5
+status: experimental
+description: |
+    Detects when the access settings for an existing cross-tenant access partner
+    are modified in Entra ID: inbound or outbound B2B collaboration, B2B direct
+    connect, or trust settings for a specific external tenant. This operation name
+    is generic and fires for any field changed on a partner (the specific field is
+    in modifiedProperties), so it is broader than, and complements, Microsoft's own
+    four split analytic rules for the same surface
+    (Cross-tenantAccessSettingsOrganizationInbound/OutboundCollaboration/DirectSettingsChanged.yaml).
+    An attacker who already has a partner entry (legitimate or self-added) can use
+    this operation to widen an initially narrow trust relationship, for example
+    turning a collaboration-only partner into one with B2B direct connect allowed,
+    without the more visible act of adding a brand new partner.
+    Confirmed against a real event generated on a live tenant on 2026-10-26, against
+    a disposable test partner, not the tenant's production default policy.
+references:
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities#core-directory
+    - https://learn.microsoft.com/en-us/entra/external-id/cross-tenant-access-overview
+    - https://github.com/Azure/Azure-Sentinel/blob/master/Solutions/Microsoft%20Entra%20ID/Analytic%20Rules/Cross-tenantAccessSettingsOrganizationInboundCollaborationSettingsChanged.yaml
+author: descambiado
+date: 2026-10-26
+tags:
+    - attack.initial-access
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1078.004
+logsource:
+    product: azure
+    service: auditlogs
+    definition: 'Requirements: The TargetResources array needs to be mapped accurately in order for this rule to work'
+detection:
+    selection:
+        OperationName|contains: 'Update a partner cross-tenant access setting'
+    condition: selection
+falsepositives:
+    - Legitimate adjustment of an existing partner relationship by an administrator
+    - Planned expansion of collaboration scope with an approved partner organization
+level: medium
