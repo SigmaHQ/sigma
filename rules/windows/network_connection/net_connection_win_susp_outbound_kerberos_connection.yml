@@ -10,9 +10,8 @@ references:
     - https://github.com/GhostPack/Rubeus
 author: Ilyas Ochkov, oscd.community
 date: 2019-10-24
-modified: 2024-03-15
+modified: 2026-11-06
 tags:
-    - attack.defense-evasion
     - attack.credential-access
     - attack.t1558
     - attack.lateral-movement
@@ -36,6 +35,11 @@ detection:
             - 'C:\Program Files\Mozilla Firefox\firefox.exe'
     filter_optional_tomcat:
         Image|endswith: '\tomcat\bin\tomcat8.exe'
+    filter_optional_zscaler:
+        # Zscaler Client Connector tunnels the user's traffic, Kerberos included, so the tunnel process owns the socket
+        Image:
+            - 'C:\Program Files\Zscaler\ZSATunnel\ZSATunnel.exe'
+            - 'C:\Program Files (x86)\Zscaler\ZSATunnel\ZSATunnel.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Web Browsers and third party application might generate similar activity. An initial baseline is required.

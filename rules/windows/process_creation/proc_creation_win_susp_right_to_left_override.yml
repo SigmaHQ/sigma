@@ -8,17 +8,18 @@ related:
 status: test
 description: |
     Detects the presence of the "u202+E" character, which causes a terminal, browser, or operating system to render text in a right-to-left sequence.
-    This is used as an obfuscation and masquerading techniques.
+    This character is used as an obfuscation and masquerading techniques by adversaries to trick users into opening malicious files.
 references:
     - https://redcanary.com/blog/right-to-left-override/
     - https://www.malwarebytes.com/blog/news/2014/01/the-rtlo-method
     - https://unicode-explorer.com/c/202E
     - https://tria.ge/241015-l98snsyeje/behavioral2
-author: Micah Babinski, @micahbabinski, Swachchhanda Shrawan Poudel (Nextron Systems)
+    - https://unprotect.it/technique/right-to-left-override-rlo-extension-spoofing/
+author: Micah Babinski, @micahbabinski, Swachchhanda Shrawan Poudel (Nextron Systems), Luc Génaux
 date: 2023-02-15
-modified: 2025-02-06
+modified: 2026-03-20
 tags:
-    - attack.defense-evasion
+    - attack.stealth
     - attack.t1036.002
 logsource:
     category: process_creation
@@ -28,7 +29,10 @@ detection:
         CommandLine|contains:
             - '\u202e'  # Unicode RTLO character
             - '[U+202E]'
+            # Real char U+202E copied/pasted below
+            - '‮'
     condition: selection
 falsepositives:
     - Commandlines that contains scriptures such as arabic or hebrew might make use of this character
 level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_susp_right_to_left_override/info.yml

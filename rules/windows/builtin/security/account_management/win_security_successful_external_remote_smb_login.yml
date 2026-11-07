@@ -10,13 +10,13 @@ references:
     - https://twitter.com/Purp1eW0lf/status/1616144561965002752
 author: Micah Babinski (@micahbabinski), Zach Mathis (@yamatosecurity)
 date: 2023-01-19
-modified: 2024-03-11
+modified: 2026-11-03
 tags:
     - attack.privilege-escalation
     - attack.persistence
-    - attack.defense-evasion
     - attack.initial-access
     - attack.credential-access
+    - attack.stealth
     - attack.t1133
     - attack.t1078
     - attack.t1110
@@ -37,8 +37,12 @@ detection:
             - '169.254.0.0/16'
             - 'fc00::/7'  # IPv6 private addresses
             - 'fe80::/10'  # IPv6 link-local addresses
+    filter_main_null:
+        IpAddress: null
     filter_main_empty:
-        IpAddress: '-'
+        IpAddress:
+            - '-'
+            - ''
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Legitimate or intentional inbound connections from public IP addresses on the SMB port.

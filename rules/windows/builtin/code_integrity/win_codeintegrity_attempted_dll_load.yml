@@ -11,7 +11,7 @@ references:
     - https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/operations/event-id-explanations
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2022-01-20
-modified: 2024-12-25
+modified: 2025-02-28
 tags:
     - attack.execution
 logsource:
@@ -48,11 +48,15 @@ detection:
         RequestedPolicy:
             - 8
             - 12
-    filter_optional_msoffice:
+    filter_optional_msoffice_1:
         FileNameBuffer|contains: '\Microsoft Office\root\vfs\ProgramFilesCommonX64\Microsoft Shared\OFFICE'
         FileNameBuffer|endswith: '\MSOXMLMF.DLL'
         # ProcessNameBuffer is AV products
         RequestedPolicy: 7
+    filter_optional_msoffice_2:
+        ProcessNameBuffer|contains: '\Program Files\Microsoft Office\root\vfs\ProgramFilesCommonX64\Microsoft Shared\Office'
+        FileNameBuffer|contains: '\Windows\System32\'
+        RequestedPolicy: 8
     filter_optional_slack:
         # Example: https://user-images.githubusercontent.com/112784902/197407680-96d4b662-8a59-4289-a483-b24d630ac2a9.png
         # Even though it's the same DLL as the one used in the electron based app filter. We need to do a separate selection due to slack's folder naming convention with the version number :)

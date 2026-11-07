@@ -1,0 +1,56 @@
+title: Potential Dropper Script Execution Via WScript/CScript/MSHTA
+id: cea72823-df4d-4567-950c-0b579eaf0846
+related:
+    - id: 1e33157c-53b1-41ad-bbcc-780b80b58288
+      type: similar
+status: test
+description: Detects wscript/cscript/mshta executions of scripts located in user directories
+references:
+    - https://thedfirreport.com/2023/10/30/netsupport-intrusion-results-in-domain-compromise/
+    - https://redcanary.com/blog/gootloader/
+    - https://www.microsoft.com/en-us/security/blog/2025/03/06/malvertising-campaign-leads-to-info-stealers-hosted-on-github/
+author: Margaritis Dimitrios (idea), Florian Roth (Nextron Systems), oscd.community, Nasreddine Bencherchali (Nextron Systems), Dave Johnson
+date: 2019-01-16
+modified: 2026-02-17
+tags:
+    - attack.execution
+    - attack.t1059.005
+    - attack.t1059.007
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_exec:
+        Image|endswith:
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+    selection_paths:
+        CommandLine|contains:
+            - ':\Perflogs\'
+            - ':\Temp\'
+            - ':\Tmp\'
+            - ':\Users\Public\'
+            - ':\Windows\Temp\'
+            - '\AppData\Local\Temp\'
+            - '\AppData\Roaming\Temp\'
+            - '\Start Menu\Programs\Startup\'
+            - '\Temporary Internet'
+            - '\Windows\Temp'
+            - '%LocalAppData%\Temp\'
+            - '%TEMP%'
+            - '%TMP%'
+    selection_ext:
+        CommandLine|contains:
+            - '.hta'
+            - '.js'
+            - '.jse'
+            - '.vba'
+            - '.vbe'
+            - '.vbs'
+            - '.wsf'
+            - '.wsh'
+    condition: all of selection_*
+falsepositives:
+    - Some installers might generate a similar behavior. An initial baseline is required
+level: medium

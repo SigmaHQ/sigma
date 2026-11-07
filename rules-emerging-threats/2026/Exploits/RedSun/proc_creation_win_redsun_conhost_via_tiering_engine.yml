@@ -1,0 +1,63 @@
+title: RedSun - Conhost.exe Spawned by TieringEngineService.exe
+id: 2ad78473-6978-40f5-b8f1-89c7e1c27a1a
+status: experimental
+description: |
+    Detects two stages of the RedSun post-exploitation process chain that deliver a SYSTEM-level shell to the attacker's interactive session.
+    Observed process chain
+      services.exe
+        → TieringEngineService.exe
+          → conhost.exe             (SYSTEM, CommandLine: bare path, no arguments)
+            → cmd.exe / shell       (SYSTEM, TerminalSessionId = attacker's session)
+
+    Stage 1 — TieringEngineService.exe spawns argument-less conhost.exe:
+      After winning the oplock + Cloud Files mount point race, the malicious TieringEngineService.exe (RedSun.exe copied to System32, started via CoCreateInstance
+      / services.exe) detects it is NT AUTHORITY\SYSTEM and calls LaunchConsoleInSessionId().
+      This opens \\.\pipe\REDSUN, reads the attacker's session ID, duplicates the SYSTEM token, re-stamps it with that session ID via SetTokenInformation(TokenSessionId), then
+      calls CreateProcessAsUser to spawn conhost.exe with no arguments.
+
+    Stage 2 — Shell spawned from rogue conhost.exe (EDR sources with GrandParentImage):
+      The rogue SYSTEM conhost.exe spawns a shell (cmd.exe, PowerShell, etc.) as SYSTEM in the attacker's interactive session.
+      On EDR sources that expose GrandParentImage, the full three-level chain (TieringEngineService.exe → conhost.exe → shell) can be matched directly.
+      The legitimate TieringEngineService.exe is a headless COM server that is unlikely to spawn conhost.exe under normal conditions.
+references:
+    - https://github.com/Nightmare-Eclipse/RedSun
+author: Swachchhanda Shrawan Poudel (Nextron Systems), @unresolvedhost
+date: 2026-04-17
+tags:
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1134.002
+    - attack.t1036.005
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+    definition: 'Requirements: By default the process_creation type event might not contain the GrandParentImage. Make sure you collect such fields in order to use this rule'
+detection:
+    # Stage 1: TieringEngineService.exe (malicious) spawns conhost.exe with no arguments
+    selection_tiering_to_conhost:
+        ParentImage|endswith: '\TieringEngineService.exe'
+        Image|endswith: '\conhost.exe'
+        CommandLine|endswith: 'conhost.exe"'
+        User|contains:
+            - 'AUTHORI'
+            - 'AUTORI'
+            - '$'
+    # Stage 2: full three-level chain for EDR sources that expose GrandParentImage
+    # GrandParent=TieringEngineService.exe, Parent=conhost.exe, Image=shell process
+    selection_shell_full_chain:
+        GrandParentImage|endswith: '\TieringEngineService.exe'
+        ParentImage|endswith: '\conhost.exe'
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell_ise.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        User|contains:
+            - 'AUTHORI'
+            - 'AUTORI'
+            - '$'
+    condition: 1 of selection_*
+falsepositives:
+    - Unknown
+level: high
