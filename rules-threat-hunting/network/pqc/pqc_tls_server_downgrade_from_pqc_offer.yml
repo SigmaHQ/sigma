@@ -1,0 +1,33 @@
+title: TLS Server Downgrade From Offered PQC Hybrid Group
+id: 87ffb82c-28d7-4b13-a5a3-e58182972af8
+status: experimental
+description: The client offered a post-quantum hybrid key-exchange group (e.g. X25519MLKEM768)
+  but the server selected a classical group. This silently forfeits quantum protection
+  even where the client is PQC-ready, and can indicate a misconfigured or downgrade-forcing
+  middlebox. Requires ClientHello supported-groups visibility.
+references:
+- https://csrc.nist.gov/pubs/ir/8547/ipd
+author: TAI Creative LLC
+date: '2026-07-16'
+tags:
+- attack.collection
+- attack.t1040
+logsource:
+  product: zeek
+  service: ssl
+detection:
+  client_offered_pqc:
+    client_supported_groups|contains:
+    - mlkem
+    - kyber
+  server_chose_classical:
+    curve:
+    - x25519
+    - secp256r1
+    - secp384r1
+  condition: client_offered_pqc and server_chose_classical
+falsepositives:
+- Servers not yet PQC-capable (expected); becomes actionable once the server is supposed
+  to support hybrid KEX.
+level: medium
+license: DRL-1.1

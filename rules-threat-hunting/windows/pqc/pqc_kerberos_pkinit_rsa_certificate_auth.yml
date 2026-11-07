@@ -1,0 +1,28 @@
+title: Kerberos PKINIT Using RSA Certificate Authentication
+id: af6b6c23-2f01-4061-b354-67ff876675a5
+status: experimental
+description: A Kerberos pre-authentication used a certificate (PKINIT). Where the
+  certificate key is RSA/ECC, the ticket-granting trust chain is forgeable on a CRQC
+  (Trust-Now-Forge-Later). Surfaces certificate-based Kerberos auth for PQC-capable
+  PKI migration planning.
+references:
+- https://csrc.nist.gov/pubs/ir/8547/ipd
+author: TAI Creative LLC
+date: '2026-07-16'
+tags:
+- attack.credential-access
+- attack.t1558
+- attack.lateral-movement
+- attack.t1550
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4768
+    CertificateThumbprint|exists: true
+  condition: selection
+falsepositives:
+- Smart-card/PKINIT environments (expected); inventory finding.
+level: low
+license: DRL-1.1

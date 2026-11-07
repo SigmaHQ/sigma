@@ -1,0 +1,30 @@
+title: Application JWT Signed With Quantum-Vulnerable Algorithm (RS256/ES256)
+id: 6c8a1912-867b-4b5a-a0fe-c3035a9b7c63
+status: experimental
+description: A JSON Web Token signed with RS256/RS384/ES256/ES384 was observed in
+  application traffic. These rely on RSA/ECDSA and are forgeable on a CRQC. Inventory
+  rule for application-layer signing that a network CBOM and a source-code CBOM should
+  reconcile.
+references:
+- https://csrc.nist.gov/pubs/ir/8547/ipd
+author: TAI Creative LLC
+date: '2026-07-16'
+tags:
+- attack.credential-access
+- attack.t1552
+- attack.t1550.001
+logsource:
+  category: proxy
+detection:
+  selection:
+    cs-header|contains:
+    - alg":"RS256
+    - alg":"RS384
+    - alg":"ES256
+    - alg":"ES384
+  condition: selection
+falsepositives:
+- Universal until application signing migrates to PQC/hybrid; inventory finding, not
+  an intrusion alert.
+level: low
+license: DRL-1.1

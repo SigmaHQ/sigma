@@ -1,0 +1,28 @@
+title: Kerberos RC4-HMAC Encryption Type In Use
+id: 00680db5-20a1-4273-a081-8732c7e3913b
+status: experimental
+description: A Kerberos ticket used the RC4-HMAC encryption type (etype 0x17). RC4/MD-based
+  Kerberos crypto is classically weak, enables Kerberoasting, and is further weakened
+  by Grover's algorithm. Migrate to AES etypes as a prerequisite to a quantum-safe
+  identity plane.
+references:
+- https://csrc.nist.gov/pubs/ir/8547/ipd
+author: TAI Creative LLC
+date: '2026-07-16'
+tags:
+- attack.credential-access
+- attack.t1558.003
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID:
+    - 4768
+    - 4769
+    TicketEncryptionType: '0x17'
+  condition: selection
+falsepositives:
+- Legacy services pinned to RC4 (should be remediated).
+level: medium
+license: DRL-1.1
