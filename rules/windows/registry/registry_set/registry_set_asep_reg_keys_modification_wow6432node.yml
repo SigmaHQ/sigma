@@ -12,7 +12,7 @@ references:
     - https://oddvar.moe/2018/03/21/persistence-using-runonceex-hidden-from-autoruns-exe/
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 date: 2019-10-25
-modified: 2025-12-08
+modified: 2026-11-04
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -43,8 +43,12 @@ detection:
     filter_main_ms_win_desktop_runtime:
         Details|startswith: '"C:\ProgramData\Package Cache\{d21a4f20-968a-4b0c-bf04-a38da5f06e41}\windowsdesktop-runtime-'
     filter_main_vcredist:
-        Image|endswith: '\VC_redist.x64.exe'
-        Details|endswith: '}\VC_redist.x64.exe" /burn.runonce'
+        Image|endswith:
+            - '\VC_redist.x64.exe'
+            - '\VC_redist.x86.exe'
+        Details|endswith:
+            - '}\VC_redist.x64.exe" /burn.runonce'
+            - '}\VC_redist.x86.exe" /burn.runonce'
     filter_main_upgrades:
         Image|startswith:
             - 'C:\ProgramData\Package Cache'
@@ -72,7 +76,7 @@ detection:
         Image:
             - 'C:\Program Files\Microsoft Office\root\integration\integrator.exe'
             - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
-        TargetObject|contains: '\Explorer\Browser Helper Objects\{31D09BA0-12F5-4CCE-BE8A-2923E76605DA}\'
+        TargetObject|contains: '\Explorer\Browser Helper Objects\{31D09BA0-12F5-4CCE-BE8A-2923E76605DA}' # HKLM\SOFTWARE\Microsoft\Office\16.0\ClickToRunStore\HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects\{31D09BA0-12F5-4CCE-BE8A-2923E76605DA}
     filter_optional_dropbox:
         - Details|endswith: '-A251-47B7-93E1-CDD82E34AF8B}'
         - Details: 'grpconv -o'
