@@ -1,0 +1,27 @@
+title: Expand Write To Alternate Data Stream
+id: 8f3e4199-4b91-47ea-92d8-def43ccbd14f
+status: experimental
+description: |
+    Detects usage of "expand.exe" where the destination is an NTFS Alternate Data Stream (ADS).
+    Adversaries abuse "expand.exe" to copy a (potentially remote) file into an ADS in order to hide a payload and evade detection.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Expand/
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1564.004/T1564.004.md
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.stealth
+    - attack.t1564.004
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\expand.exe'
+        - OriginalFileName: 'expand.exe'
+    selection_ads:
+        CommandLine|re: '\\[^\\ ]+:[^\\/ ]'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
