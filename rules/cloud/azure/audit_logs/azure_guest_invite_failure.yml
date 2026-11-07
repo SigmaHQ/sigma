@@ -4,8 +4,11 @@ status: test
 description: Detects when a user that doesn't have permissions to invite a guest user attempts to invite one.
 references:
     - https://learn.microsoft.com/en-us/entra/architecture/security-operations-privileged-accounts#things-to-monitor
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities#invited-users
+    - https://analyticsrules.exchange/analyticrules/572e75ef-5147-49d9-9d65-13f2ed1e3a86/
 author: Mark Morowczynski '@markmorow', Yochana Henderson, '@Yochana-H'
 date: 2022-08-10
+modified: 2026-05-09
 tags:
     - attack.privilege-escalation
     - attack.initial-access
@@ -17,8 +20,8 @@ logsource:
     service: auditlogs
 detection:
     selection:
-        properties.message: Invite external user
-        Status: failure
+        operationName: Invite external user
+        properties.result: failure
     condition: selection
 falsepositives:
     - A non malicious user is unaware of the proper process
