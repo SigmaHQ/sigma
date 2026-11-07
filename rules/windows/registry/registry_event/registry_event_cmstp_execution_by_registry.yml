@@ -10,7 +10,7 @@ references:
     - https://web.archive.org/web/20190722224110/https://oddvar.moe/2017/08/15/research-on-cmstp-exe/
 author: Nik Seetharaman
 date: 2018-07-16
-modified: 2026-08-27
+modified: 2026-10-21
 tags:
     - attack.execution
     - attack.stealth
@@ -28,8 +28,13 @@ detection:
         Details:
             - 'C:\Windows\System32\cmcfg32.dll'
             - 'C:\Windows\SysWOW64\cmcfg32.dll'
+    filter_main_cmnative:
+        TargetObject|endswith: 'SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cmmgr32.exe\CmNative'
+        Details: 'DWORD (0x00000002)'
     filter_main_empty:
         Details: '(Empty)'
+    filter_main_null:
+        Details: null
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Legitimate CMSTP use (unlikely in modern enterprise environments)

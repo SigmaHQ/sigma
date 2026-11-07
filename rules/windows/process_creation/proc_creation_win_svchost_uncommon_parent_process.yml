@@ -6,7 +6,7 @@ references:
     - Internal Research
 author: Florian Roth (Nextron Systems)
 date: 2017-08-15
-modified: 2026-10-19
+modified: 2026-10-22
 tags:
     - attack.stealth
     - attack.t1036.005
@@ -24,12 +24,24 @@ detection:
             - '\rpcnet.exe'
             - '\services.exe'
             - '\TiWorker.exe'
-    filter_main_svchost:
+    filter_main_svchost_1:
         ParentImage|endswith: '\svchost.exe'
+        Image:
+            - 'C:\Windows\System32\svchost.exe'
+            - 'C:\Windows\SysWow64\svchost.exe'
         CommandLine|endswith:
             - 'svchost.exe"'
             - 'svchost.exe'
-            - '-k TSLicensing'
+    filter_main_svchost_2:
+        ParentImage:
+            - 'C:\Windows\System32\svchost.exe'
+            - 'C:\Windows\SysWow64\svchost.exe'
+        Image:
+            - 'C:\Windows\System32\svchost.exe'
+            - 'C:\Windows\SysWow64\svchost.exe'
+        CommandLine|contains:
+            - ' -k '
+            - ' -p '
     filter_main_parent_null:
         ParentImage: null
     filter_main_parent_empty:
