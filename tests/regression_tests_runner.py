@@ -1,7 +1,12 @@
-"""Run regression tests for Sigma rules based on their regression_tests_path attribute."""
+"""Run regression tests for Sigma rules.
+
+Unlike the old runner, rules do NOT declare a `regression_tests_path`. Instead
+this script walks the `regression_data/` tree for `info.yml` files and, for
+each one, looks up the Sigma rule(s) by the `id`s listed under `rules`, then
+executes the `test_cases`.
+"""
 
 import argparse
-import concurrent.futures
 import json
 import os
 import shutil
@@ -23,7 +28,6 @@ def get_absolute_path(base_path: str, relative_path: str) -> str:
     if os.path.isabs(relative_path):
         return relative_path
 
-    # Normalize path separators
     relative_path = relative_path.replace("/", os.sep).replace("\\", os.sep)
     workspace_root = base_path
     while not os.path.exists(os.path.join(workspace_root, relative_path)):
@@ -34,192 +38,25 @@ def get_absolute_path(base_path: str, relative_path: str) -> str:
     return os.path.join(workspace_root, relative_path)
 
 
-def load_info_yaml(
-    regression_tests_path: str, rule_id: str, file_path: str
-) -> tuple[List[Dict], List[Dict]]:
-    """Load and parse the regression test info YAML file."""
-    results = []
-    missing_files = []
-
-    if not os.path.exists(regression_tests_path):
-        missing_files.append(
-            {
-                "rule_path": file_path,
-                "rule_id": rule_id,
-                "missing_file": regression_tests_path,
-                "file_type": "regression_tests_path",
-            }
-        )
-        return results, missing_files
-
-    try:
-        with open(regression_tests_path, "r", encoding="utf-8") as f:
-            info_data = yaml.load(f, Loader=_YAMLLoader)
-
-        if not info_data or "regression_tests_info" not in info_data:
-            print(f"Warning: No regression_tests_info found in {regression_tests_path}")
-            return results, missing_files
-
-        # Extract test data from regression_tests_info
-        test_data = []
-        regression_tests = info_data.get("regression_tests_info", [])
-        rule_metadata = info_data.get("rule_metadata", [])
-
-        for test in regression_tests:
-            if not isinstance(test, dict):
-                continue
-
-            test_path = get_absolute_path(
-                os.path.dirname(file_path), test.get("path", "")
-            )
-
-            # Check if test file exists
-            if not os.path.exists(test_path):
-                missing_files.append(
-                    {
-                        "rule_path": file_path,
-                        "rule_id": rule_id,
-                        "missing_file": test_path,
-                        "file_type": "test_file",
-                        "test_name": test.get("name", "Unnamed Test"),
-                        "test_type": test.get("type", "unknown"),
-                    }
-                )
-
-            base_dir = os.path.dirname(regression_tests_path)
-            pipelines = [
-                get_absolute_path(base_dir, p) for p in test.get("pipelines", [])
-            ]
-            filters = [
-                get_absolute_path(base_dir, f) for f in test.get("filters", [])
-            ]
-
-            test_data.append(
-                {
-                    "type": test.get("type", "unknown"),
-                    "path": test_path,
-                    "name": test.get("name", "Unnamed Test"),
-                    "provider": test.get("provider", ""),
-                    "match_count": test.get("match_count"),
-                    "pipelines": pipelines,
-                    "filters": filters,
-                }
-            )
-        info_metadata_rule_id = None
-        for metadata_entry in rule_metadata:
-            if not isinstance(metadata_entry, dict):
-                continue
-            info_metadata_rule_id = metadata_entry.get("id", "")
-
-        if test_data:
-            results.append(
-                {
-                    "path": file_path,
-                    "id": rule_id,
-                    "tests": test_data,
-                    "info_metadata_rule_id": info_metadata_rule_id,
-                }
-            )
-
-    except yaml.YAMLError as e:
-        print(f"Warning: Could not parse info file {regression_tests_path}: {e}")
-
-    return results, missing_files
-
-
-def find_rule_missing_test(rule_data: Dict, file_path: str) -> tuple[bool, List[Dict]]:
-    """Find missing test files for a single rule based on its data.
-
-    Returns:
-        skip: True if the rule should be skipped, False otherwise
-        missing_regression_tests_path: List of dicts with missing regression_tests_path info
-
-    """
-    missing_regression_tests_path = []
-    rule_id = rule_data.get("id", "unknown")
-    rule_status = rule_data.get("status", "").lower()
-
-    # Check if rule status requires regression tests
-    requires_regression_tests = rule_status in ["test", "stable"]
-
-    # Check if rule has regression_tests_path
-    has_regression_tests_path = "regression_tests_path" in rule_data
-
-    # If rule requires regression tests but doesn't have regression_tests_path
-    if requires_regression_tests and not has_regression_tests_path:
-        missing_regression_tests_path.append(
-            {
-                "rule_path": file_path,
-                "rule_id": rule_id,
-                "status": rule_status,
-            }
-        )
-        return True, missing_regression_tests_path
-
-    # Skip rules that don't require regression tests
-    # and don't have regression_tests_path
-    if not requires_regression_tests and not has_regression_tests_path:
-        return True, missing_regression_tests_path
-    return False, missing_regression_tests_path
-
-
-def find_rule_tests(rule_data: Dict, file_path: str) -> tuple[List[Dict], List[Dict]]:
-    """Find regression tests and missing files for a single rule based on its data."""
-    results = []
-    missing_files = []
-    rule_id = rule_data.get("id", "unknown")
-
-    if rule_data and "regression_tests_path" in rule_data:
-        regression_tests_path = get_absolute_path(
-            os.path.dirname(file_path),
-            rule_data.get("regression_tests_path", ""),
-        )
-
-        # Load the info.yml file
-        yml_result, yml_missing_files = load_info_yaml(
-            regression_tests_path, rule_id, file_path
-        )
-        results.extend(yml_result)
-        missing_files.extend(yml_missing_files)
-    return results, missing_files
-
-
-def _process_rule_file(
-    file_path: str,
-) -> tuple[List[Dict], List[Dict], List[Dict]]:
-    """Load and process a single rule file.
-
-    Returns:
-        tuple: (results, missing_files, missing_regression_tests_path)
-    """
+def _read_rule(file_path: str) -> tuple[Optional[str], str, str]:
+    """Return (rule_id, status, file_path) for a Sigma rule file."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             rule_data = yaml.load(f, Loader=_YAMLLoader)
-        if not rule_data:
-            return [], [], []
-        skip, missing_test = find_rule_missing_test(rule_data, file_path)
-        if skip:
-            return [], [], missing_test
-        result, missing_file = find_rule_tests(rule_data, file_path)
-        return result, missing_file, missing_test
+        if isinstance(rule_data, dict):
+            return rule_data.get("id"), str(rule_data.get("status", "")).lower(), file_path
     except yaml.YAMLError as e:
         print(f"Warning: Could not parse {file_path}: {e}")
-        return [], [], []
+    return None, "", file_path
 
 
-def find_rules_with_tests(
-    rules_paths: List[str],
-    workers: Optional[int] = None,
-) -> tuple[List[Dict], List[Dict], List[Dict]]:
-    """Find all rules that have a 'regression_tests_path' attribute pointing to test info files.
+def build_rule_index(rules_paths: List[str]) -> tuple[Dict[str, str], Dict[str, str]]:
+    """Scan rule directories.
 
     Returns:
-        tuple: (rules_with_tests, missing_files, missing_regression_tests_path)
+        tuple: (index, status_by_id) where index maps rule id -> file path and
+        status_by_id maps rule id -> status.
     """
-    results = []
-    missing_files = []
-    missing_regression_tests_path = []
-
     all_files = []
     for rules_path in rules_paths:
         if not os.path.exists(rules_path):
@@ -230,17 +67,168 @@ def find_rules_with_tests(
                 if file.endswith(".yml"):
                     all_files.append(os.path.join(root, file))
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=_default_workers(workers)) as executor:
-        for r, mf, mrp in executor.map(_process_rule_file, all_files):
-            results.extend(r)
-            missing_files.extend(mf)
-            missing_regression_tests_path.extend(mrp)
+    index: Dict[str, str] = {}
+    status_by_id: Dict[str, str] = {}
+    for file_path in all_files:
+        rule_id, status, path = _read_rule(file_path)
+        if not rule_id:
+            continue
+        if rule_id in index:
+            print(
+                f"Warning: Duplicate rule id '{rule_id}' in {path} "
+                f"(already seen at {index[rule_id]})"
+            )
+            continue
+        index[rule_id] = path
+        status_by_id[rule_id] = status
+    return index, status_by_id
 
-    return results, missing_files, missing_regression_tests_path
+
+def load_info_yaml(
+    info_path: str, rule_index: Dict[str, str]
+) -> tuple[List[Dict], List[Dict], List[Dict]]:
+    """Parse a regression-test info.yml file.
+
+    Returns:
+        tuple: (results, missing_files, missing_rules)
+    """
+    results: List[Dict] = []
+    missing_files: List[Dict] = []
+    missing_rules: List[Dict] = []
+
+    try:
+        with open(info_path, "r", encoding="utf-8") as f:
+            info_data = yaml.load(f, Loader=_YAMLLoader)
+    except yaml.YAMLError as e:
+        print(f"Warning: Could not parse info file {info_path}: {e}")
+        return results, missing_files, missing_rules
+
+    if not info_data or "test_cases" not in info_data:
+        print(f"Warning: No test_cases found in {info_path}")
+        return results, missing_files, missing_rules
+
+    base_dir = os.path.dirname(info_path)
+    rules = info_data.get("rules", [])
+    test_cases = info_data.get("test_cases", [])
+    # Root-level pipelines as a fallback; test_cases[*].pipelines takes precedence.
+    root_pipelines = info_data.get("pipelines", [])
+
+    # Parse test cases once (shared by every rule listed in this info.yml).
+    test_data = []
+    for test in test_cases:
+        if not isinstance(test, dict):
+            continue
+
+        test_path = get_absolute_path(base_dir, test.get("path", ""))
+        pipelines = [
+            get_absolute_path(base_dir, p)
+            for p in test.get("pipelines", root_pipelines)
+        ]
+        filters = [get_absolute_path(base_dir, f) for f in test.get("filters", [])]
+
+        test_data.append(
+            {
+                "type": test.get("type", "unknown"),
+                "path": test_path,
+                "name": test.get("name", "Unnamed Test"),
+                "provider": test.get("provider", ""),
+                "match_count": test.get("match_count"),
+                "pipelines": pipelines,
+                "filters": filters,
+            }
+        )
+
+    if not test_data:
+        return results, missing_files, missing_rules
+
+    for rule_entry in rules:
+        if not isinstance(rule_entry, dict):
+            continue
+        rule_id = rule_entry.get("id")
+        if not rule_id:
+            continue
+
+        rule_path = rule_index.get(rule_id)
+        if not rule_path:
+            missing_rules.append(
+                {
+                    "rule_id": rule_id,
+                    "info_path": info_path,
+                }
+            )
+            continue
+
+        # Check referenced test data files exist (once per resolved rule).
+        for test in test_data:
+            if not os.path.exists(test["path"]):
+                missing_files.append(
+                    {
+                        "rule_path": rule_path,
+                        "rule_id": rule_id,
+                        "missing_file": test["path"],
+                        "file_type": "test_file",
+                        "test_name": test["name"],
+                        "test_type": test["type"],
+                    }
+                )
+
+        results.append(
+            {
+                "path": rule_path,
+                "id": rule_id,
+                "info_path": info_path,
+                "tests": test_data,
+            }
+        )
+
+    return results, missing_files, missing_rules
 
 
-def _default_workers(n: Optional[int]) -> int:
-    return n if n is not None else min(32, (os.cpu_count() or 1) * 4)
+def find_info_files(regression_data_paths: List[str]) -> List[str]:
+    """Find all info.yml files under the regression_data tree(s)."""
+    info_files = []
+    for base in regression_data_paths:
+        if not os.path.exists(base):
+            print(f"Warning: regression_data path {base} does not exist")
+            continue
+        for root, _, files in os.walk(base):
+            for file in files:
+                if file == "info.yml":
+                    info_files.append(os.path.join(root, file))
+    return info_files
+
+
+def find_rules_with_tests(
+    rules_paths: List[str],
+    regression_data_paths: List[str],
+) -> tuple[List[Dict], List[Dict], List[Dict], List[Dict]]:
+    """Find all rules that have regression tests defined under regression_data_paths.
+
+    Returns:
+        tuple: (rules_with_tests, missing_files, missing_rules,
+                missing_regression_tests)
+    """
+    rule_index, status_by_id = build_rule_index(rules_paths)
+
+    results: List[Dict] = []
+    missing_files: List[Dict] = []
+    missing_rules: List[Dict] = []
+
+    for info_path in find_info_files(regression_data_paths):
+        r, mf, mr = load_info_yaml(info_path, rule_index)
+        results.extend(r)
+        missing_files.extend(mf)
+        missing_rules.extend(mr)
+
+    # test/stable rules must have regression tests defined
+    tested_ids = {r["id"] for r in results}
+    missing_regression_tests = [
+        {"rule_id": rid, "rule_path": rule_index[rid], "status": status}
+        for rid, status in status_by_id.items()
+        if status in ("test", "stable") and rid not in tested_ids
+    ]
+
+    return results, missing_files, missing_rules, missing_regression_tests
 
 
 def _link(src: str, dst: str) -> None:
@@ -251,44 +239,25 @@ def _link(src: str, dst: str) -> None:
         shutil.copy2(src, dst)
 
 
-def run_evtx_batch(
-    evtx_test_items: List[tuple],
+def run_evtx_checker(
+    rule_path: str,
+    rule_id: str,
+    test_data: Dict,
     evtx_checker_path: str,
     thor_config: str,
-) -> Optional[Dict[str, List[str]]]:
-    """Run evtx-sigma-checker once for all EVTX tests.
+) -> tuple[bool, str]:
+    """Run evtx-sigma-checker for a single rule against a single EVTX file."""
+    evtx_path = test_data["path"]
 
-    Returns:
-        Dict mapping rule_id -> list of matching JSON output lines, or None if the subprocess failed.
-    """
     with tempfile.TemporaryDirectory() as tmpdir:
         rules_dir = os.path.join(tmpdir, "rules")
         evtx_dir = os.path.join(tmpdir, "evtx")
         os.makedirs(rules_dir)
         os.makedirs(evtx_dir)
 
-        id_to_path = {rule_info["id"]: rule_info["path"] for rule_info, _, _ in evtx_test_items}
-
-        for rule_info, _, test_data in evtx_test_items:
-            rule_path = rule_info["path"]
-            evtx_path = test_data["path"]
-            rule_id = rule_info["id"]
-
-            # Use rule_id as filename to avoid collisions across directories
-            rule_dst = os.path.join(rules_dir, f"{rule_id}.yml")
-            if not os.path.exists(rule_dst):
-                _link(os.path.abspath(rule_path), rule_dst)
-
-            if os.path.exists(evtx_path):
-                evtx_dst = os.path.join(evtx_dir, os.path.basename(evtx_path))
-                if not os.path.exists(evtx_dst):
-                    _link(os.path.abspath(evtx_path), evtx_dst)
-                else:
-                    print(
-                        f"  Warning: EVTX filename collision for '{os.path.basename(evtx_path)}' "
-                        f"(rule {rule_id}) - file already staged from another rule; "
-                        "review info.yml to ensure unique EVTX filenames"
-                    )
+        rule_dst = os.path.join(rules_dir, f"{rule_id}.yml")
+        _link(os.path.abspath(rule_path), rule_dst)
+        _link(os.path.abspath(evtx_path), os.path.join(evtx_dir, os.path.basename(evtx_path)))
 
         cmd = [
             evtx_checker_path,
@@ -301,29 +270,44 @@ def run_evtx_batch(
         try:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         except subprocess.TimeoutExpired:
-            print("  Timeout: batched evtx-sigma-checker timed out")
-            return None
+            print(f"  Timeout: evtx-sigma-checker timed out for {rule_id}")
+            return False, ""
 
         if result.returncode != 0:
-            stderr = result.stderr
-            for rule_id, rule_path in id_to_path.items():
-                stderr = stderr.replace(os.path.join(rules_dir, f"{rule_id}.yml"), rule_path)
+            stderr = result.stderr.replace(rule_dst, rule_path)
             print(f"  Error: evtx-sigma-checker exited with code {result.returncode}: {stderr.strip()}")
-            print("  Aborting further EVTX tests. Fix the errors above before retrying.")
-            return None
+            return False, ""
 
-        matches: Dict[str, List[str]] = {}
+        match_lines = []
         for line in result.stdout.strip().splitlines():
             try:
-                json_obj = json.loads(line)
-                rid = json_obj.get("RuleId")
-                evtx_stem = os.path.splitext(os.path.basename(json_obj.get("File", "")))[0]
-                if rid and evtx_stem == rid:
-                    matches.setdefault(rid, []).append(line)
+                if json.loads(line).get("RuleId") == rule_id:
+                    match_lines.append(line)
             except json.JSONDecodeError:
                 print(f"  Warning: Skipping non-JSON line: {line}")
 
-        return matches
+        return _evaluate_matches(rule_id, "evtx", test_data, match_lines)
+
+
+def _evaluate_matches(
+    rule_id: str, test_type: str, test_data: Dict, match_lines: List[str]
+) -> tuple[bool, str]:
+    """Compare the number of matches against the expected match_count."""
+    match_count = len(match_lines)
+    all_output = "\n    ".join(match_lines)
+    test_name = test_data.get("name", "Unnamed Test")
+    expected_count = test_data.get("match_count")
+
+    if expected_count is not None:
+        if match_count < expected_count:
+            print(f"  Error: {rule_id} - {test_name} (type: {test_type}): Match count too low: expected {expected_count}, got {match_count}")
+            return False, all_output
+        if match_count > expected_count:
+            print(f"  Error: {rule_id} - {test_name} (type: {test_type}): Got {match_count} matches but only {expected_count} expected - consider updating match_count in info.yml")
+            return False, all_output
+        return True, all_output
+
+    return match_count > 0, all_output
 
 
 def compile_rule_to_expr(
@@ -382,39 +366,25 @@ def run_json_checker(
         return False, ""
 
     match_lines = [ln for ln in result.stdout.splitlines() if ln.endswith("MATCH")]
-    match_count = len(match_lines)
-    all_output = "\n    ".join(match_lines)
-
-    expected_count = test_data.get("match_count")
-    if expected_count is not None:
-        if match_count < expected_count:
-            print(
-                f"  Error: {rule_id}: Match count too low: expected {expected_count}, got {match_count}"
-            )
-            return False, all_output
-        if match_count > expected_count:
-            print(
-                f"  Warning: {rule_id}: Got {match_count} matches but only {expected_count} expected - consider updating match_count in info.yml"
-            )
-        return True, all_output
-
-    return match_count > 0, all_output
+    return _evaluate_matches(rule_id, test_type, test_data, match_lines)
 
 
 def run_test(
+    args: argparse.Namespace,
     rule_path: str,
     rule_id: str,
     test_data: Dict,
-    json_checker_path: str,
 ) -> tuple[bool, str]:
-    """Run a test based on its type."""
+    """Run a single test based on its type."""
     test_type = test_data.get("type", "unknown")
 
+    if test_type == "evtx":
+        return run_evtx_checker(rule_path, rule_id, test_data, args.evtx_checker, args.thor_config)
     if test_type in {"json", "ndjson", "jsonl"}:
-        if not json_checker_path:
+        if not args.json_checker:
             print("  Error: --json-checker is required for 'ndjson/json/jsonl' tests")
             return False, ""
-        return run_json_checker(test_type, rule_path, rule_id, test_data, json_checker_path)
+        return run_json_checker(test_type, rule_path, rule_id, test_data, args.json_checker)
     print(f"  Warning: Unknown test type '{test_type}', skipping")
     return False, ""
 
@@ -422,7 +392,7 @@ def run_test(
 def parse_arguments() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Run regression tests for Sigma rules with regression_tests_path"
+        description="Run regression tests for Sigma rules defined under regression_data/"
     )
 
     parser.add_argument(
@@ -430,7 +400,15 @@ def parse_arguments() -> argparse.Namespace:
         required=True,
         action="extend",
         nargs="+",
-        help="Comma-separated paths to rule directories",
+        help="Paths to rule directories (used to look up rules by id)",
+    )
+
+    parser.add_argument(
+        "--regression-data",
+        action="extend",
+        nargs="+",
+        default=None,
+        help="Paths to regression_data directories containing info.yml files (default: regression_data)",
     )
 
     parser.add_argument(
@@ -451,7 +429,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--validate-only",
         action="store_true",
-        help="Only validate rule status requirements without running tests",
+        help="Only validate that rules and test files exist, without running tests",
     )
 
     parser.add_argument(
@@ -466,49 +444,39 @@ def parse_arguments() -> argparse.Namespace:
         help="Enable verbose output, showing successful test results as well",
     )
 
-    parser.add_argument(
-        "--workers",
-        type=int,
-        default=None,
-        help="Number of parallel workers for running tests (default: auto based on CPU count)",
-    )
-
     args = parser.parse_args()
-    if args.workers is not None and args.workers < 1:
-        parser.error("--workers must be >= 1")
+    if not args.regression_data:
+        args.regression_data = ["regression_data"]
     return args
 
 
 def init_checks(args: argparse.Namespace) -> None:
     """Initialization that checks for functional environment."""
     if args.validate_only:
-        print("Starting Rule Status Validation...")
+        print("Starting Regression Test Validation...")
     else:
         print("Starting Regression Tests...")
 
-        # Check required arguments for test execution
         if not args.evtx_checker or not args.thor_config:
             print(
                 "Error: --evtx-checker and --thor-config are required unless using --validate-only"
             )
             sys.exit(1)
 
-        # Check if evtx-sigma-checker exists
         if not os.path.exists(args.evtx_checker):
             print(f"Error: evtx-sigma-checker not found at {args.evtx_checker}")
             sys.exit(1)
 
-        # Check if THOR config exists
         if not os.path.exists(args.thor_config):
             print(f"Error: Thor config not found at {args.thor_config}")
             sys.exit(1)
 
-        # json_checker is optional; only needed for 'ndjson/json/jsonl' tests
         if args.json_checker and not os.path.exists(args.json_checker):
             print(f"Error: json_checker not found at {args.json_checker}")
             sys.exit(1)
-        print(f"Rules paths: {args.rules_paths}")
 
+    print(f"Rules paths: {args.rules_paths}")
+    print(f"Regression data: {args.regression_data}")
     if not args.validate_only:
         print(f"EVTX checker: {args.evtx_checker}")
         print(f"Thor config: {args.thor_config}")
@@ -518,66 +486,33 @@ def init_checks(args: argparse.Namespace) -> None:
 def run_tests(
     args: argparse.Namespace, rules_with_tests
 ) -> tuple[int, int, List[Dict]]:
-    """Run tests for all rules: EVTX tests in one batch call, JSON tests in parallel."""
+    """Run every test, one subprocess call per test."""
     failures = []
     passed_tests = 0
+    total_tests = 0
 
-    all_test_items = [
-        (rule_info, i, test_data)
-        for rule_info in rules_with_tests
-        for i, test_data in enumerate(rule_info["tests"])
-    ]
-    total_tests = len(all_test_items)
-
-    evtx_items = [(ri, i, td) for ri, i, td in all_test_items if td.get("type") == "evtx"]
-    other_items = [(ri, i, td) for ri, i, td in all_test_items if td.get("type") != "evtx"]
-
-    # --- EVTX: single batched subprocess call ---
-    if evtx_items:
-        batch_matches = run_evtx_batch(evtx_items, args.evtx_checker, args.thor_config)
-
-        for rule_info, i, test_data in evtx_items:
-            rule_id = rule_info["id"]
-            rule_path = rule_info["path"]
+    for rule_info in rules_with_tests:
+        rule_id = rule_info["id"]
+        rule_path = rule_info["path"]
+        for i, test_data in enumerate(rule_info["tests"]):
+            total_tests += 1
             test_name = test_data.get("name", f"Test {i + 1}")
-            test_type = "evtx"
+            test_type = test_data.get("type", "unknown")
             test_path = test_data.get("path", "unknown")
 
-            if batch_matches is None:
-                failures.append({
-                    "rule_id": rule_id,
-                    "rule_path": rule_path,
-                    "test_name": test_name,
-                    "test_type": test_type,
-                    "test_path": test_path,
-                    "test_number": i + 1,
-                    "batch_failed": True,
-                })
-                continue
+            if args.verbose:
+                print(f"\nTesting rule: {rule_id} - {test_name} (type: {test_type}): {test_path}")
 
-            match_outputs = batch_matches.get(rule_id, [])
-            match_count = len(match_outputs)
-            all_output = "\n    ".join(match_outputs)
-            expected_count = test_data.get("match_count")
-
-            if expected_count is not None:
-                if match_count < expected_count:
-                    print(f"  Error: {rule_id}: Match count too low: expected {expected_count}, got {match_count}")
-                    success = False
-                else:
-                    if match_count > expected_count:
-                        print(f"  Warning: {rule_id}: Got {match_count} matches but only {expected_count} expected - consider updating match_count in info.yml")
-                    success = True
-            else:
-                success = match_count > 0
+            success, output = run_test(args, rule_path, rule_id, test_data)
 
             if args.verbose:
                 if success:
                     print(f"    ✓ PASS - Match found for Rule ID: {rule_id}")
-                    if all_output:
-                        print(f"    Output: {all_output}")
+                    if output:
+                        print(f"    Output: {output}")
                 else:
-                    print(f"    ✗ FAIL: {rule_id}")
+                    print(f"    ✗ FAIL: {rule_id} - {test_name} (type: {test_type}): {test_path}")
+                    print(f"    Output: {output if output else '(no matches)'}")
 
             if success:
                 passed_tests += 1
@@ -591,133 +526,69 @@ def run_tests(
                     "test_number": i + 1,
                 })
 
-    # --- JSON/NDJSON/JSONL: parallel workers ---
-    if other_items:
-        def run_single(item: tuple) -> tuple:
-            rule_info, i, test_data = item
-            rule_path = rule_info["path"]
-            rule_id = rule_info["id"]
-            test_name = test_data.get("name", f"Test {i + 1}")
-            test_type = test_data.get("type", "unknown")
-            test_path = test_data.get("path", "unknown")
-
-            if args.verbose:
-                print(f"\nTesting rule: {rule_id} - {test_name} (type: {test_type}): {test_path}")
-
-            success, output = run_test(
-                rule_path, rule_id, test_data, args.json_checker,
-            )
-
-            if args.verbose:
-                if success:
-                    print(f"    ✓ PASS - Match found for Rule ID: {rule_id}")
-                    if output:
-                        print(f"    Output: {output}")
-                else:
-                    print(f"    ✗ FAIL: {rule_id}")
-
-            return success, rule_id, rule_path, test_name, test_type, test_path, i + 1
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=_default_workers(args.workers)) as executor:
-            futures = [executor.submit(run_single, item) for item in other_items]
-            for future in concurrent.futures.as_completed(futures):
-                success, rule_id, rule_path, test_name, test_type, test_path, test_num = future.result()
-                if success:
-                    passed_tests += 1
-                else:
-                    failures.append({
-                        "rule_id": rule_id,
-                        "rule_path": rule_path,
-                        "test_name": test_name,
-                        "test_type": test_type,
-                        "test_path": test_path,
-                        "test_number": test_num,
-                    })
-
     return total_tests, passed_tests, failures
 
 
-def validate_missing_tests(
-    args: argparse.Namespace,
-    rules_with_tests: List[Dict],
-    missing_regression_tests_path: List[Dict],
-) -> None:
-    """Print rules missing regression_tests_path and handle validation."""
+def check_missing_rules(missing_rules: List[Dict]) -> None:
+    """Print rule ids referenced in info.yml files that were not found."""
+    if not missing_rules:
+        return
 
-    # Check for missing regression_tests_path in test/stable rules
-    if missing_regression_tests_path and not args.ignore_validation:
+    print(f"\nERROR: Found {len(missing_rules)} rule id(s) referenced in "
+          "info.yml but not found in the rule directories:")
+    print("=" * 60)
+    for missing in missing_rules:
+        print(f"Rule ID: {missing['rule_id']}")
+        print(f"  Referenced in: {missing['info_path']}")
         print()
-        print("-" * 50)
-        print("RULES MISSING REGRESSION_TESTS_PATH:")
-        print("-" * 50)
-        for missing in missing_regression_tests_path:
-            print(f"Rule: {missing['rule_id']} (status: {missing['status']})")
-            print(f"  File: {missing['rule_path']}")
-            print()
-        print("=" * 70)
-        print(
-            "Rules with status 'test' or 'stable' must have a 'regression_tests_path' field."
-        )
-        print("Please add regression tests for these rules or change their status.")
-        print("=" * 70)
-        print(
-            f"\nERROR: Found {len(missing_regression_tests_path)} "
-            "test/stable rule(s) without regression_tests_path."
-        )
+    print("=" * 60)
+    print("Ensure every id under 'rules' in info.yml matches an existing Sigma rule.")
+    sys.exit(1)
 
-        sys.exit(1)
-    elif missing_regression_tests_path and args.ignore_validation:
-        print(
-            f"\nWARNING: Found {len(missing_regression_tests_path)} "
-            "test/stable rule(s) without regression_tests_path (validation ignored)"
-        )
-        print(
-            "Consider adding regression tests for these rules "
-            "or changing their status to 'experimental'."
-        )
 
-    # If validate-only mode, exit successfully after validation
-    if args.validate_only:
-        if args.ignore_validation and missing_regression_tests_path:
-            print("✅ All rules passed validation (validation ignored)!")
-        else:
-            print("✅ All rules passed validation!")
-        print(f"Found {len(rules_with_tests)} rules with regression tests configured.")
-        sys.exit(0)
+def check_missing_regression_tests(
+    missing_regression_tests: List[Dict], ignore_validation: bool
+) -> None:
+    """Enforce that test/stable rules have regression tests defined."""
+    if not missing_regression_tests:
+        return
+
+    count = len(missing_regression_tests)
+    if ignore_validation:
+        print(
+            f"\nWARNING: Found {count} test/stable rule(s) without regression tests "
+            "(validation ignored)"
+        )
+        return
+
+    print("\n" + "=" * 60)
+    print("RULES MISSING REGRESSION TESTS:")
+    print("=" * 60)
+    for missing in missing_regression_tests:
+        print(f"Rule: {missing['rule_id']} (status: {missing['status']})")
+        print(f"  File: {missing['rule_path']}")
+        print()
+    print("=" * 60)
+    print("Rules with status 'test' or 'stable' must have regression tests defined "
+          "under regression_data (an info.yml referencing the rule id).")
+    print(f"\nERROR: Found {count} test/stable rule(s) without regression tests.")
+    sys.exit(1)
 
 
 def check_missing_test_files(missing_files: List[Dict]) -> None:
-    """Check for missing test files and print errors if any are found."""
+    """Check for missing test data files and print errors if any are found."""
     if not missing_files:
         return
 
-    print(f"\nERROR: Found {len(missing_files)} missing file(s):")
+    print(f"\nERROR: Found {len(missing_files)} missing test data file(s):")
     print("=" * 60)
-
-    regression_test_files = [
-        f for f in missing_files if f["file_type"] == "regression_tests_path"
-    ]
-    test_files = [f for f in missing_files if f["file_type"] == "test_file"]
-
-    if regression_test_files:
-        print(f"\nMISSING REGRESSION TEST INFO FILES ({len(regression_test_files)}):")
-        print("-" * 50)
-        for missing in regression_test_files:
-            print(f"Rule: {missing['rule_id']}")
-            print(f"  File: {missing['rule_path']}")
-            print(f"  Missing: {missing['missing_file']}")
-            print()
-
-    if test_files:
-        print(f"\nMISSING TEST DATA FILES ({len(test_files)}):")
-        print("-" * 50)
-        for missing in test_files:
-            print(f"Rule: {missing['rule_id']}")
-            print(f"  File: {missing['rule_path']}")
-            print(f"  Test: {missing['test_name']} (type: {missing['test_type']})")
-            print(f"  Missing: {missing['missing_file']}")
-            print()
-
+    print("-" * 50)
+    for missing in missing_files:
+        print(f"Rule: {missing['rule_id']}")
+        print(f"  File: {missing['rule_path']}")
+        print(f"  Test: {missing['test_name']} (type: {missing['test_type']})")
+        print(f"  Missing: {missing['missing_file']}")
+        print()
     print("=" * 60)
     print("Please ensure all referenced files exist before running tests.")
     sys.exit(1)
@@ -736,16 +607,10 @@ def print_summary(total_tests: int, passed_tests: int, failures: List[Dict]) -> 
         success_rate = (passed_tests / total_tests) * 100
         print(f"Success rate: {success_rate:.1f}%")
 
-    # Print failures
     if failures:
         print(f"\nFAILED TESTS ({len(failures)}):")
         print("-" * 40)
-        batch_failures = [f for f in failures if f.get("batch_failed")]
-        if batch_failures:
-            print(f"  evtx-sigma-checker batch failed ({len(batch_failures)} test(s) affected)\n")
         for failure in failures:
-            if failure.get("batch_failed"):
-                continue
             print(f"Rule: {failure['rule_id']}")
             print(f"  File: {failure['rule_path']}")
             print(f"  Test: {failure['test_name']} (type: {failure['test_type']})")
@@ -755,162 +620,39 @@ def print_summary(total_tests: int, passed_tests: int, failures: List[Dict]) -> 
     print("=" * 60)
 
 
-def check_rule_id_consistency(rules_with_tests: List[Dict]) -> List[Dict]:
-    """Check if rule IDs are consistent between rule files and their info.yml files.
-    Also checks if rule IDs match the test file names.
-
-    Returns:
-        List of dicts containing information about inconsistent rule IDs
-    """
-    inconsistent_rules = []
-
-    for rule_info in rules_with_tests:
-        rule_id = rule_info["id"]
-        info_metadata_rule_id = rule_info.get("info_metadata_rule_id", "")
-        rule_path = rule_info["path"]
-        tests = rule_info.get("tests", [])
-
-        # Check rule ID vs info.yml rule_metadata[0].id consistency
-        if not info_metadata_rule_id:
-            inconsistent_rules.append(
-                {
-                    "rule_id": rule_id,
-                    "info_metadata_rule_id": info_metadata_rule_id,
-                    "rule_path": rule_path,
-                    "issue": "missing_info_metadata_rule_id",
-                    "expected": rule_id,
-                    "actual": info_metadata_rule_id,
-                    "message": "info.yml is missing rule_metadata or rule_metadata[0].id",
-                }
-            )
-        elif rule_id != info_metadata_rule_id:
-            inconsistent_rules.append(
-                {
-                    "rule_id": rule_id,
-                    "info_metadata_rule_id": info_metadata_rule_id,
-                    "rule_path": rule_path,
-                    "issue": "rule_vs_info_metadata_mismatch",
-                    "expected": rule_id,
-                    "actual": info_metadata_rule_id,
-                    "message": f"Rule ID '{rule_id}' in rule file does not match "
-                    f"info.yml rule_metadata[0].id '{info_metadata_rule_id}'",
-                }
-            )
-
-        # Check rule ID vs test file name consistency
-        for test in tests:
-            test_path = test.get("path", "")
-            if test_path:
-                # Extract filename without extension
-                filename = os.path.basename(test_path)
-                name_without_ext = os.path.splitext(filename)[0]
-                file_ext = os.path.splitext(filename)[1].lower()
-
-                # Check if the filename (without extension) matches the rule ID
-                # Only check for .evtx and .json files (.json is optional conversion of .evtx)
-                if file_ext in [".evtx", ".json"] and name_without_ext != rule_id:
-                    expected_filename = f"{rule_id}{file_ext}"
-                    inconsistent_rules.append(
-                        {
-                            "rule_id": rule_id,
-                            "test_filename": filename,
-                            "rule_path": rule_path,
-                            "test_path": test_path,
-                            "issue": "rule_vs_testfile_mismatch",
-                            "expected": expected_filename,
-                            "actual": filename,
-                            "message": f"Rule ID '{rule_id}' does not match test file"
-                            f"name '{name_without_ext}' (expected: {rule_id}{file_ext})",
-                        }
-                    )
-
-    if inconsistent_rules:
-        print("\nERROR: Found rule ID inconsistencies:")
-        print("=" * 60)
-        print()
-
-        # Group by issue type for better readability
-        rule_vs_info_issues = [
-            r
-            for r in inconsistent_rules
-            if r.get("issue")
-            in ["rule_vs_info_metadata_mismatch", "missing_info_metadata_rule_id"]
-        ]
-        rule_vs_testfile_issues = [
-            r
-            for r in inconsistent_rules
-            if r.get("issue") == "rule_vs_testfile_mismatch"
-        ]
-
-        if rule_vs_info_issues:
-            print("RULE ID vs INFO.YML RULE_METADATA[0].ID MISMATCHES:")
-            print("-" * 50)
-            for inconsistent in rule_vs_info_issues:
-                print(f"Rule file ID: {inconsistent['rule_id']}")
-                print(
-                    f"Info.yml rule_metadata[0].id: {inconsistent['info_metadata_rule_id']}"
-                )
-                print(f"Expected: {inconsistent['expected']}")
-                print(f"Actual: {inconsistent['actual']}")
-                print(f"Rule file: {inconsistent['rule_path']}")
-                print(f"Message: {inconsistent['message']}")
-                print("-" * 50)
-                print()
-
-        if rule_vs_testfile_issues:
-            print("RULE ID vs TEST FILE NAME MISMATCHES:")
-            print("-" * 40)
-            for inconsistent in rule_vs_testfile_issues:
-                print(f"Rule ID: {inconsistent['rule_id']}")
-                print(f"Expected filename: {inconsistent['expected']}")
-                print(f"Actual filename: {inconsistent['actual']}")
-                print(f"Rule file: {inconsistent['rule_path']}")
-                print(f"Test file: {inconsistent['test_path']}")
-                print(f"{inconsistent['message']}")
-                print()
-
-        print("<=>" * 20)
-        print("Rule IDs must match between:")
-        print("1. Rule files ID and their info.yml rule_metadata[0].id")
-        print("2. Rule files ID and their test file names (EVTX/JSON files)")
-        print("   Note: JSON files are optional conversions of EVTX files")
-    return inconsistent_rules
-
-
 def main():
     """Main function to run regression tests for Sigma rules."""
     args = parse_arguments()
     init_checks(args)
 
-    # Find rules with tests
-    print("Scanning for rules with test data...")
-    rules_with_tests, missing_files, missing_regression_tests_path = (
-        find_rules_with_tests(args.rules_paths, workers=args.workers)
+    print("Scanning regression_data for info.yml files...")
+    rules_with_tests, missing_files, missing_rules, missing_regression_tests = (
+        find_rules_with_tests(args.rules_paths, args.regression_data)
     )
-
     print(f"Found {len(rules_with_tests)} rule(s) with regression tests configured.\n")
+    for info_path in sorted({r["info_path"] for r in rules_with_tests}):
+        print(f"  {info_path}")
+    print()
 
-    print("Checking for consistent rule <--> test mapping...")
-    inconsistent_rules = check_rule_id_consistency(rules_with_tests)
-    if inconsistent_rules:
-        sys.exit(1)
-    else:
-        print("All rules are mapped correctly.")
-
-    validate_missing_tests(args, rules_with_tests, missing_regression_tests_path)
+    check_missing_rules(missing_rules)
+    check_missing_regression_tests(missing_regression_tests, args.ignore_validation)
     check_missing_test_files(missing_files)
+
+    if args.validate_only:
+        print("✅ All rules passed validation!")
+        print(f"Found {len(rules_with_tests)} rules with regression tests configured.")
+        sys.exit(0)
+
     print()
     if not rules_with_tests:
         print("No rules with test data found")
         sys.exit(1)
 
-    # Test each rule
     print("Running tests...\n")
     total_tests, passed_tests, failures = run_tests(args, rules_with_tests)
 
     print_summary(total_tests, passed_tests, failures)
 
-    # Exit with error code if any tests failed
     if failures:
         sys.exit(1)
 
