@@ -1,0 +1,35 @@
+title: AI Coding Agent Settings File Created By Uncommon Process
+id: 721dc312-582d-4b2f-96e3-e0e35027da6e
+status: experimental
+description: |
+    Detects a process other than the agent itself creating the Claude Code settings file or the Codex configuration file of a user.
+    These files can disable approval prompts and the sandbox for every future session (for example "defaultMode" set to "bypassPermissions", or "approval_policy" set to "never" with "sandbox_mode" set to "danger-full-access").
+    A script or installer creating them is suspicious.
+references:
+    - https://code.claude.com/docs/en/settings
+    - https://developers.openai.com/codex/config-reference
+    - https://github.com/yug3009p/agent-attack-samples
+author: Yug Patel
+date: 2026-11-04
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '\.claude\settings.json'
+            - '\.claude\settings.local.json'
+            - '\.codex\config.toml'
+    filter_main_agent:
+        Image|endswith:
+            - '\claude.exe'
+            - '\codex.exe'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - A user creating the file in a text editor or IDE
+    - Configuration management or dotfile tools
+level: medium
+regression_tests_path: regression_data/rules/windows/file/file_event/file_event_win_ai_agent_config_created_by_uncommon_process/info.yml
