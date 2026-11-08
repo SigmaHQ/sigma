@@ -1,0 +1,50 @@
+title: DC Machine Account Network Logon from Non-DC Source IP
+id: b2e4a719-3c8f-4d1b-a507-f83c2d56e901
+status: experimental
+description: |
+    Detects a Domain Controller machine account authenticating from a source IP that is not
+    a known Domain Controller. DC machine accounts should only authenticate locally or from other DCs during
+    replication operations. Any logon event for a DC account from a workstation or non-DC host is anomalous and
+    indicates one of the following:
+
+      - Silver Ticket: attacker forged a Kerberos TGS for a DC machine account without
+        requesting a TGT
+      - Pass-the-Ticket: attacker is replaying a captured DC machine account TGS from
+        a non-DC host
+      - Overpass-the-Hash: attacker converted a stolen DC machine account hash into a
+        Kerberos ticket and is authenticating from a non-DC host
+      - Exploitation of certain vulnerabilities such as CVE-2026-54121 (Certighost):
+        attacker obtained a DC certificate via ADCS CDC-chase
+        abuse, authenticates via PKINIT as the DC from their own host, then performs DCSync
+references:
+    - https://github.com/aniqfakhrul/CVE-2026-54121
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-07-29
+tags:
+    - attack.credential-access
+    - attack.lateral-movement
+    - attack.t1550.003
+    - attack.t1558.002
+    - attack.t1649
+    - cve.2026-54121
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4624
+        TargetUserName|endswith: '$'
+        TargetUserName|expand: '%dc_machine_accounts%'
+    filter_main_dc_source:
+        IpAddress|expand: '%dc_ip_addresses%'
+    filter_main_loopback:
+        - IpAddress:
+              - '127.0.0.1'
+              - '::1'
+              - '::ffff:127.0.0.1'
+              - '-'
+        - IpAddress|startswith: 'fe80:'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unlikely if %dc_machine_accounts% and %dc_ip_addresses% are correctly populated.
+level: critical
