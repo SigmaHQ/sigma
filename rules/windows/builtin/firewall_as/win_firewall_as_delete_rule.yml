@@ -6,7 +6,7 @@ references:
     - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
 author: frack113
 date: 2022-02-19
-modified: 2024-08-29
+modified: 2026-10-19
 tags:
     - attack.defense-impairment
     - attack.t1686.003
@@ -23,14 +23,25 @@ detection:
             - 'C:\Program Files (x86)\'
             - 'C:\Program Files\'
             - 'C:\Windows\WinSxS\'
+    filter_main_local_system:
+        # Added to filter out modifications made by the Local System account as these are typically legitimate system actions and cause false positives.
+        ModifyingUser: 'S-1-5-18'
+    filter_main_msiexec:
+        ModifyingApplication:
+            - 'C:\Windows\SysWOW64\msiexec.exe'
+            - 'C:\Windows\System32\msiexec.exe'
     filter_main_svchost:
         ModifyingApplication: 'C:\Windows\System32\svchost.exe'
-    filter_optional_msmpeng:
+    filter_main_msmpeng:
         ModifyingApplication|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
         ModifyingApplication|endswith: '\MsMpEng.exe'
     filter_main_null:
         ModifyingApplication: null
     filter_main_empty:
         ModifyingApplication: ''
+    filter_optional_google_updater:
+        ModifyingApplication|startswith: 'C:\Windows\SystemTemp\'
+        ModifyingApplication|contains: 'GoogleUpdater'
+        ModifyingApplication|endswith: '\setup.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 level: medium
