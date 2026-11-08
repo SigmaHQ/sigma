@@ -1,0 +1,26 @@
+title: HackTool - HiveSwarming Execution
+id: a94aa3f9-97d3-46ac-ae02-94be9573acbe
+status: experimental
+description: |
+    Detects execution of HiveSwarming, a tool that converts Windows registry exports to registry hive files and vice versa without requiring special privileges.
+    This tool can be used to prepare a modified user hive that is later staged as NTUSER.MAN for mandatory profile persistence.
+references:
+    - https://deceptiq.com/blog/ntuser-man-registry-persistence
+    - https://github.com/stormshield/HiveSwarming
+author: Ammar Jokhadar (Thawd Security)
+date: 2026-07-21
+tags:
+    - attack.persistence
+    - attack.defense-impairment
+    - attack.t1112
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\HiveSwarming.exe'
+        - OriginalFileName: 'HiveSwarming.exe'
+    condition: selection_img
+falsepositives:
+    - Legitimate use of HiveSwarming by administrators, migration teams, or security professionals.
+level: high
