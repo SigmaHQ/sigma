@@ -1,11 +1,10 @@
-title: Weak Certificate Mapping Enabled On Domain Controller
+title: Suspicious Weak Certificate Mapping Enabled On Domain Controller
 id: f823f0f0-3eba-4a4f-a414-e4bc24f5dbb5
 status: experimental
 description: |
-    Detects registry changes that weaken certificate-based authentication on Domain Controllers (ESC10).
-        - Setting the KDC "StrongCertificateBindingEnforcement" value to 0 disables strong certificate mapping for Kerberos (PKINIT).
-        - Enabling the UPN mapping bit (0x4) in the Schannel "CertificateMappingMethods" value allows implicit UPN-based certificate mapping for Schannel (e.g. LDAPS).
+    Detects the Schannel "CertificateMappingMethods" value being set with the UPN mapping bit (0x4), which allows implicit UPN-based certificate mapping for Schannel (e.g. LDAPS on Domain Controllers) (ESC10).
     Attackers able to change the UPN of an account they control can then obtain a certificate that authenticates as another principal.
+    The KDC "StrongCertificateBindingEnforcement" value is not covered: it is no longer supported since the September 9, 2025 Windows update (KB5014754) and does not weaken Kerberos certificate mapping on a patched Domain Controller.
 references:
     - https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7
     - https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation
@@ -22,10 +21,7 @@ logsource:
     category: registry_set
     product: windows
 detection:
-    selection_kdc:
-        TargetObject|endswith: '\Services\Kdc\StrongCertificateBindingEnforcement'
-        Details: 'DWORD (0x00000000)'
-    selection_schannel:
+    selection:
         TargetObject|endswith: '\Control\SecurityProviders\Schannel\CertificateMappingMethods'
         Details: # Any value with the UPN mapping bit (0x4) set
             - 'DWORD (0x00000004)'
@@ -44,7 +40,8 @@ detection:
             - 'DWORD (0x0000001d)'
             - 'DWORD (0x0000001e)'
             - 'DWORD (0x0000001f)'
-    condition: 1 of selection_*
+    condition: selection
 falsepositives:
-    - Legacy compatibility configurations applied by administrators
+    - Administrators following the KB5014754 troubleshooting step that sets CertificateMappingMethods to 0x1F
 level: high
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_dc_weak_certificate_mapping/info.yml
