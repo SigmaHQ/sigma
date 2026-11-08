@@ -1,0 +1,29 @@
+title: Potential Ephemeral Container Injection Into Running Pod
+id: 1e42546c-cb6d-42f5-9e90-829bb393d00f
+status: experimental
+description: |
+    Detects successful updates to the ephemeralcontainers subresource of a running Pod.
+    This activity is commonly performed by "kubectl debug" to attach an ephemeral container to an existing workload.
+    Attackers may abuse ephemeral containers to introduce a shell or additional tooling into otherwise minimal or distroless workloads while blending into an existing Pod.
+references:
+    - https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/
+    - https://microsoft.github.io/Threat-Matrix-for-Kubernetes/techniques/Sidecar%20Injection/
+author: Sanket Yeram (@sankyyeram), A3NG3L
+date: 2026-10-18
+tags:
+    - attack.t1609
+    - attack.execution
+logsource:
+    category: application
+    product: kubernetes
+    service: audit
+detection:
+    selection:
+        verb: 'patch'
+        objectRef.resource: 'pods'
+        objectRef.subresource: 'ephemeralcontainers'
+        responseStatus.code: 200
+    condition: selection
+falsepositives:
+    - Legitimate administrator debugging and troubleshooting activity. Investigate the user identity, source IP, target workload, and whether the change was authorized.
+level: medium
