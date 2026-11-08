@@ -1,0 +1,37 @@
+title: Potentially Suspicious Child Process Of TextTransform
+id: 3193e9fc-9ca4-446a-be24-b3cdb1f7e028
+status: experimental
+description: |
+    Detects potentially suspicious child processes spawned by Microsoft Visual Studio Text Transformation utilities.
+    T4 text templates can contain C# code that is compiled and executed during transformation and could be abused to proxy execution through a trusted developer utility.
+references:
+    - https://learn.microsoft.com/en-us/visualstudio/modeling/generating-files-with-the-texttransform-utility
+    - https://learn.microsoft.com/en-us/visualstudio/modeling/debugging-a-t4-text-template
+author: Diablo-research
+date: 2026-10-02
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1127
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith:
+            - '\TextTransform.exe'
+            - '\TextTransformCore.exe'
+    selection_child:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\regsvr32.exe'
+            - '\rundll32.exe'
+            - '\wscript.exe'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate T4 templates or development and build automation that intentionally launch external command or script interpreters
+level: medium
