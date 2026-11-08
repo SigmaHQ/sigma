@@ -3,10 +3,11 @@ id: a55349d8-9588-4c5a-8e3b-1925fe2a4ffe
 status: test
 description: Detects the deletion of the Exchange PowerShell cmdlet History logs which may indicate an attempt to destroy forensic evidence
 references:
-    - https://m365internals.com/2022/10/07/hunting-in-on-premises-exchange-server-logs/
+    - https://web.archive.org/web/20221012062917/https://m365internals.com/2022/10/07/hunting-in-on-premises-exchange-server-logs/
+    - https://www.it-server-room.com/en/exchange-server-log-file-locations-and-cleanup-guide/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-10-26
-modified: 2022-12-30
+modified: 2026-10-13
 tags:
     - attack.stealth
     - attack.t1070
@@ -15,8 +16,9 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetFilename|startswith: '\Logging\CmdletInfra\LocalPowerShell\Cmdlet\'
-        TargetFilename|contains: '_Cmdlet_'
+        TargetFilename|contains|all:
+            - '\Logging\CmdletInfra\LocalPowerShell\Cmdlet\'
+            - '_Cmdlet_'
     condition: selection
 falsepositives:
     - Possible FP during log rotation
