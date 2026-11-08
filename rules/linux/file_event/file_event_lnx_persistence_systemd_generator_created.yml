@@ -1,0 +1,67 @@
+title: Systemd Generator Created
+id: 5d177477-2a4d-401e-a78b-1a24ba5c2238
+status: experimental
+description: |
+    Detects the creation of files in systemd generator directories.
+    Systemd executes generators very early during boot and on configuration reload to dynamically generate unit files, symlinks, or drop-ins.
+    An adversary can create a malicious generator to execute arbitrary code before regular services start and maintain persistence.
+    System generators run as root, while user generators run with the privileges of the user session.
+references:
+    - https://pberba.github.io/security/2022/02/07/linux-threat-hunting-for-persistence-systemd-generators/
+    - https://www.elastic.co/security-labs/primer-on-persistence-mechanisms
+    - https://www.freedesktop.org/software/systemd/man/latest/systemd.generator.html
+related:
+    - id: 1bac86ba-41aa-4f62-9d6b-405eac99b485
+      type: similar
+author: jejex0
+date: 2026-10-26
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1037
+    - attack.t1543.002
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection:
+        TargetFilename|startswith:
+            - '/etc/systemd/system-generators/'
+            - '/etc/systemd/user-generators/'
+            - '/lib/systemd/system-generators/'
+            - '/lib/systemd/user-generators/'
+            - '/run/systemd/system-generators/'
+            - '/run/systemd/user-generators/'
+            - '/usr/lib/systemd/system-generators/'
+            - '/usr/lib/systemd/user-generators/'
+            - '/usr/local/lib/systemd/system-generators/'
+            - '/usr/local/lib/systemd/user-generators/'
+    filter_main_package_manager:
+        Image|endswith:
+            - '/apk'
+            - '/apt'
+            - '/apt-get'
+            - '/dnf'
+            - '/dnf-automatic'
+            - '/dpkg'
+            - '/dpkg-divert'
+            - '/microdnf'
+            - '/pacman'
+            - '/packagekitd'
+            - '/rpm'
+            - '/snapd'
+            - '/yum'
+            - '/zypper'
+    filter_main_temp_file:
+        TargetFilename|endswith:
+            - '.dpkg-new'
+            - '.dpkg-remove'
+            - '.swp'
+            - '.swpx'
+            - '.swx'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Legitimate systemd package upgrades or custom generators deployed by administrators
+    - Package managers or configuration management tools creating generator files
+    - Temporary editor files created in generator directories
+level: medium
