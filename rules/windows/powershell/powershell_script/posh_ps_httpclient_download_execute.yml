@@ -1,0 +1,28 @@
+title: HttpClient Download With Expression Execution In PowerShell
+id: 9c4c529b-c0d3-4d86-a7ea-7cd87391e6d6
+status: experimental
+description: Detects PowerShell scripts that retrieve a string with the .NET HttpClient GetStringAsync method and invoke expression execution in the same script block, a pattern that can execute downloaded code in memory.
+references:
+    - https://plainbit.co.kr/data/bbsData/17676054191.pdf
+    - https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclient.getstringasync
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-expression
+author: duy-tu2005
+date: 2026-09-26
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_download:
+        ScriptBlockText|contains|all:
+            - 'Net.Http.HttpClient'
+            - 'GetStringAsync'
+    selection_execute:
+        ScriptBlockText|re: '(?i)\b(?:Invoke-Expression|IEX)\b'
+    condition: all of selection_*
+falsepositives:
+    - Administrative bootstrap or installation scripts that execute script text downloaded with HttpClient
+level: medium
