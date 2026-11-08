@@ -11,7 +11,7 @@ references:
     - https://lolbas-project.github.io/#/download
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-12-10
-modified: 2026-10-14
+modified: 2026-10-26
 tags:
     - attack.stealth
     - attack.t1218
@@ -77,6 +77,22 @@ detection:
     filter_optional_dell_techhub_copy:
         Image|endswith: '\esentutl.exe'
         TargetFilename|startswith: 'C:\ProgramData\Dell\DTP\DB\SRUDBData\'
+    filter_optional_expand_system_dpx_scratch:
+        # expand.exe run as SYSTEM by services (e.g. the Waves MaxxAudio driver service unpacking MaxxAudio_Data.cab) writes its own "<hex>$dpx$.tmp" scratch files into the Windows Temp folder
+        Image|endswith: '\expand.exe'
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+        TargetFilename|startswith: 'C:\Windows\Temp\'
+        TargetFilename|endswith: '$dpx$.tmp'
+    filter_optional_certutil_rootcas_sst:
+        # "certutil -generateSSTFromWU" run as SYSTEM (e.g. by EDR agents refreshing the trusted root list) writes RootCAs.sst into a SystemTemp subfolder
+        Image|endswith: '\certutil.exe'
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+        TargetFilename|startswith: 'C:\Windows\SystemTemp\'
+        TargetFilename|endswith: '\RootCAs.sst'
     condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
