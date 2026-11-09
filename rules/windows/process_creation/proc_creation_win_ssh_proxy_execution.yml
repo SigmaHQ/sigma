@@ -1,4 +1,4 @@
-title: Program Executed Using Proxy/Local Command Via SSH.EXE
+title: Program Executed Using Proxy/Local/KnownHosts Command Via SSH.EXE
 id: 7d6d30b8-5b91-4b90-a891-46cccaf29598
 status: test
 description: Detect usage of the "ssh.exe" binary as a proxy to launch other programs.
@@ -8,11 +8,16 @@ references:
     - https://gtfobins.github.io/gtfobins/ssh/
     - https://man.openbsd.org/ssh_config#ProxyCommand
     - https://man.openbsd.org/ssh_config#LocalCommand
-author: frack113, Nasreddine Bencherchali
+    - https://man.openbsd.org/ssh_config#KnownHostsCommand
+    - https://www.microsoft.com/en-us/security/blog/2026/09/29/star-blizzard-refines-phishing-and-malware-delivery-with-the-redflick-technique/
+author: frack113, Nasreddine Bencherchali, Yared Henriquez @DevCop95 (improvements)
 date: 2022-12-29
-modified: 2025-10-16
+modified: 2026-11-09
 tags:
+    - attack.execution
+    - attack.defense_evasion
     - attack.stealth
+    - attack.t1202
     - attack.t1218
 logsource:
     category: process_creation
@@ -39,6 +44,7 @@ detection:
         - CommandLine|contains|all:
               - 'PermitLocalCommand=yes'
               - ' LocalCommand'
+        - CommandLine|contains: 'KnownHostsCommand'
     condition: selection_parent or all of selection_cli_*
 falsepositives:
     - Legitimate usage for administration purposes
