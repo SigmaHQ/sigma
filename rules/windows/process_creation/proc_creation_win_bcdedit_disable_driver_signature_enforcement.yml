@@ -1,9 +1,10 @@
-title: Driver Signature Enforcement Weakened Via Bcdedit.EXE
+title: Potential Driver Signature Enforcement Weakening Via Bcdedit.EXE
 id: 7f3dbed6-2952-43d0-9d64-0b7c407f109b
 status: experimental
 description: |
     Detects usage of "bcdedit.exe" to enable test signing mode or to disable kernel code integrity checks ("testsigning", "nointegritychecks", "DISABLE_INTEGRITY_CHECKS").
-    Both settings allow unsigned or self-signed kernel drivers to be loaded after the next reboot and have been abused by malware such as BlackEnergy to load rootkit drivers.
+    Both settings allow unsigned or self-signed kernel drivers to be loaded after the next reboot.
+    Test signing mode has been enabled by malware such as BlackEnergy to load a driver component.
 references:
     - https://learn.microsoft.com/en-us/windows-hardware/drivers/install/the-testsigning-boot-configuration-option
     - https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/bcdedit--set
@@ -35,7 +36,7 @@ detection:
     condition: all of selection_*
 falsepositives:
     - Driver developers and hardware/driver test labs (e.g. HLK) enabling test signing on development machines
-level: high
+level: medium
 simulation:
     - type: atomic-red-team
       name: Code Signing Policy Modification
