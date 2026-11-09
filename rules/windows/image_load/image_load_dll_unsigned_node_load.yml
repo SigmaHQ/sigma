@@ -12,6 +12,7 @@ references:
     - https://www.electronjs.org/docs/latest/tutorial/native-code-and-electron
 author: Jonathan Beierle (@hullabrian)
 date: 2025-11-22
+modified: 2026-08-27
 tags:
     - attack.execution
     - attack.privilege-escalation
@@ -35,6 +36,16 @@ detection:
         ImageLoaded|endswith:
             - '\electron.napi.node'
             - '\node.napi.glibc.node'
+    filter_optional_vscode_core:
+        Image|contains: '\Microsoft VS Code\Code.exe'
+        ImageLoaded|contains: '\Microsoft VS Code\resources\app\node_modules'
+    filter_optional_evernote:
+        Image|contains:
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+            - '\AppData\Local\Programs\'
+        Image|endswith: '\Evernote\Evernote.exe'
+        ImageLoaded|contains: '\Evernote\resources\app'
     condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - VsCode extensions or similar legitimate tools might use unsigned .node files. These should be investigated on a case-by-case basis, and whitelisted if determined to be benign.

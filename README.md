@@ -132,6 +132,7 @@ Join the Sigma community on [Discord](https://discord.gg/CZhaX3ygdt) to discuss 
 * [SOC Prime](https://my.socprime.com/sigma/) - Threat detection marketplace hosting community Sigma rules with translation to 25+ SIEM, EDR, and XDR platforms
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) - Splunk app providing saved searches derived from converted Sigma rules
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35) - Open-source collaborative forensic timeline analysis tool that uses Sigma rules to tag and detect events
+* [Varpulis](https://varpulis-cep.com) - Open-source stream engine that runs Sigma rules, correlation rules included, on Kafka or NATS event streams, judged in event time
 * [VirusTotal](https://docs.virustotal.com/docs/crowdsourced-sigma-rules) - Whenever a sample matches any open-source Sigma rules, the matching rules are displayed as part of the file report
 * [ypsilon](https://github.com/P4T12ICK/ypsilon) - Automated Use Case Testing
 
