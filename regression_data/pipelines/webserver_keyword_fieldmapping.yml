@@ -1,0 +1,17 @@
+# Keyword-only detection items (no field name) cannot be compiled by the
+# golang_expr backend: it emits an unbound value expression such as ""@type"",
+# which is not valid expr syntax and makes json_checker fail at compile time.
+# This test-only pipeline binds those keywords to one normalised field holding
+# the whole logged request (request line plus body). pySigma wraps the mapped
+# values in wildcards, so the original substring-match semantics are preserved
+# without changing the rules themselves.
+name: webserver_keyword_fieldmapping
+priority: 100
+transformations:
+    - id: field_mapping_webserver_keywords
+      type: field_name_mapping
+      mapping:
+          null: request
+      rule_conditions:
+          - type: logsource
+            category: webserver
