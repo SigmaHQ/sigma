@@ -1,0 +1,28 @@
+title: PowerShell Script Block Logging Disabled
+id: c3755957-1bb1-4a77-878e-e91331331f92
+status: test
+description: Detects the PowerShell policy registry value for Script Block Logging being set to zero. Adversaries may disable this policy to reduce visibility into PowerShell script execution.
+references:
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows
+    - https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowspowershell
+author: Shah Zaib Sajid
+date: 2026-11-10
+tags:
+    - attack.defense-impairment
+    - attack.t1562.002
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_target:
+        TargetObject|endswith:
+            - '\Microsoft\Windows\PowerShell\ScriptBlockLogging\EnableScriptBlockLogging'
+            - '\Microsoft\Windows\PowerShell\ScriptBlockLogging\EnableScriptBlockInvocationLogging'
+            - '\Microsoft\PowerShellCore\ScriptBlockLogging\EnableScriptBlockLogging'
+            - '\Microsoft\PowerShellCore\ScriptBlockLogging\EnableScriptBlockInvocationLogging'
+    selection_disabled:
+        Details: 'DWORD (0x00000000)'
+    condition: all of selection_*
+falsepositives:
+    - Administrators intentionally disabling PowerShell logging through Group Policy or configuration management
+level: medium
