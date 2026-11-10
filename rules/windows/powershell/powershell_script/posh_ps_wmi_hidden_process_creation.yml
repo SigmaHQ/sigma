@@ -1,0 +1,36 @@
+title: Hidden Process Creation Via WMI From PowerShell
+id: 4dd4e0fa-3fb9-43d1-9bfa-c8a80928d2b7
+related:
+    - id: d21374ff-f574-44a7-9998-4a8c8bf33d7d
+      type: similar
+status: experimental
+description: Detects PowerShell scripts that configure Win32_ProcessStartup with a hidden window and invoke Win32_Process.Create, a pattern used to conceal process execution in ClickFix campaigns.
+references:
+    - https://github.com/PaloAltoNetworks/Unit42-timely-threat-intel/blob/fa37d28df8c8fd6db1a08dff9aadb8466821cb4b/2026-08-05-New-Clickfix-Variant.txt
+    - https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-processstartup
+author: duy-tu2005
+date: 2026-09-26
+tags:
+    - attack.execution
+    - attack.t1047
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_startup:
+        ScriptBlockText|contains: 'Win32_ProcessStartup'
+    selection_hidden:
+        ScriptBlockText|re: '(?i)\bShowWindow\s*=\s*(?:\[(?:System\.)?UInt16\]\s*)?0\b'
+    selection_process:
+        ScriptBlockText|re: '(?i)\bWin32_Process\b'
+    selection_create_direct:
+        ScriptBlockText|re: '(?i)\.Create\s*\('
+    selection_create_cim:
+        ScriptBlockText|contains: 'Invoke-CimMethod'
+        ScriptBlockText|re: '(?i)-MethodName\s+["'']?Create\b'
+    condition: selection_startup and selection_hidden and selection_process and 1 of selection_create_*
+falsepositives:
+    - Administrative automation that intentionally launches hidden processes through WMI
+level: medium
