@@ -1,0 +1,25 @@
+title: Azure Resource Diagnostic Setting Deleted
+id: 91fd6c67-3f12-4b9f-b657-27de3db845de
+status: experimental
+description: |
+    Detects deletion of an Azure resource diagnostic setting. Removing a diagnostic
+    setting can stop resource logs from being exported to their configured destination.
+references:
+    - https://learn.microsoft.com/en-us/rest/api/monitor/diagnostic-settings/delete
+    - https://learn.microsoft.com/en-us/azure/azure-monitor/data-collection/diagnostic-settings
+author: Shah Zaib Sajid (@shahzaibjanjua25)
+date: 2026-11-11
+tags:
+    - attack.defense-impairment
+    - attack.t1562.008
+logsource:
+    product: azure
+    service: activitylogs
+detection:
+    selection:
+        operationName: MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE
+    condition: selection
+falsepositives:
+    - Planned resource decommissioning, migration, or diagnostic-setting maintenance
+level: medium
+regression_tests_path: ../../../../regression_data/rules/cloud/azure/activity_logs/azure_resource_diagnostic_setting_deleted/info.yml
