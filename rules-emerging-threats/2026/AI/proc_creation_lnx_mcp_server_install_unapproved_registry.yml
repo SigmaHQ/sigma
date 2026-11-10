@@ -1,0 +1,56 @@
+title: MCP Server Installed From Non-Approved Registry - Linux
+id: f8adc8ec-515a-4d6b-9998-b419d6906ee8
+status: experimental
+description: |
+    Detects installation of Model Context Protocol (MCP) servers via 'claude mcp add', 'mcp install', or npm/pip install of mcp-server-* packages from sources other than the official MCP registry at registry.modelcontextprotocol.io.
+    Untrusted MCP servers run with the same privileges as the calling agent and have direct tool-execution access, making this a high-value supply-chain backdoor vector.
+    Note: local development paths, git URLs, and 'npm link' installs intentionally fire here. Tune via the filter or via private-registry allow-listing.
+references:
+    - https://modelcontextprotocol.io/docs/concepts/architecture
+    - https://registry.modelcontextprotocol.io/
+    - https://owasp.org/www-project-mcp-top-10/
+    - https://docs.anthropic.com/en/docs/claude-code/mcp
+author: Punith Gowda (Network Intelligence)
+date: 2026-05-10
+tags:
+    - attack.initial-access
+    - attack.execution
+    - attack.t1195.002
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_claude_mcp:
+        CommandLine|contains:
+            - 'claude mcp add'
+            - 'mcp install'
+    selection_pkg_install:
+        Image|endswith:
+            - '/npm'
+            - '/npx'
+            - '/yarn'
+            - '/pnpm'
+            - '/pip'
+            - '/pip3'
+            - '/uv'
+            - '/uvx'
+        CommandLine|contains:
+            - 'mcp-server-'
+            - '@modelcontextprotocol/server-'
+            - 'mcp-server@'
+    filter_main_official_registry:
+        CommandLine|contains: 'registry.modelcontextprotocol.io'
+    filter_main_official_packages:
+        CommandLine|endswith:
+            - '@modelcontextprotocol/server-filesystem'
+            - '@modelcontextprotocol/server-git'
+            - '@modelcontextprotocol/server-github'
+            - '@modelcontextprotocol/server-postgres'
+            - '@modelcontextprotocol/server-sqlite'
+    condition: (selection_claude_mcp or selection_pkg_install) and not 1 of filter_main_*
+falsepositives:
+    - Internal MCP servers published to a private registry that the SOC has not yet allow-listed
+    - Developers iterating on a local MCP server via 'npm link' or editable installs
+    - Tuning required for orgs using the official MCP packages with version pins (e.g. '@modelcontextprotocol/server-git@0.6.2')
+level: high
