@@ -117,6 +117,7 @@ Join the Sigma community on [Discord](https://discord.gg/CZhaX3ygdt) to discuss 
 * [Confluent Sigma](https://github.com/confluentinc/confluent-sigma) - Kafka Streams supported Sigma rules
 * [Detection Studio](https://detection.studio/?ref=sigmahq_readme) - Convert Sigma rules to any supported SIEM
 * [Exeon.UEBA](https://exeon.com/ueba/) - User and Entity Behavior Analytics (UEBA) solution from Exeon which provides a built-in Sigma detection engine
+* [HAWK.io MDR](https://www.hawk.io/) - Managed detection and response platform that runs Sigma rules as native detections, converted with the open-source [pySigma-backend-hawk](https://github.com/redsand/pySigma-backend-hawk)
 * [IBM QRadar](https://community.ibm.com/community/user/security/blogs/gladys-koskas1/2023/08/02/qradar-natively-supports-sigma-for-rules-creation) - Natively ingests Sigma rules for real-time detection via the YARA and Sigma Rules Manager app
 * [Joe Sandbox](https://www.joesecurity.org/blog/8225577975210857708) - Automated malware analysis platform that applies Sigma rules during sandbox execution to detect threats in behavioral logs
 * [LimaCharlie](https://limacharlie.io/) - SecOps cloud platform with native Sigma rule support and automatic conversion to its Detection & Response rule format
@@ -132,6 +133,7 @@ Join the Sigma community on [Discord](https://discord.gg/CZhaX3ygdt) to discuss 
 * [SOC Prime](https://my.socprime.com/sigma/) - Threat detection marketplace hosting community Sigma rules with translation to 25+ SIEM, EDR, and XDR platforms
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) - Splunk app providing saved searches derived from converted Sigma rules
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35) - Open-source collaborative forensic timeline analysis tool that uses Sigma rules to tag and detect events
+* [Varpulis](https://varpulis-cep.com) - Open-source stream engine that runs Sigma rules, correlation rules included, on Kafka or NATS event streams, judged in event time
 * [VirusTotal](https://docs.virustotal.com/docs/crowdsourced-sigma-rules) - Whenever a sample matches any open-source Sigma rules, the matching rules are displayed as part of the file report
 * [ypsilon](https://github.com/P4T12ICK/ypsilon) - Automated Use Case Testing
 
