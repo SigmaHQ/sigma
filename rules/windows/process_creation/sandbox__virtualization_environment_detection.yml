@@ -1,0 +1,29 @@
+title: Sandbox / Virtualization Environment Detection
+id: a1eceaaa-7b4b-52bc-565d-2b34ce72abc6
+status: experimental
+description: Detects attempts to identify virtualization or sandbox environments via VM artifact queries or macOS hardware model probing.
+references:
+    - https://entroprism.net
+author: Entroprism (Beijing Yijun Foreign Trade Co., Ltd.)
+date: 2026/11/03
+tags:
+    - attack.t1497
+    - detection.threat_hunting
+logsource:
+    product: windows
+    category: process_creation
+detection:
+  selection_artifacts:
+    CommandLine|contains:
+      - 'VMware'
+      - 'VBoxService'
+      - 'vbox'
+      - 'qemu-ga'
+  selection_mac:
+    CommandLine|contains:
+      - 'sysctl hw.model'
+      - 'ioreg -l'
+  condition: selection_artifacts or selection_mac
+level: medium
+falsepositives:
+  - legitimate virtualization management tools
