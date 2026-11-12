@@ -365,7 +365,7 @@ def run_json_checker(
         print(f"  Error running json_checker: {e.stderr or e}")
         return False, ""
 
-    match_lines = [ln for ln in result.stdout.splitlines() if ln.endswith("MATCH")]
+    match_lines = [ln for ln in result.stdout.splitlines() if ln.endswith("MATCH") and not ln.endswith("NO-MATCH")]
     return _evaluate_matches(rule_id, test_type, test_data, match_lines)
 
 
