@@ -17,6 +17,7 @@ references:
     - https://github.com/RootUp/git-fsmonitor
     - https://gtfobins.github.io/gtfobins/git/
     - https://git-scm.com/docs/git-remote-ext
+    - https://git-scm.com/docs/git-config
 author: Ashish Pulivarthy (ashish-cybersec)
 date: 2026-07-02
 tags:
@@ -32,30 +33,32 @@ detection:
         - OriginalFileName: 'git.exe'
     selection_config_keys:
         CommandLine|contains:
-            - 'core.sshCommand='
+            - 'core.askPass='
+            - 'core.editor='
             - 'core.fsmonitor='
             - 'core.pager='
-            - 'core.editor='
-            - 'sequence.editor='
+            - 'core.sshCommand='
+            - 'credential.helper='
             - 'diff.external='
+            - 'sequence.editor='
     selection_interpreter:
         CommandLine|contains:
-            - 'cmd '
-            - 'cmd.exe'
-            - 'powershell'
-            - 'pwsh'
-            - 'mshta'
-            - 'rundll32'
-            - 'regsvr32'
-            - 'wscript'
-            - 'cscript'
-            - 'bitsadmin'
-            - 'certutil'
             - '.bat'
             - '.cmd'
+            - '.hta'
             - '.ps1'
             - '.vbs'
-            - '.hta'
+            - 'bitsadmin'
+            - 'certutil'
+            - 'cmd '
+            - 'cmd.exe'
+            - 'cscript'
+            - 'mshta'
+            - 'powershell'
+            - 'pwsh'
+            - 'regsvr32'
+            - 'rundll32'
+            - 'wscript'
     selection_ext_transport:
         CommandLine|contains: 'ext::'
     condition: selection_img and ((selection_config_keys and selection_interpreter) or selection_ext_transport)
