@@ -1,0 +1,23 @@
+title: Fax Service ImagePath Modified to PowerShell
+id: 9bcf060f-794a-40ff-b650-a846648f2507
+status: experimental
+description: Detects modification of the Fax service ImagePath to point to PowerShell.
+references:
+    - https://www.atomicredteam.io/docs/atomics/T1543.003
+author: Saksham Bhattarai
+date: 2026-10-27
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1543.003
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection:
+        TargetObject|endswith: '\Services\Fax\ImagePath'
+        Details|contains: 'powershell.exe'
+    condition: selection
+falsepositives:
+    - Authorized service configuration testing
+level: high
