@@ -15,7 +15,7 @@ references:
     - https://tria.ge/211119-gs7rtshcfr/behavioral2 [Lokibot sample from Nov 2021]
 author: Christian Burkard (Nextron Systems)
 date: 2021-08-30
-modified: 2026-08-27
+modified: 2026-11-12
 tags:
     - attack.persistence
     - attack.privilege-escalation
@@ -44,7 +44,20 @@ detection:
             - '{A56A841F-E974-45C1-8001-7E3F8A085917}'
             - '{4ED3A719-CEA8-4BD9-910D-E252F997AFC2}'
             - '{BFEC0C93-0B7D-4F2C-B09C-AFFFC4BDAE78}'
-    condition: 1 of selection_* and not 1 of filter_main_*
+    filter_main_exefile_default:
+        EventType: SetValue
+        TargetObject|endswith: '\exefile\shell\open\command\(Default)'
+        Details:
+            - '"%%1" %%\*'
+            - '"%1" %\*'
+    filter_optional_container_worker:
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
+        Image|endswith: '\containerworker.exe'
+        TargetObject|contains: '\Windows\Containers\Layers\'
+    condition: 1 of selection_* and not 1 of filter_main_* and not 1 of filter_optional_container_*
 falsepositives:
     - Unknown
 level: high
