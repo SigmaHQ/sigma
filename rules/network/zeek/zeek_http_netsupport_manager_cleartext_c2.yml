@@ -1,0 +1,32 @@
+title: NetSupport Manager RAT Cleartext HTTP C2
+id: 05ecc93a-4441-46c8-8b29-a19a22538c0b
+status: experimental
+description: |
+    Detects NetSupport Manager client check-in traffic carried over cleartext HTTP on TCP port 443,
+    identified by the "NetSupport Manager/" User-Agent appearing in an HTTP transaction whose responder
+    port is 443. Legitimate NetSupport gateways negotiate TLS on 443; an HTTP analyzer firing in plaintext
+    on the TLS port while carrying this User-Agent is characteristic of the RAT abusing 443 to blend with
+    HTTPS egress.
+references:
+    - https://redcanary.com/blog/misbehaving-rats/
+    - https://blog.talosintelligence.com/detecting-evolving-threats-netsupport-rat/
+    - https://blogs.opentext.com/netsupport-remote-access-trojan-rat-delivered-through-fake-browser-updates-by-socgholish-threat-actors/
+author: cyberlandji
+date: 2026-06-30
+tags:
+    - attack.command-and-control
+    - attack.t1219
+    - attack.t1071.001
+logsource:
+    product: zeek
+    service: http
+detection:
+    selection_ua:
+        user_agent|startswith: 'NetSupport Manager/'
+    selection_port:
+        id.resp_p: 443
+    condition: selection_ua and selection_port
+falsepositives:
+    - Sanctioned NetSupport Manager remote-support sessions misconfigured to use cleartext HTTP on 443
+      instead of TLS. Uncommon; confirm against your authorised remote-support inventory before escalating.
+level: high
