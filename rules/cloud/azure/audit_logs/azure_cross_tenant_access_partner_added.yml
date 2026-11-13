@@ -1,0 +1,41 @@
+title: Partner Added To Azure Cross-Tenant Access Settings
+id: e8998f5c-3646-4c6f-aed9-fbfe1867f467
+status: experimental
+description: |
+    Detects when an external tenant is added as a partner in Entra ID cross-tenant
+    access settings. This establishes a trust relationship that can allow inbound
+    B2B collaboration, B2B direct connect, or inbound/outbound sign-in from the
+    added tenant, depending on the settings configured on top of it. An attacker
+    with Global Administrator or Security Administrator rights who adds a
+    tenant they control gains a durable path for external users or applications
+    from that tenant to interact with this one, a technique used for persistence
+    and data exfiltration via cross-tenant collaboration.
+    Confirmed against a real event generated on a live tenant on 2026-10-26, and
+    matches Microsoft's own analytic rule for the same detection
+    (Cross-tenantAccessSettingsOrganizationAdded.yaml), which uses the same
+    OperationName and the same modifiedProperties shape.
+references:
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities#core-directory
+    - https://learn.microsoft.com/en-us/entra/external-id/cross-tenant-access-overview
+    - https://github.com/Azure/Azure-Sentinel/blob/master/Solutions/Microsoft%20Entra%20ID/Analytic%20Rules/Cross-tenantAccessSettingsOrganizationAdded.yaml
+author: descambiado
+date: 2026-10-26
+tags:
+    - attack.initial-access
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1078.004
+logsource:
+    product: azure
+    service: auditlogs
+    definition: 'Requirements: The TargetResources array needs to be mapped accurately in order for this rule to work'
+detection:
+    selection:
+        OperationName|contains: 'Add a partner to cross-tenant access setting'
+        TargetResources.ModifiedProperties.DisplayName: 'tenantId'
+    condition: selection
+falsepositives:
+    - Legitimate onboarding of a partner organization for approved B2B collaboration
+    - Multi-tenant organization setup adding sibling tenants
+level: medium
