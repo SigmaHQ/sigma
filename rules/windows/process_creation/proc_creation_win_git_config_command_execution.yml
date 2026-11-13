@@ -1,0 +1,67 @@
+title: Potential Arbitrary Command Execution Via Git Config Override
+id: b551e93d-e3f1-4076-92eb-dd2dbce9e34d
+status: experimental
+description: |
+    Detects execution of "git.exe" with an inline configuration override ("-c").
+    The override points a code-execution directive at a command interpreter.
+    Covered directives include "core.sshCommand", "core.fsmonitor" and "core.pager".
+    Git runs the value of these directives as an external program.
+    A threat actor can therefore use the trusted "git.exe" binary as a proxy.
+    This achieves arbitrary command execution while evading detection.
+    The rule also covers the "ext::" transport.
+    A related abuse stores the payload in a repository's ".git/config" file.
+    It is triggered when an editor or IDE runs "git status" and stays off the command line.
+references:
+    - https://github.com/justinsteven/advisories/blob/c6754fdb255aed503a3cd40023c54419f820c3b3/2022_git_buried_bare_repos_and_fsmonitor_various_abuses.md
+    - https://www.cobalt.io/blog/red-team-technique-exploiting-git-fsmonitor-for-initial-access
+    - https://github.com/RootUp/git-fsmonitor
+    - https://gtfobins.github.io/gtfobins/git/
+    - https://git-scm.com/docs/git-remote-ext
+    - https://git-scm.com/docs/git-config
+author: Ashish Pulivarthy (ashish-cybersec)
+date: 2026-07-02
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1202
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\git.exe'
+        - OriginalFileName: 'git.exe'
+    selection_config_keys:
+        CommandLine|contains:
+            - 'core.askPass='
+            - 'core.editor='
+            - 'core.fsmonitor='
+            - 'core.pager='
+            - 'core.sshCommand='
+            - 'credential.helper='
+            - 'diff.external='
+            - 'sequence.editor='
+    selection_interpreter:
+        CommandLine|contains:
+            - '.bat'
+            - '.cmd'
+            - '.hta'
+            - '.ps1'
+            - '.vbs'
+            - 'bitsadmin'
+            - 'certutil'
+            - 'cmd '
+            - 'cmd.exe'
+            - 'cscript'
+            - 'mshta'
+            - 'powershell'
+            - 'pwsh'
+            - 'regsvr32'
+            - 'rundll32'
+            - 'wscript'
+    selection_ext_transport:
+        CommandLine|contains: 'ext::'
+    condition: selection_img and ((selection_config_keys and selection_interpreter) or selection_ext_transport)
+falsepositives:
+    - Rare legitimate use of a git configuration directive that points to a scripting interpreter (e.g. a custom pager or editor wrapper).
+level: medium
