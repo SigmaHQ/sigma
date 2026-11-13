@@ -1,10 +1,12 @@
 # Sigma Regression Testing
 
 Regression tests verify that Sigma rules actually match the events they are
-supposed to detect. Each rule (rules with status `test` or `stable` must) points to an
-`info.yml` describing one or more test cases, each backed by a real event
-sample (EVTX or JSON). CI runs every sample against its rule and fails if the
-expected number of matches is not produced.
+supposed to detect. Each `info.yml` under `regression_data/` describes one or
+more test cases (each backed by a real EVTX or JSON event sample) and lists the
+rule `id`s it applies to. The runner walks `regression_data/` for `info.yml`
+files, looks up each rule by its `id`, and runs every sample against the rule,
+failing if the expected number of matches is not produced. Rules with status
+`test` or `stable` must have regression tests defined.
 
 The runner lives at [`tests/regression_tests_runner.py`](../tests/regression_tests_runner.py)
 and runs on every push/PR via [`.github/workflows/regression-tests.yml`](../.github/workflows/regression-tests.yml).
@@ -15,16 +17,20 @@ and runs on every push/PR via [`.github/workflows/regression-tests.yml`](../.git
 regression_data/
 ├── pipelines/                 # Sigma conversion pipelines used by JSON tests
 └── rules/<product>/<category>/<rule_name>/
-    ├── info.yml               # test definitions for the rule
-    ├── <rule_id>.evtx         # EVTX sample (name must equal rule id)
-    └── <rule_id>.json         # optional JSON/NDJSON sample (name must equal rule id)
+    ├── info.yml               # test definitions, referencing rule(s) by id
+    ├── <sample>.evtx          # EVTX sample
+    └── <sample>.json          # optional JSON/NDJSON sample
 ```
 
-The rule file references its tests with:
+Mirroring the rule tree as `rules/<product>/<category>/<rule_name>/` is best
+practice for discoverability, but it is **not enforced**. The runner finds
+tests by walking for `info.yml` files and resolving rules by `id`, so an
+`info.yml` may live anywhere and a single test case can exercise multiple rules
+(list several entries under `rules`).
 
-```yaml
-regression_tests_path: ../../regression_data/rules/windows/process_creation/<rule_name>/info.yml
-```
+Rules no longer declare a `regression_tests_path`. Instead each `info.yml`
+references the rule(s) it tests by `id` (see below), and the runner resolves
+them against the rule directories passed via `--rules-paths`.
 
 ## Supported Types
 
@@ -39,10 +45,10 @@ directory.
   type: evtx
   provider: Microsoft-Windows-Sysmon # Not used atm
   match_count: 1
-  path: regression_data/rules/windows/process_creation/<rule_name>/<rule_id>.evtx
+  path: regression_data/rules/windows/process_creation/<rule_name>/<sample>.evtx
 ```
 
-The `.evtx` file name must equal the rule `id`.
+The sample is defined in the `path` field; the file name is arbitrary.
 
 ### Json / NDJson / JsonL
 
@@ -59,10 +65,11 @@ listed `pipelines` and `filters`), then run against the event sample by
   match_count: 1
   pipelines:
       - regression_data/pipelines/process_creation_fieldmapping.yml
-  path: regression_data/rules/windows/process_creation/<rule_name>/<rule_id>.json
+  path: regression_data/rules/windows/process_creation/<rule_name>/<sample>.json
 ```
 
 `pipelines` and `filters` are optional and with no pipeline, the rule is converted with `--without-pipeline`.
+A test case's `pipelines` take precedence over a root-level `pipelines` (see below).
 
 ## info.yml Format
 
@@ -71,24 +78,34 @@ id: 242d26e0-1ce5-4a34-960d-144f34f60e37   # id of this test-info file
 description: N/A
 date: 2025-12-25
 author: Author Name
-rule_metadata:
-    - id: 7dbbcac2-57a0-45ac-b306-ff30a8bd2981   # must match the rule file id
-      title: Windows AMSI Related Registry Tampering Via CommandLine
-regression_tests_info:
+pipelines:                                   # optional, fallback for test_cases
+    - regression_data/pipelines/process_creation_fieldmapping.yml
+rules:
+    - id: 7dbbcac2-57a0-45ac-b306-ff30a8bd2981   # resolved against --rules-paths
+test_cases:
     - name: Positive Detection Test
       type: evtx
       provider: Microsoft-Windows-Sysmon # Not used atm
       match_count: 1
-      path: regression_data/rules/.../<rule_id>.evtx
+      path: regression_data/rules/.../<sample>.evtx
     - name: Positive Detection Test
       type: json
       match_count: 1
-      pipelines:
+      pipelines:                           # overrides the root-level pipelines
           - regression_data/pipelines/process_creation_fieldmapping.yml
-      path: regression_data/rules/.../<rule_id>.json
+      path: regression_data/rules/.../<sample>.json
 ```
 
-Fields per entry in `regression_tests_info`:
+A root-level `pipelines` applies to every test case that does not define its
+own `pipelines`; a test case's `pipelines` always take precedence.
+
+`pipelines` and `filters` are only used for JSON-based matching
+(`json`/`ndjson`/`jsonl`), since they feed the `sigma convert` step. EVTX tests
+run the rule directly via `evtx-sigma-checker` and ignore both fields.
+
+Each entry in `rules` needs an `id` (looked up against `--rules-paths`).
+
+Fields per entry in `test_cases`:
 
 | Field         | Required | Description                                                        |
 |---------------|----------|--------------------------------------------------------------------|
@@ -104,9 +121,10 @@ If `match_count` is omitted, the test passes when there is at least one match.
 
 ## Validation rules
 
-- Rules with status `test` or `stable` must define `regression_tests_path`
-  (enforced unless `--ignore-validation`).
-- Referenced `info.yml` and sample files must exist.
-- Rule `id` == `info.yml`, `rule_metadata[0].id` == EVTX/JSON sample file name.
+- Rules with status `test` or `stable` must have regression tests defined,
+  i.e. be referenced by some `info.yml` (enforced unless `--ignore-validation`).
+- Every `id` listed under `rules` in an `info.yml` must resolve to an existing
+  rule file.
+- Referenced sample files (the `path` of each test case) must exist.
 
-The runner exits non-zero on any failed test, missing file, or inconsistency.
+The runner exits non-zero on any failed test, missing file, or missing rule.
