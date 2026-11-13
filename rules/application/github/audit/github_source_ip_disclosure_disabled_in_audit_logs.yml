@@ -1,0 +1,29 @@
+title: GitHub - Source IP Disclosure Disabled in Audit Logs
+id: 35e7516f-a38f-45c6-b680-42f0acbcdb00
+status: experimental
+description: Detects when source IP disclosure is disabled for a GitHub business or organization. Disabling source IP disclosure may reduce the visibility of source IP addresses in audit logs and could be used by an attacker to impair audit visibility or hinder investigation and detection.
+references:
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/audit-log-events-for-your-enterprise
+    - https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/audit-log-events-for-your-organization
+    - https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/displaying-ip-addresses-in-the-audit-log-for-your-organization
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/displaying-ip-addresses-in-the-audit-log-for-your-enterprise
+author: Stamatis Chatzimangou (@_st0pp3r_)
+date: 2026-08-17
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+    - attack.t1685.002
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable it by following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection:
+        action:
+            - 'business.disable_source_ip_disclosure'
+            - 'org.disable_source_ip_disclosure'
+    condition: selection
+falsepositives:
+    - Authorized administrators intentionally disabling source IP disclosure as part of a planned configuration change.
+    - Organizational or compliance-driven changes to GitHub audit log privacy settings.
+level: medium
