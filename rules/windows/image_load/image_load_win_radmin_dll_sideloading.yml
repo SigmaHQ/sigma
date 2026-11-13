@@ -1,0 +1,26 @@
+
+title: Potential Radmin DLL Sideloading From User AppData
+id: 7b9139bc-caba-464b-a932-dc7e1dca6eb9
+status: experimental
+description: Detects the Radmin executable FamItrfc.exe loading BlkScrDl.dll from a user's local AppData Radmin directory, as observed in a reported supply-chain compromise.
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering
+    - https://www.manageengine.com/threat-analysis-lab/aomei-backupper-supply-chain-compromise.html
+    - https://labs.cloudsecurityalliance.org/research/csa-research-note-aomei-backupper-update-server-tampering-20/
+author: brandolphj
+date: 2026-10-21
+tags:
+    - attack.t1574.001
+logsource:
+    category: image_load
+    product: windows
+
+detection:
+    selection:
+        Image|endswith: '\AppData\Local\Radmin\FamItrfc.exe'
+        ImageLoaded|endswith: '\AppData\Local\Radmin\BlkScrDl.dll'
+    condition: selection
+
+falsepositives:
+    - Unknown
+level: high
