@@ -1,0 +1,45 @@
+title: Authentication Method Registered From Outside Corporate Network
+id: 4a1e6f92-3c8d-4b7a-9e5f-2d61c8a94b30
+related:
+    - id: 4d78a000-ab52-4564-88a5-7ab5242b20c7
+      type: derived
+status: experimental
+description: |
+    Detects a user registering a new authentication method (Authenticator app,
+    phone number, FIDO2 key) from an IP address outside known corporate ranges.
+    Commonly observed after AiTM (Adversary-in-the-Middle) phishing kits such as
+    Tycoon2FA hijack a session token: the attacker registers their own MFA method
+    to keep access even after the victim resets their password.
+references:
+    - https://blog.sekoia.io/tycoon2fa-an-in-depth-analysis-of-the-innovative-phishing-kit/
+    - https://learn.microsoft.com/en-us/entra/identity/authentication/howto-authentication-methods-activity
+author: Enrique Rodríguez Romero
+date: 2026-09-07
+modified: 2026-09-30
+tags:
+    - attack.persistence
+    - attack.credential-access
+    - attack.stealth
+    - attack.t1556.006
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        LoggedByService: 'Authentication Methods'
+        Category: 'UserManagement'
+        OperationName:
+            - 'User registered security info'
+            - 'User registered all required security info'
+            - 'User changed default security info'
+    filter_main_corp_ip:
+        callerIpAddress|expand: '%corporate_ip_ranges%'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Employees registering a new MFA device while traveling or working from
+      home outside documented corporate IP ranges
+    - Requires the placeholder '%corporate_ip_ranges%' to be resolved via a
+      pySigma pipeline that treats it as CIDR ranges in the target query
+      language (e.g. Sentinel's ipv4_is_in_range()), since the Sigma cidr
+      modifier cannot be combined with expand
+level: medium
