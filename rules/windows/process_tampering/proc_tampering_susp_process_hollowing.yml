@@ -5,9 +5,10 @@ description: Detects when a memory process image does not match the disk image, 
 references:
     - https://twitter.com/SecurePeacock/status/1486054048390332423?s=20
     - https://www.bleepingcomputer.com/news/microsoft/microsoft-sysmon-now-detects-malware-process-tampering-attempts/
+    - https://learn.microsoft.com/en-us/windows/security/operating-system-security/sysmon/sysmon-events
 author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io', Sittikorn S
 date: 2022-01-25
-modified: 2023-11-28
+modified: 2026-11-11
 tags:
     - attack.privilege-escalation
     - attack.stealth
@@ -20,8 +21,6 @@ detection:
         Type: 'Image is replaced'
     filter_main_generic:
         Image|contains:
-            - ':\Program Files (x86)'
-            - ':\Program Files\'
             - ':\Windows\System32\wbem\WMIADAP.exe'
             - ':\Windows\SysWOW64\wbem\WMIADAP.exe'
     filter_optional_opera:
@@ -31,5 +30,6 @@ detection:
         Image|endswith: '\WindowsApps\MicrosoftEdge.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - Unknown
+    - Some applications may legitimately modify or replace their in-memory image. Validate the image, signer, parent process, and update context before adding a local exclusion.
 level: medium
+regression_tests_path: ../../../regression_data/rules/windows/process_tampering/proc_tampering_susp_process_hollowing/info.yml
