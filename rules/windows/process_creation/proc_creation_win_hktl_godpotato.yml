@@ -1,11 +1,10 @@
 title: HackTool - GodPotato Execution
 id: 2a5a2f2c-9936-41e7-948c-13f96936c7a2
-status: experimental
+status: test
 description: |
     Detects the execution of GodPotato, a privilege escalation tool that abuses a flaw in how the RPCSS service handles OXID resolution over DCOM.
     It escalates from an account that holds the SeImpersonatePrivilege token privilege, such as a web or database service account, to SYSTEM.
     It affects Windows 8 through Windows 11 and Windows Server 2012 through Windows Server 2022.
-    Threat actors have been observed running it under other file names, which the "OriginalFileName" field still identifies.
 references:
     - https://github.com/BeichenDream/GodPotato
     - https://www.ic3.gov/CSA/2025/250219.pdf
@@ -22,13 +21,11 @@ logsource:
 detection:
     selection:
         - Image|endswith:
-              - '\GodPotato-NET2.exe'
-              - '\GodPotato-NET35.exe'
-              - '\GodPotato-NET4.exe'
+              - '\GodPotato-*.exe'
               - '\GodPotato.exe'
         - OriginalFileName: 'GodPotato.exe'
     condition: selection
 falsepositives:
-    - Unknown
+    - Legitimate files with these rare hacktool names
 level: high
 regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_hktl_godpotato/info.yml
