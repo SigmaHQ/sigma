@@ -1,0 +1,36 @@
+title: Suspicious Outlook Inbox Rule Created
+id: dfafa3be-4d64-4707-bb47-bfae9f48ec40
+status: experimental
+description: Detects the creation or modification of an Outlook inbox rule that performs potentially suspicious actions such as forwarding, redirecting, deleting or moving messages. Attackers abuse inbox rules for persistence, since rules keep firing even after a password reset, and to collect or hide email, a technique widely used in Business Email Compromise.
+references:
+    - https://research.splunk.com/cloud/449f525a-7b42-47be-96a7-d9724e336c19/
+author: Splunk Threat Research Team (original rule), ali-vrd (sigma rule)
+date: 2026-11-10
+tags:
+    - attack.persistence
+    - attack.t1137.005
+    - attack.collection
+    - attack.t1114.003
+    - attack.stealth
+    - attack.t1564.008
+logsource:
+    product: m365
+    service: audit
+detection:
+    selection:
+        Operation:
+            - New-InboxRule
+            - Set-InboxRule
+    selection_action:
+        Parameters.Name|contains:
+            - ForwardTo
+            - ForwardAsAttachmentTo
+            - RedirectTo
+            - DeleteMessage
+            - SoftDeleteMessage
+            - MoveToFolder
+            - CopyToFolder
+    condition: selection and selection_action
+falsepositives:
+    - Legitimate inbox rules created by users that forward, move or delete messages
+level: medium
