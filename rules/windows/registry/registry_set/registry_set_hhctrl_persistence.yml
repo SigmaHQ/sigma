@@ -7,7 +7,7 @@ references:
     - https://www.hexacorn.com/blog/2018/04/23/beyond-good-ol-run-key-part-77/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-07-21
-modified: 2023-08-17
+modified: 2026-11-12
 tags:
     - attack.persistence
 logsource:
@@ -16,9 +16,19 @@ logsource:
 detection:
     selection:
         TargetObject|contains: '\CLSID\{52A2AAAE-085D-4187-97EA-8C30DB990436}\InprocServer32\(Default)'
-    filter:
-        Details: 'C:\Windows\System32\hhctrl.ocx'
-    condition: selection and not filter
+    filter_main_default_value:
+        Details:
+            - '%%SystemRoot%%\System32\hhctrl.ocx'
+            - '%%SystemRoot%%\SysWOW64\hhctrl.ocx'
+            - '%%windir%%\System32\hhctrl.ocx'
+            - '%%windir%%\SysWOW64\hhctrl.ocx'
+            - '%SystemRoot%\System32\hhctrl.ocx'
+            - '%SystemRoot%\SysWOW64\hhctrl.ocx'
+            - '%windir%\System32\hhctrl.ocx'
+            - '%windir%\SysWOW64\hhctrl.ocx'
+            - 'C:\Windows\System32\hhctrl.ocx'
+            - 'C:\Windows\SysWOW64\hhctrl.ocx'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unlikely
 level: high
