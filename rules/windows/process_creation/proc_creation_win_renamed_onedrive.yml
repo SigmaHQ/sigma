@@ -1,0 +1,29 @@
+title: Renamed OneDrive Client Execution
+id: 8e3a9d39-ba97-4649-9c6d-6628e4d9991f
+status: experimental
+description: |
+    Detects execution of a binary whose PE OriginalFileName is OneDrive.exe but whose file name is not OneDrive.exe.
+    Adversaries rename signed Microsoft binaries to side-load malicious DLLs. For example, in the "Setup Center" campaign that delivers RevStealer (REF2859), the Microsoft-signed OneDrive client is renamed Installer.exe and shipped next to a malicious proxy version.dll that is side-loaded by it.
+    The rule is derived from static reversing of the sample, not from observed telemetry.
+references:
+    - https://www.elastic.co/security-labs/threat-command/revstealer-credential-harvesting-infostealer
+    - https://bazaar.abuse.ch/sample/2e3bdd68f85755b02caa42ec0228fb8a56c964479c4f085eae67569d67440e49/
+    - https://bazaar.abuse.ch/sample/b371d2e01562fc0d29072ac1a56969628b6408f2368c056c3158f4fe0c609960/
+    - https://github.com/harperjohnsai/detections/blob/d8423a700dadfffe1369e23462940bd3c9d91b36/iocs/2026-11-revstealer-setup-center/README.md
+author: Harper Johns
+date: 2026-11-13
+tags:
+    - attack.stealth
+    - attack.t1036.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        OriginalFileName: 'OneDrive.exe'
+    filter_main_legit_name:
+        Image|endswith: '\OneDrive.exe'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Software that bundles and renames the OneDrive client (uncommon)
+level: medium
