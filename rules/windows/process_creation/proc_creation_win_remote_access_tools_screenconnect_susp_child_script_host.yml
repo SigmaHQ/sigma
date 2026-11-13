@@ -1,0 +1,42 @@
+title: Remote Access Tool - ScreenConnect Client Spawns Script Host
+id: 7d3fb316-ea7c-4010-85ac-93ef4d9db33d
+related:
+    - id: 7b582f1a-b318-4c6a-bf4e-66fe49bf55a5
+      type: similar
+status: experimental
+description: |
+    Detects the ScreenConnect client process directly spawning a Windows script host (wscript.exe, cscript.exe) or mshta.exe.
+    Threat actors installing rogue ScreenConnect clients have been observed repeatedly spawning wscript.exe to run a staged chain of VBScript files from a temporary folder.
+    This differs from ScreenConnect's legitimate "run command" feature, which executes through a run.cmd file in the ScreenConnect temp directory.
+references:
+    - https://www.huntress.com/blog/rogue-screenconnect-installations
+    - https://github.com/Mohammedalkahala/purpleloop/tree/main/detections/huntress-rmm-wsh
+author: Mohammed Alkahala
+date: 2026-11-13
+tags:
+    - attack.command-and-control
+    - attack.t1219
+    - attack.execution
+    - attack.t1059.005
+    - attack.t1218.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith:
+            - '\ScreenConnect.ClientService.exe'
+            - '\ScreenConnect.WindowsClient.exe'
+    selection_img:
+        - Image|endswith:
+              - '\cscript.exe'
+              - '\mshta.exe'
+              - '\wscript.exe'
+        - OriginalFileName:
+              - 'cscript.exe'
+              - 'MSHTA.EXE'
+              - 'wscript.exe'
+    condition: all of selection_*
+falsepositives:
+    - Administrators deliberately launching VBScript or HTA files directly from a ScreenConnect session. Baseline per environment.
+level: high

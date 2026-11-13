@@ -1,0 +1,36 @@
+title: Run Key Set To Launch VBScript Via Script Host
+id: 53ab10ca-696a-4c2f-8ba2-1e992a2e2ad6
+status: experimental
+description: |
+    Detects a "Run" or "RunOnce" registry value being set to launch a VBScript file through a Windows script host.
+    Threat actors use this for persistence, for example a "WindowsServiceHost" Run value pointing to a .vbs file in the user profile, as seen in rogue ScreenConnect intrusions.
+references:
+    - https://www.huntress.com/blog/rogue-screenconnect-installations
+    - https://github.com/Mohammedalkahala/purpleloop/tree/main/detections/huntress-rmm-wsh
+author: Mohammed Alkahala
+date: 2026-11-13
+tags:
+    - attack.persistence
+    - attack.t1547.001
+    - attack.execution
+    - attack.t1059.005
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_key:
+        TargetObject|contains:
+            - '\Software\Microsoft\Windows\CurrentVersion\Run\'
+            - '\Software\Microsoft\Windows\CurrentVersion\RunOnce\'
+    selection_details:
+        Details|contains:
+            - 'wscript'
+            - 'cscript'
+    selection_ext:
+        Details|contains:
+            - '.vbs'
+            - '.vbe'
+    condition: all of selection_*
+falsepositives:
+    - Legacy software that starts helper VBScript files at logon. Allow-list these by full path.
+level: medium
