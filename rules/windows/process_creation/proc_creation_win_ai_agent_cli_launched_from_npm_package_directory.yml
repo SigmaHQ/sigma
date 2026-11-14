@@ -1,0 +1,33 @@
+title: AI Coding Agent CLI Launched From Npm Package Directory
+id: 0898c6b6-a8a9-4f6b-96ae-28e74a62ab21
+status: experimental
+description: |
+    Detects Claude Code or the OpenAI Codex CLI starting with a working directory inside "node_modules".
+    npm runs the install scripts of a package (such as "postinstall") from the folder of that package in "node_modules", so an agent starting there was most likely launched by the install script of a dependency.
+    This matches the s1ngularity supply chain attack (malicious Nx packages, August 2025), where an install script ran locally installed AI coding agents to search the host for secrets.
+references:
+    - https://github.com/nrwl/nx/security/advisories/GHSA-cxm3-wv7p-598c
+    - https://www.wiz.io/blog/s1ngularity-supply-chain-attack
+    - https://docs.npmjs.com/cli/using-npm/scripts
+    - https://github.com/yug3009p/agent-attack-samples
+author: Yug Patel
+date: 2026-11-04
+tags:
+    - attack.initial-access
+    - attack.t1195.002
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\claude.exe'
+            - '\codex.exe'
+        CurrentDirectory|contains: '\node_modules\'
+    condition: selection
+falsepositives:
+    - A developer deliberately starting an agent from inside a "node_modules" folder
+level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_ai_agent_cli_launched_from_npm_package_directory/info.yml
