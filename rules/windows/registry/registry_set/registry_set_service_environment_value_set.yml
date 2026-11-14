@@ -1,0 +1,36 @@
+title: Service Environment Variables Set Via Registry
+id: 0c8f2336-9fe3-467d-9a1b-efbba1862d74
+related:
+    - id: ad89044a-8f49-4673-9a55-cbd88a1b374f
+      type: similar
+status: experimental
+description: |
+    Detects a write to the "Environment" value of a Windows service.
+    This REG_MULTI_SZ value holds environment variables that the service process receives at start.
+    Attackers can use it to set .NET variables such as "COR_ENABLE_PROFILING" and "COR_PROFILER", or "APPDOMAIN_MANAGER_ASM" and "APPDOMAIN_MANAGER_TYPE", for one service only, so that a trusted service process loads their code.
+    Sysmon logs the data of this value as "Binary Data", so rules that look for the variable names in the registry cannot see it.
+references:
+    - https://www.zscaler.com/blogs/cybersecurity-best-practices/cor_profiler-for-persistence
+    - https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/cb157b1b05f327011fb0eb298aeaee31815072a7/docs/windows-service-instrumentation.md
+    - https://learn.microsoft.com/en-us/archive/blogs/msaffer/using-intellitrace-with-services
+author: Cory Burrell
+date: 2026-11-14
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1574.012
+    - attack.t1574.014
+logsource:
+    category: registry_set
+    product: windows
+    definition: 'Requirements: Sysmon config that monitors the "Environment" value under HKLM\SYSTEM\CurrentControlSet\Services\ (for example sysmon-modular, which logs all writes under that key)'
+detection:
+    selection:
+        TargetObject|startswith: 'HKLM\SYSTEM\'
+        TargetObject|contains: '\Services\'
+        TargetObject|endswith: '\Environment'
+    condition: selection
+falsepositives:
+    - Application performance monitoring and profiling agents (for example Datadog, New Relic, OpenTelemetry or Visual Studio IntelliTrace) that set environment variables for a service such as IIS (W3SVC, WAS)
+level: medium
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_service_environment_value_set/info.yml
