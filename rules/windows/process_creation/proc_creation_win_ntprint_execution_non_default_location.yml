@@ -1,0 +1,38 @@
+title: Ntprint.EXE Execution From Non-Default Location
+id: 872a0ee5-2885-45be-bff1-c28f8b291f71
+status: experimental
+description: |
+    Detects the execution of the Windows printer driver installation binary "ntprint.exe" from a non-default directory.
+    Attackers can copy the Microsoft-signed binary to a folder they control next to a malicious "ntprint.dll" and run it, for example with the "PSetupElevatedLegacyPrintDriverInstallW" method on the command line, so that the signed process loads the attacker's DLL from its own folder (DLL sideloading).
+references:
+    - https://www.hexacorn.com/blog/2025/10/06/ntprint-exe-lolbin/
+    - https://github.com/redcanaryco/atomic-red-team/blob/91da6949984b21380dad0ccd7a49d44c5e8ff3bb/atomics/T1574.001/T1574.001.yaml
+author: mechanicb0y
+date: 2026-11-09
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1574.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith: '\ntprint.exe'
+        - OriginalFileName: 'ntprint.exe'
+    filter_main_legit_location:
+        Image:
+            - 'C:\Windows\System32\ntprint.exe'
+            - 'C:\Windows\SysWOW64\ntprint.exe'
+    filter_main_winsxs:
+        Image|startswith: 'C:\Windows\WinSxS\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Windows installed on a drive other than C
+level: high
+simulation:
+    - type: atomic-red-team
+      name: DLL Search Order Hijacking - ntprint
+      technique: T1574.001
+      atomic_guid: e96b8105-d7f7-484e-8d81-2d0c7086971b
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_ntprint_execution_non_default_location/info.yml
