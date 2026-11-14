@@ -1,0 +1,31 @@
+title: Scheduled Task Files Masquerading as System Binaries (dllhost/taskhostw)
+id: d5ba62a1-5139-47f9-992d-a93cdf3f5fb2
+status: experimental
+description: |
+    Detects creation (or modification) of scheduled task files named "dllhost" or
+    "taskhostw" under C:\Windows\System32\Tasks - names masquerading as the legitimate
+    system binaries dllhost.exe / taskhostw.exe. Observed PavinLoader.BAT persistence
+    dropped such task files. Note that the Task Scheduler service (svchost.exe) writes
+    task XML natively for all task-creation APIs, so the writer process does not
+    distinguish legitimate from malicious creation here; the masquerading name is the signal.
+references:
+    - https://github.com/fotedev/pavinloader-easeus-campaign
+    - https://attack.mitre.org/techniques/T1053/005/
+author: fotedev
+date: 2026-10-29
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1053.005
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_target:
+        TargetFilename|endswith:
+            - '\Windows\System32\Tasks\dllhost'
+            - '\Windows\System32\Tasks\taskhostw'
+    condition: selection_target
+falsepositives:
+    - Administrative tooling or configuration management that legitimately registers tasks with these exact names (uncommon; the names impersonate system binaries)
+level: high
