@@ -1,0 +1,28 @@
+title: SSH Authorized Keys File Modification
+id: cb0b988d-c31f-45ef-8e67-0b7bce3b98d1
+status: experimental
+description: |
+    Detects creation or modification of SSH authorized_keys files. Adversaries add
+    their own public keys to these files to maintain persistence on compromised
+    Linux hosts and regain access without a password.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1098.004/T1098.004.md
+author: Gideon Opukeme
+date: 2026-10-17
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098
+    - attack.t1098.004
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection_path:
+        type: 'PATH'
+        name|endswith: '/.ssh/authorized_keys'
+    condition: selection_path
+falsepositives:
+    - Legitimate administrators adding SSH keys during onboarding or configuration management
+    - Automation tools that deploy keys as part of server provisioning
+level: medium
