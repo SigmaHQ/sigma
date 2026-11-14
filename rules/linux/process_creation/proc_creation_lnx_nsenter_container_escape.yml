@@ -7,6 +7,8 @@ description: |
     out of a container and execute commands on the underlying host.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1611/T1611.md
+    - https://man7.org/linux/man-pages/man1/nsenter.1.html
+    - https://www.elastic.co/guide/en/security/current/potential-docker-escape-via-nsenter.html
 author: Gideon Opukeme
 date: 2026-10-18
 tags:
@@ -18,13 +20,23 @@ logsource:
 detection:
     selection_img:
         Image|endswith: '/nsenter'
-    selection_host_ns:
+    selection_target_mid:
         CommandLine|contains:
-            - '--mount=/proc/1/ns/'
-            - '--net=/proc/1/ns/'
-            - '-t 1'
-            - '--target 1'
-    condition: selection_img and selection_host_ns
+            - ' -t 1 '
+            - ' -t1 '
+            - ' --target 1 '
+            - ' --target=1 '
+    selection_target_end:
+        CommandLine|endswith:
+            - ' -t 1'
+            - ' -t1'
+            - ' --target 1'
+            - ' --target=1'
+    selection_ns_path:
+        CommandLine|contains:
+            - '=/proc/1/ns/'
+    condition: selection_img and (1 of selection_target_* or selection_ns_path)
 falsepositives:
     - Administrators using nsenter to debug or manage containers from the host
+    - Node debugging tooling such as kubectl node-shell or similar privileged debug pods
 level: high
