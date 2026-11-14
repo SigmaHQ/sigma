@@ -1,0 +1,44 @@
+title: M365 Mailbox Items Accessed Via Legacy Email Protocol
+id: d812c83f-5bd2-457f-8b18-dd98e2e3cdb1
+status: experimental
+description: |
+    Detects access to mailbox items in the Microsoft 365 unified audit log (MailItemsAccessed)
+    where the client used a legacy email protocol (IMAP4 or POP3). MailItemsAccessed is the audit
+    event that proves mail was actually read or synced, and it records the protocol and client in
+    ClientInfoString. Legacy protocols are the classic remote-collection vector: they authenticate
+    with basic authentication, which bypasses MFA, so an attacker who has stolen a user's password
+    can connect remotely over IMAP or POP3 and pull the contents of the mailbox without ever
+    triggering a modern-auth sign-in alert. Microsoft recommends disabling legacy protocols for
+    exactly this reason. This rule fires on the collection itself, not on the sign-in, so it also
+    catches cases where the sign-in was not itself flagged as legacy authentication.
+references:
+    - https://learn.microsoft.com/ar-sa/purview/audit-log-investigate-accounts
+    - https://www.levelblue.com/blogs/spiderlabs-blog/microsoft-365-identifying-mailbox-access
+    - https://research.splunk.com/sources/3d5188eb-341a-4b46-9caa-aade4047d027/
+author: Haroon Arshad
+date: 2026-11-12
+tags:
+    - attack.collection
+    - attack.t1114.002
+logsource:
+    service: audit
+    product: m365
+detection:
+    selection:
+        Workload: 'Exchange'
+        Operation: 'MailItemsAccessed'
+        ClientInfoString|contains:
+            - 'IMAP4'
+            - 'POP3'
+    condition: selection
+falsepositives:
+    - Legacy mail clients still in use in the tenant (old phones, printers or scanners, and mail apps that only speak IMAP/POP3). Baseline which accounts use these protocols legitimately and exclude them by UserId.
+    - Shared mailboxes or service accounts accessed by automation that uses IMAP/POP3.
+    - Tenants that have not disabled legacy protocols will see this fire for normal users; treat the first hits as an inventory of who still uses legacy mail, then tune.
+level: medium
+related:
+    - id: 60f6535a-760f-42a9-be3f-c9a0a025906e
+      type: similar
+fields:
+    - UserId
+    - ClientInfoString
