@@ -1,0 +1,27 @@
+title: AMSI Bypass (patch amsi.dll AmsiScanBuffer / reflection unload)
+id: cbc374b2-17d5-55d6-8a3b-ef15b1cbb174
+status: experimental
+description: Detects AMSI bypass via AmsiScanBuffer patching or PowerShell reflection unload.
+references:
+    - https://entroprism.net
+author: Entroprism (Beijing Yijun Foreign Trade Co., Ltd.)
+date: 2026/11/03
+tags:
+    - attack.t1562
+    - detection.threat_hunting
+logsource:
+    product: windows
+    category: process_creation
+detection:
+  selection_patch:
+    CommandLine|contains:
+      - 'AmsiScanBuffer'
+      - 'VirtualProtect'
+  selection_reflection:
+    CommandLine|contains:
+      - '[Ref].Assembly'
+      - 'System.Management.Automation.AmsiUtils'
+  condition: selection_patch or selection_reflection
+level: high
+falsepositives:
+  - legitimate PowerShell module loading

@@ -1,0 +1,25 @@
+title: APC Injection (QueueUserAPC / NtQueueApcThread)
+id: e20746a7-f79f-54c4-1075-3fa5d8a47c81
+status: experimental
+description: Detects APC injection via QueueUserAPC / NtQueueApcThread calls with granted process access.
+references:
+    - https://entroprism.net
+author: Entroprism (Beijing Yijun Foreign Trade Co., Ltd.)
+date: 2026/11/03
+tags:
+    - attack.t1055
+    - detection.threat_hunting
+logsource:
+    product: windows
+    category: process_access
+detection:
+  selection_apc:
+    CallTrace|contains:
+      - 'QueueUserAPC'
+      - 'NtQueueApcThread'
+  selection_granted:
+    GrantedAccess|contains: '0x40'
+  condition: selection_apc and selection_granted
+level: high
+falsepositives:
+  - legitimate asynchronous procedure call usage
