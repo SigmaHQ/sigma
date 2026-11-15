@@ -1,0 +1,40 @@
+title: Suspicious AdminSDHolder Object Modification
+id: 979f723e-e1f5-42d3-a487-dd4f5d62ae94
+related:
+    - id: 2c99737c-585d-4431-b61a-c911d86ff32f # Powerview Add-DomainObjectAcl DCSync AD Extend Right
+      type: similar
+status: experimental
+description: |
+    Detects a modification of the "CN=AdminSDHolder,CN=System" object of an Active Directory domain.
+    The AdminSDHolder object is the permission template that the SDProp process copies every 60 minutes onto all protected accounts and groups (Domain Admins, Enterprise Admins, Administrators, krbtgt...).
+    An attacker who adds an ACE for a controlled principal to this object obtains a persistent backdoor: SDProp grants the same rights on every protected object and re-applies them whenever they are removed.
+    The object is not changed by normal domain operations, so any modification is worth an investigation.
+references:
+    - https://adsecurity.org/?p=1906
+    - https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5136
+    - https://github.com/elastic/detection-rules/blob/f4ef34b1c996da53880053dd497ca546c1b0bbfa/rules/windows/persistence_ad_adminsdholder.toml
+author: elhoim
+date: 2026-11-09
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098
+logsource:
+    product: windows
+    service: security
+    definition: |
+        Enable 'Audit Directory Service Changes' (Success) on the domain controllers under:
+        Computer Configuration -> Policies -> Windows Settings -> Security Settings -> Advanced Audit Policy Configuration -> Audit Policies -> DS Access.
+        Permission inheritance is disabled on AdminSDHolder, so a SACL auditing "Write all properties" and "Modify permissions" for Everyone must be set
+        explicitly on the 'CN=AdminSDHolder,CN=System,DC=<domain>,DC=<tld>' object (for example with https://github.com/OTRF/Set-AuditRule).
+detection:
+    selection:
+        EventID: 5136
+        ObjectDN|startswith: 'CN=AdminSDHolder,CN=System,'
+    condition: selection
+falsepositives:
+    - Installation or upgrade of products that extend the AdminSDHolder permissions, such as Microsoft Exchange Server "Setup /PrepareAD", Active Directory schema or domain preparation (adprep) or identity management suites. Validate the account, the attribute and the time window against the change management records.
+    - Deliberate hardening of the AdminSDHolder ACL by a Tier 0 administrator.
+level: high
+regression_tests_path: regression_data/rules/windows/builtin/security/win_security_adminsdholder_object_modification/info.yml
