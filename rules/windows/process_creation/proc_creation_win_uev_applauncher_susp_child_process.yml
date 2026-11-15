@@ -1,0 +1,49 @@
+title: Suspicious Child Process Of UE-V AppLauncher
+id: 6def4ed1-2425-48c6-91b4-f2710dc4a6f2
+related:
+    - id: 2ead58ff-53ba-443c-ba82-87c0ec698b1f # Ntsd suspicious child
+      type: similar
+    - id: 25d754af-71d9-45f4-a485-42af98e081f0 # PIX engine host suspicious child
+      type: similar
+status: experimental
+description: |
+    Detects "AppLauncher.exe", part of the Microsoft User Experience Virtualization (UE-V) Template Generator in the Windows ADK, spawning a shell or a common LOLBIN as a child process.
+    Attackers can abuse this signed tool to proxy execution of arbitrary binaries.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/AppLauncher/
+author: Aditi Nagpure
+date: 2026-10-27
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1127
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\Microsoft User Experience Virtualization\Management\AppLauncher.exe'
+    selection_child:
+        - Image|endswith:
+              - '\cmd.exe'
+              - '\cscript.exe'
+              - '\mshta.exe'
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\regsvr32.exe'
+              - '\rundll32.exe'
+              - '\wscript.exe'
+        - OriginalFileName:
+              - 'Cmd.Exe'
+              - 'cscript.exe'
+              - 'MSHTA.EXE'
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+              - 'REGSVR32.EXE'
+              - 'RUNDLL32.EXE'
+              - 'wscript.exe'
+    condition: all of selection_*
+falsepositives:
+    - Administrators generating UE-V settings location templates for a script host or shell-based application
+level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_uev_applauncher_susp_child_process/info.yml
