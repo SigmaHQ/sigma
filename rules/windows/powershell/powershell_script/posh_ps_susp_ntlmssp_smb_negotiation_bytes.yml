@@ -1,0 +1,42 @@
+title: Suspicious NTLMSSP Or SMB Negotiation Bytes In PowerShell Script
+id: cd1ab510-1719-4715-89f6-7a3519472c91
+status: experimental
+description: |
+    Detects PowerShell script blocks that build NTLMSSP or SMB negotiation packets by hand, either through the "NTLMSSPNegotiate" plus "NegotiateSMB" (also covers "NegotiateSMB2") stage names or through the raw "NTLMSSP" signature bytes written as a hex string or byte array.
+    The byte form also covers the service control manager (svcctl) RPC interface UUID that SMB execution tooling binds to in order to create a remote service.
+    Such packet construction only appears in scripts that speak SMB/NTLM themselves, which is what pass-the-hash, NTLM relay and SMB execution tooling implemented in PowerShell does. Regular PowerShell remoting and file access rely on the Windows SMB client and never contain these bytes.
+    Byte arrays are only matched in the compact form without spaces (for example "0x4e,0x54,0x4c"); a spaced spelling such as "0x4e, 0x54, 0x4c" is not detected.
+references:
+    - https://github.com/Kevin-Robertson/Invoke-TheHash/blob/153ca54a744489434d5a4257189e8a20bd28ecec/Invoke-SMBExec.ps1
+    - https://github.com/elastic/detection-rules/blob/f4ef34b1c996da53880053dd497ca546c1b0bbfa/rules/windows/credential_access_posh_relay_tools.toml
+author: elhoim
+date: 2026-11-09
+tags:
+    - attack.collection
+    - attack.credential-access
+    - attack.lateral-movement
+    - attack.t1550.002
+    - attack.t1557.001
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_names_ntlmssp:
+        ScriptBlockText|contains: 'NTLMSSPNegotiate'
+    selection_names_smb:
+        ScriptBlockText|contains: 'NegotiateSMB'
+    selection_bytes:
+        ScriptBlockText|contains:
+            - '4E544C4D53535000'
+            - '0x4e,0x54,0x4c,0x4d,0x53,0x53,0x50'
+            - '0x4e,0x54,0x20,0x4c,0x4d'
+            - '0x53,0x4d,0x42,0x20,0x32'
+            - '0x81,0xbb,0x7a,0x36,0x44,0x98,0xf1,0x35,0xad,0x32,0x98,0xf0,0x38' # svcctl RPC interface UUID used by Invoke-SMBExec
+    filter_optional_mde_live_response:
+        Path|startswith: 'C:\ProgramData\Microsoft\Windows Defender Advanced Threat Protection\Downloads\'
+    condition: (all of selection_names_* or selection_bytes) and not 1 of filter_optional_*
+falsepositives:
+    - Network protocol research or SMB client implementations written in PowerShell
+level: high
+regression_tests_path: regression_data/rules/windows/powershell/powershell_script/posh_ps_susp_ntlmssp_smb_negotiation_bytes/info.yml
