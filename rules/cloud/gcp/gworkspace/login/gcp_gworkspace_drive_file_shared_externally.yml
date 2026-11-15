@@ -1,0 +1,31 @@
+title: Google Workspace Drive File Shared Externally or Publicly
+id: 5e79cc2d-9f4a-4b27-d1e8-3c6a2f5b8e10
+status: experimental
+description: |
+    Detects when a Google Drive file ACL is changed to allow access by anyone
+    with the link or the general public via the change_acl_editors Drive audit
+    event. This can indicate intentional or accidental exfiltration of sensitive
+    documents by making them accessible to unauthenticated external parties.
+references:
+    - https://developers.google.com/admin-sdk/reports/v1/appendix/activity/drive
+    - https://support.google.com/a/answer/60781
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.collection
+    - attack.t1530
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection:
+        protoPayload.serviceName: 'drive.googleapis.com'
+        protoPayload.metadata.event.eventName: 'change_acl_editors'
+        protoPayload.metadata.event.visibility:
+            - 'people_with_link'
+            - 'public_on_the_web'
+    condition: selection
+falsepositives:
+    - Legitimate sharing of a public-facing document such as a press release or open job posting
+    - Developer sharing a demo or sample file for external review
+level: medium
