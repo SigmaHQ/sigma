@@ -1,0 +1,29 @@
+title: Suspicious Renamed MSBuild Execution
+id: 0df03709-f088-49fd-b668-3934e8b8b8e3
+status: experimental
+description: |
+    Detects the execution of the Microsoft Build Engine ("MSBuild.exe" according to its OriginalFileName) from an image that does not carry the MSBuild file name.
+    MSBuild compiles and runs inline C# or VB tasks from a project file and is a well-known application control bypass; renaming the binary is done to evade detections that key on the process name while keeping the trusted Microsoft signature.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Msbuild/
+    - https://github.com/elastic/detection-rules/blob/f4ef34b1c996da53880053dd497ca546c1b0bbfa/rules/windows/defense_evasion_execution_msbuild_started_renamed.toml
+author: elhoim
+date: 2026-11-09
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1036.003
+    - attack.t1127.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        OriginalFileName: 'MSBuild.exe'
+    filter_main_legit_name:
+        Image|endswith: '\MSBuild.exe'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unlikely
+level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_renamed_msbuild/info.yml
