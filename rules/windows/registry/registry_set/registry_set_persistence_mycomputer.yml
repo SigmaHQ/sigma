@@ -6,7 +6,7 @@ references:
     - https://www.hexacorn.com/blog/2017/01/18/beyond-good-ol-run-key-part-55/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-08-09
-modified: 2024-01-11
+modified: 2026-11-16
 tags:
     - attack.persistence
 logsource:
@@ -15,8 +15,20 @@ logsource:
 detection:
     selection:
         TargetObject|contains: '\Microsoft\Windows\CurrentVersion\Explorer\MyComputer'
-        TargetObject|endswith: '(Default)'
-    condition: selection
+        TargetObject|endswith: 'path\(Default)'
+    filter_main_default:
+        Details|startswith:
+            - '%%SystemRoot%%\System32\'
+            - '%%SystemRoot%%\SysWOW64\'
+            - '%%Windir%%\System32\'
+            - '%%Windir%%\SysWOW64\'
+            - '%SystemRoot%\System32\'
+            - '%SystemRoot%\SysWOW64\'
+            - '%Windir%\System32\'
+            - '%Windir%\SysWOW64\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unlikely but if you experience FPs add specific processes and locations you would like to monitor for
 level: high
