@@ -5,12 +5,17 @@ on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   EVTX_BASELINE_VERSION: v0.8.5
   JSON_MATCHER_VERSION: v0.0.2
 
 jobs:
   true-positive-tests:
+    name: true-positive-tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

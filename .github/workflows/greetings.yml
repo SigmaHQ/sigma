@@ -8,13 +8,18 @@ on:
     types:
       - opened
 
-permissions:
-  issues: write
-  pull-requests: write
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
 
 jobs:
   greeting:
     name: Greet First-Time Contributors
+    permissions:
+      issues: write # comment on new issues
+      pull-requests: write # comment on new PRs
     if: github.event_name == 'issues' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository)
     runs-on: ubuntu-latest
     steps:

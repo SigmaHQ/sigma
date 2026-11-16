@@ -8,11 +8,16 @@ on: [push, pull_request, merge_group, workflow_dispatch]
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   EVTX_BASELINE_VERSION: v0.8.5
 
 jobs:
   check-baseline-win7:
+    name: check-baseline-win7
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -39,6 +44,7 @@ jobs:
         ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
   check-baseline-win10:
+    name: check-baseline-win10
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -65,6 +71,7 @@ jobs:
         ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
   check-baseline-win11:
+    name: check-baseline-win11
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -91,6 +98,7 @@ jobs:
         ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
   check-baseline-win11-2023:
+    name: check-baseline-win11-2023
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -117,6 +125,7 @@ jobs:
         ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
   check-baseline-win2022:
+    name: check-baseline-win2022
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -141,6 +150,7 @@ jobs:
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
   check-baseline-win2022-domain-controller:
+    name: check-baseline-win2022-domain-controller
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -165,6 +175,7 @@ jobs:
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
   check-baseline-win2022-0-20348-azure:
+    name: check-baseline-win2022-0-20348-azure
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

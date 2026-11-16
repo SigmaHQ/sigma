@@ -10,12 +10,19 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   pull-master:
+    name: pull-master
     if: github.repository_owner == 'SigmaHQ'
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write # push the PR branch
+      pull-requests: write # open the PR
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -31,7 +38,7 @@ jobs:
         pip install pySigma
         python tests/deprecated_rules.py --format csv
         python tests/deprecated_rules.py --format json
-    - name: Create Pull Request
+    - name: Create Pull Request # zizmor: ignore[superfluous-actions] action handles branch reuse/PR updates
       uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
       with:
         reviewers: nasbench, frack113, phantinuss

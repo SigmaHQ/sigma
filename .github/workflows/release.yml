@@ -5,12 +5,18 @@ on:
 
 name: Create Release
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     name: Create Release
     if: github.repository_owner == 'SigmaHQ'
     permissions:
-      contents: write
+      contents: write # create the draft release and upload assets
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
