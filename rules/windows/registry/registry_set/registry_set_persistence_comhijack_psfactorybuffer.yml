@@ -9,7 +9,7 @@ references:
     - https://www.trendmicro.com/en_us/research/23/e/void-rabisu-s-use-of-romcom-backdoor-shows-a-growing-shift-in-th.html
 author: BlackBerry Threat Research and Intelligence Team - @Joseliyo_Jstnk
 date: 2023-06-07
-modified: 2023-08-17
+modified: 2026-11-12
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -20,11 +20,19 @@ logsource:
 detection:
     selection:
         TargetObject|endswith: '\CLSID\{c90250f3-4d7d-4991-9b69-a5c5bc1c2ae6}\InProcServer32\(Default)'
-    filter_main:
+    filter_main_default_value:
         Details:
+            - '%%SystemRoot%%\System32\ActXPrxy.dll'
+            - '%%SystemRoot%%\SysWOW64\ActXPrxy.dll'
+            - '%%windir%%\System32\ActXPrxy.dll'
+            - '%%windir%%\SysWOW64\ActXPrxy.dll'
+            - '%SystemRoot%\System32\ActXPrxy.dll'
+            - '%SystemRoot%\SysWOW64\ActXPrxy.dll'
             - '%windir%\System32\ActXPrxy.dll'
+            - '%windir%\SysWOW64\ActXPrxy.dll'
             - 'C:\Windows\System32\ActXPrxy.dll'
-    condition: selection and not filter_main
+            - 'C:\Windows\SysWOW64\ActXPrxy.dll'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
