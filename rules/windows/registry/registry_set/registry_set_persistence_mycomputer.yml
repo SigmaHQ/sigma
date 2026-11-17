@@ -18,17 +18,29 @@ detection:
         TargetObject|endswith: 'path\(Default)'
     filter_main_default:
         Details|startswith:
-            - '%%SystemRoot%%\System32\'
-            - '%%SystemRoot%%\SysWOW64\'
-            - '%%Windir%%\System32\'
-            - '%%Windir%%\SysWOW64\'
-            - '%SystemRoot%\System32\'
-            - '%SystemRoot%\SysWOW64\'
-            - '%Windir%\System32\'
-            - '%Windir%\SysWOW64\'
-            - 'C:\Windows\System32\'
-            - 'C:\Windows\SysWOW64\'
-    condition: selection and not 1 of filter_main_*
+            - '%%SystemRoot%%\'
+            - '%%Windir%%\'
+            - '%SystemRoot%\'
+            - '%Windir%\'
+            - 'C:\Windows\'
+    filter_main_path_backup:
+        TargetObject|endswith: '\MyComputer\BackupPath\(Default)'
+        Details|endswith:
+            - '\System32\sdclt.exe'
+            - '\SysWOW64\sdclt.exe'
+    filter_main_path_cleanup:
+        TargetObject|endswith: '\MyComputer\cleanuppath\(Default)'
+        Details|endswith:
+            - '\System32\cleanmgr.exe /D %c'
+            - '\SysWOW64\cleanmgr.exe /D %c'
+            - '\System32\cleanmgr.exe /D %%c'
+            - '\SysWOW64\cleanmgr.exe /D %%c'
+    filter_main_path_defrag:
+        TargetObject|endswith: '\MyComputer\DefragPath\(Default)'
+        Details|endswith:
+            - '\System32\dfrgui.exe'
+            - '\SysWOW64\dfrgui.exe'
+    condition: selection and not (filter_main_default and 1 of filter_main_path_*)
 falsepositives:
     - Unlikely but if you experience FPs add specific processes and locations you would like to monitor for
 level: high
