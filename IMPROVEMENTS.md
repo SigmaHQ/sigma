@@ -25,15 +25,18 @@ group** — it is the gate every contribution passes through.
 
 | File | Change | Why |
 |------|--------|-----|
-| `tests/requirements.txt` *(new)* | Pins `PyYAML==6.0.3`, `colorama==0.4.6` | Deps for the legacy Python harness (`test_rules.py`, `test_logsource.py`, `regression_tests_runner.py`). Exact pins = reproducible runs. |
-| `tests/requirements-validation.txt` *(new)* | Pins `pysigma==1.3.3`, `sigma-cli==3.0.2`, `pySigma-validators-sigmahq==0.20.2` | Deps for `sigma check`. The validators encode the SigmaHQ conventions, so a floating patch could silently change the rule pass/fail bar for all open PRs. |
+| `tests/requirements.txt` *(new)* | Pins `PyYAML==6.0.3`, `colorama==0.4.6` | Deps for the legacy Python harness (`test_rules.py`, `test_logsource.py`). Exact pins = reproducible runs. |
+| `tests/requirements-validation.txt` *(new)* | Pins `pysigma==2.1.0`, `sigma-cli==4.0.1`, `pySigma-validators-sigmahq==0.21.0` | Deps for `sigma check`. The validators encode the SigmaHQ conventions, so a floating patch could silently change the rule pass/fail bar for all open PRs. |
 | `.github/workflows/sigma-test.yml` | 3 jobs now `pip install -r ...` instead of inline package lists; all 3 `setup-python` steps gained `cache: pip` + `cache-dependency-path: tests/requirements*.txt` | Single source of truth for versions; cached installs cut per-job setup time. |
-| `.github/workflows/regression-tests.yml` | `pip install pyyaml` → `pip install -r tests/requirements.txt`; added the same pip cache | Consistency + caching for the regression job too. |
+
+`.github/workflows/regression-tests.yml` is not touched. It gained its own
+`tests/regression_requirements.txt` and pip cache in #6272 while this change was
+open, so the regression job is already covered.
 
 ### Notable decision: validators pin tightened
 
-The validators were previously `pySigma-validators-sigmahq==0.20.*` (floating
-patch). They are now `==0.20.2` (exact). Trade-off: we lose automatic patch
+The validators were previously `pySigma-validators-sigmahq==0.21.*` (floating
+patch). They are now `==0.21.0` (exact). Trade-off: we lose automatic patch
 pickup, but we gain that **convention changes become an explicit, reviewable
 commit** instead of a surprise CI failure landing on unrelated PRs. For a shared
 CI gate, reproducibility outweighs auto-bumping.
@@ -55,11 +58,12 @@ CI gate, reproducibility outweighs auto-bumping.
 
 ### Verification done
 
-- Both edited workflow files parse as valid YAML.
+- The edited workflow file parses as valid YAML.
 - `.yamllint` ignores `.github/` and `tests/`, so the new files and workflow
   edits cannot break the `yamllint` job.
-- Pinned versions were confirmed against PyPI as the current latest and are
-  mutually compatible.
+- Pinned versions are exactly the ones `master`'s `sigma-check` job resolved
+  and passed with on 2026-11-17, so this change freezes current behaviour
+  rather than altering it.
 
 ---
 
