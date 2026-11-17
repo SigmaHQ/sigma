@@ -1,0 +1,34 @@
+title: OpenAI Codex Command Runner Child Process Outside Expected Sandbox User Identity
+id: b3d7e5f1-2a4c-4b6d-8e0f-5c6d7e8f9a0b
+status: experimental
+description: |
+    Detects a child process spawned by the OpenAI Codex command runner (codex-command-runner-*.exe) running under a user account other than the expected sandbox identities (CodexSandboxOffline or CodexSandboxOnline).
+    The command runner operates exclusively as one of the two restricted local sandbox accounts and is expected to inherit that identity to all children it spawns.
+    A child process running under any other user indicates that the restricted token context has been broken — either through token impersonation, a restricted-token
+    bypass, or a local privilege escalation — and the process has escaped the Codex sandbox boundary.
+references:
+    - https://jonny-johnson.medium.com/a-deep-dive-into-codex-windows-sandbox-a2489bf4ae91
+    - https://openai.com/index/building-codex-windows-sandbox/
+author: Jonathan Johnson, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-05-26
+tags:
+    - attack.execution
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1055
+    - attack.t1068
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|contains: '\codex-command-runner-'
+        ParentImage|endswith: '.exe'
+    filter_main_expected_users:
+        User:
+            - 'CodexSandboxOffline'
+            - 'CodexSandboxOnline'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high
