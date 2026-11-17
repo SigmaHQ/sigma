@@ -1,7 +1,10 @@
 title: Web Static Asset Hotlinked From Non-Owned Origin
 id: 9c4e2a71-3f6b-4d8e-b1a5-7e2c0d9f6a34
 status: experimental
-description: Detects static web assets requested with a Referer from a non-owned origin, typical of a cloned page (often a login portal) that still hotlinks the legitimate site's assets.
+description: |
+    Detects static web assets requested with a Referer from a non-owned origin, typical of a cloned page (often a login portal) that still hotlinks the legitimate site's assets.
+    Populate the '%owned_web_origins%' placeholder with every origin the organization serves content from, including internal hostnames and reverse-proxy backends, anchored as '://example.com/', '://example.com:', '.example.com/' or '.example.com:' so that hostnames such as 'example.com.attacker.net' are not treated as owned.
+    The Referer is client-controlled: a cloned page can suppress it, and if the page sends its full URL (non-default Referrer-Policy), an owned origin embedded in the path or query string is treated as owned.
 references:
     - https://docs.canarytokens.org/guide/css-cloned-site-token.html
     - https://docs.canarytokens.org/guide/cloned-web-token.html
@@ -9,9 +12,8 @@ author: Abdullah Alzamil
 date: 2026-10-16
 tags:
     - attack.resource-development
-    - attack.t1608.005
-    - attack.t1583.001
     - attack.reconnaissance
+    - attack.t1608.005
     - attack.t1598.003
 logsource:
     category: webserver
@@ -19,10 +21,16 @@ detection:
     selection_asset:
         cs-uri-stem|endswith:
             - '.css'
+            - '.gif'
             - '.ico'
+            - '.jpeg'
+            - '.jpg'
             - '.js'
             - '.png'
             - '.svg'
+            - '.webp'
+            - '.woff'
+            - '.woff2'
     selection_referer:
         cs-referer|exists: true
     filter_main_empty_referer:
