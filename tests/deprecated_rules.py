@@ -24,7 +24,7 @@ path_to_rules = [
 
 
 def get_level(rule):
-    return rule.level if rule.status else SigmaLevel.MEDIUM
+    return rule.level if rule.level else SigmaLevel.MEDIUM
 
 
 def get_modified_time(rule):

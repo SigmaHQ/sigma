@@ -2,7 +2,13 @@ title: AppLocker Application Would Have Been Blocked
 id: 557e3bd3-7f21-495d-8d50-7c8bdfb8041c
 status: experimental
 description: |
-    Detects when AppLocker "Audit only" enforcement mode reports that an Application, DLL, Script, MSI, or Packaged-App would have been blocked if AppLocker "Enforce rules" enforcement mode was enabled.
+    Detects when AppLocker "Audit only" enforcement mode reports that an Application, DLL, Script, MSI,
+    or Packaged-App would have been blocked if AppLocker "Enforce rules" enforcement mode was enabled.
+    This rule triggers on the AppLocker audit events and requires review of the reported path against the local AppLocker policy.
+    Since this rule triggers solely on event IDs without path-based filtering, tuning and false positive
+    suppression must be handled at the AppLocker policy level by the policy author, not via Sigma filters.
+    Analysts should review the reported FullFilePath and correlate with the local AppLocker policy to
+    determine whether the activity is expected or warrants investigation.
 references:
     - https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/what-is-applocker
     - https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/using-event-viewer-with-applocker
@@ -10,6 +16,7 @@ references:
     - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/ee844150(v=ws.11)
 author: heyyanu
 date: 2026-03-26
+modified: 2026-10-20
 tags:
     - attack.execution
     - attack.t1204.002
@@ -28,7 +35,20 @@ detection:
             - 8006 # MSI and Script would have been blocked
             - 8021 # Packaged app execution would have been blocked
             - 8024 # Packaged app deployment would have been blocked
+    # Common FP examples (environment-specific, handle at AppLocker policy level):
+    # filter_main_fp_examples:
+    #     FullFilePath:
+    #         - 'C:\Windows\system32\VERSION.dll'
+    #         - 'C:\Windows\SYSTEM32\WINNSI.DLL'
+    #         - 'C:\Windows\SYSTEM32\NetSetupEngine.dll'
+    #         - 'C:\Windows\uus\AMD64\uusbrain.dll'
+    #         - 'C:\Windows\SYSTEM32\ImplatSetup.dll'
+    #         - 'C:\Windows\System32\bcrypt.dll'
+    #         - 'C:\Windows\SYSTEM32\NETAPI32.DLL'
+    #         - 'C:\Program Files\SplunkUniversalForwarder\bin\VCRUNTIME140.dll'
+    #     EventID: 8003
     condition: selection
 falsepositives:
     - Expected during AppLocker policy testing and audit mode deployments
-level: medium
+    - Legitimate system DLLs and applications not yet covered by the AppLocker policy (e.g. Windows system components, third-party software). False positives must be handled at the AppLocker policy level by the policy author, not via Sigma filters.
+level: low # Increase to medium or high based on the criticality of the applications being monitored and false positive tolerance.
