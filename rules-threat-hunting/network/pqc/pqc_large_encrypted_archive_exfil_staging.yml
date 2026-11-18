@@ -1,0 +1,32 @@
+title: Large Encrypted Archive Transfer (Ciphertext Staging)
+id: 46f77d54-d9eb-45d7-918c-96d15d31a991
+status: experimental
+description: A large encrypted/compressed archive (zip, gzip, 7z, encrypted blob)
+  was transferred over the network. In the harvest-now-decrypt-later model, adversaries
+  stage collected ciphertext for later quantum decryption. Correlate with the bulk-TLS-egress
+  rule and DLP context.
+references:
+- https://www.cisa.gov/quantum
+author: TAI Creative LLC
+date: '2026-07-16'
+tags:
+- attack.exfiltration
+- attack.t1560
+- attack.t1030
+logsource:
+  product: zeek
+  service: files
+detection:
+  selection:
+    mime_type:
+    - application/zip
+    - application/gzip
+    - application/x-7z-compressed
+    - application/octet-stream
+  large_file:
+    total_bytes|gte: 536870912
+  condition: selection and large_file
+falsepositives:
+- Legitimate backups and software distribution; tune size and path.
+level: low
+license: DRL-1.1
