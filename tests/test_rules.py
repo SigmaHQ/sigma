@@ -1129,7 +1129,7 @@ class TestRules(unittest.TestCase):
         faulty_config = False
 
         # This test check of the "thor.yml" config file has a missing "WinEventLog:" prefix in Windows log sources
-        path_to_thor_config = "tests/thor.yml"
+        path_to_thor_config = "thor.yml"
         try:
             path_to_thor_config = os.path.join(
                 os.path.dirname(os.path.realpath(__file__)), path_to_thor_config
