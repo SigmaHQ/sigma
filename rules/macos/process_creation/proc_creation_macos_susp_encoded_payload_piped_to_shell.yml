@@ -1,0 +1,45 @@
+title: Suspicious Encoded Payload Piped To Shell - macOS
+id: b9a60caf-969e-4033-9513-2f097adee039
+status: experimental
+description: |
+    Detects a command line that downloads content with curl, decodes it with base64, gunzip or xxd, and pipes the result into a shell interpreter, in that order.
+    This chain is used by macOS ClickFix campaigns and by the MacSync and AMOS infostealer infection chains.
+    The rule matches only where the whole pipeline appears in a single command line. On macOS that happens when a shell is invoked with -c, or when the chain is run through osascript 'do shell script'.
+    When a user pastes a pipeline directly into an interactive Terminal, each stage is executed as its own process and no single process_creation event contains the chain, so that case is not covered by this rule.
+    The decode step is what separates this from legitimate installer one-liners, which fetch and execute without decoding.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/08/18/hunting-macsync-stealer-infrastructure-through-behavioral-pivots/
+    - https://securelist.com/macsync-new-version/121383/
+    - https://hunt.io/blog/macos-clickfix-applescript-terminal-phishing
+    - https://unit42.paloaltonetworks.com/atomic-macos-amos-stealer-activity
+author: Yana Ivanov
+date: 2026-10-10
+modified: 2026-11-15
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.command-and-control
+    - attack.t1059.004
+    - attack.t1105
+    - attack.t1027
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection_shell_c:
+        Image|endswith:
+            - '/sh'
+            - '/bash'
+            - '/zsh'
+        CommandLine|contains: ' -c '
+    selection_osascript:
+        Image|endswith: '/osascript'
+        CommandLine|contains: 'do shell script'
+    selection_chain:
+        CommandLine|re: 'curl.*\|.*\b(base64\s+(-d|-D|--decode)|gunzip|gzip\s+-d|xxd\s+-r)\b.*\|\s*(\S*/)?(ba|z)?sh\b'
+    condition: selection_chain and (selection_shell_c or selection_osascript)
+falsepositives:
+    - Installation and bootstrap scripts that fetch a compressed archive and pipe it through a shell
+    - Developer and CI tooling that unpacks a downloaded archive inline
+    - Provisioning and automation scripts invoked through 'sh -c'
+level: medium
