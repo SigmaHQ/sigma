@@ -1,0 +1,35 @@
+title: Global Administrator Role Permanently Assigned
+id: 49eac29e-585e-4e63-b3ac-7a39d65adf93
+status: experimental
+description: |
+    Detects a permanent active assignment of the Global Administrator role in Microsoft Entra ID, either made through Privileged Identity Management (PIM) or reported by PIM as made outside of it.
+    A permanent active assignment gives the account standing tenant-wide control without a just-in-time activation, an approval or an expiry.
+    Attackers who control a privileged account use it to keep access, and a permanent assignment that is removed again shortly afterwards is easy to miss in a review of current role members.
+references:
+    - https://learn.microsoft.com/en-us/entra/architecture/security-operations-privileged-identity-management#azure-ad-roles-assignment
+    - https://learn.microsoft.com/en-us/entra/id-governance/privileged-identity-management/pim-how-to-use-audit-log
+    - https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#global-administrator
+author: Tim Shelton (HAWK.io)
+date: 2026-11-11
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098.003
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection_activity:
+        properties.message:
+            - 'Add member to role in PIM completed (permanent)'
+            - 'Add member to role outside of PIM (permanent)'
+    selection_role:
+        properties.targetResources|contains:
+            - '62e90394-69f5-4237-9190-012177145e10'  # Global Administrator role template id
+            - 'Global Administrator'
+            - 'Company Administrator'  # Legacy display name
+    condition: all of selection_*
+falsepositives:
+    - Planned provisioning of a break glass (emergency access) account
+    - Approved onboarding of a new tenant administrator. Verify the change with the administrator who made it and prefer an eligible assignment.
+level: high
