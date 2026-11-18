@@ -1,0 +1,30 @@
+title: Uncommon Authentication Package Loaded By LSA
+id: 87d7a44b-91a4-4859-992f-43a11d64cfe6
+status: experimental
+description: |
+    Detects the Local Security Authority (LSA) loading an authentication package other than msv1_0, which is the only one Windows loads by default.
+    Authentication packages are DLLs loaded into lsass.exe at startup from the registry, which adversaries can abuse for persistence.
+references:
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4610
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-security-system-extension
+author: 'Bartosz Siedlikowski @bsiedlikowski'
+date: 2026-11-03
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1547.002
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: The Security System Extension audit subcategory needs to be enabled to log Event ID 4610'
+detection:
+    selection:
+        EventID: 4610
+    filter_main_msv1_0:
+        # Value format is '<DLL path> : <package name>'. The package name is set by the package itself and can contain any text,
+        # so the DLL path is matched with startswith instead of contains
+        AuthenticationPackageName|startswith: '?:\Windows\system32\msv1_0.DLL :'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Legitimate third-party authentication packages, e.g. the Cygwin LSA authentication package (cyglsa)
+level: high
