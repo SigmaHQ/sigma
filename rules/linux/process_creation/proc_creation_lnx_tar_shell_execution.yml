@@ -1,0 +1,36 @@
+title: Potential Shell Or Command Execution Via Tar
+id: 5fbd1c84-c13d-414a-9ab5-c20e40a122f5
+status: experimental
+description: |
+    Detects the execution of commands or interactive shells using the "tar" utility via flags such as "--checkpoint-action=exec" or "--to-command".
+    This is a GTFOBins technique commonly abused in wildcard injection attacks, sudoers misconfigurations, or restricted shell escapes to execute arbitrary code with elevated privileges.
+references:
+    - https://gtfobins.github.io/gtfobins/tar/
+    - https://www.helpnetsecurity.com/2014/06/27/exploiting-wildcards-on-linux/
+    - https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/wildcards-spare-tricks.html#tar
+author: Rafael Soje (@rafaelsoje)
+date: 2026-10-30
+tags:
+    - attack.execution
+    - attack.privilege-escalation
+    - attack.t1059.004
+    - attack.t1548.003
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith: '/tar'
+        CommandLine|contains:
+            - '--checkpoint-action=exec'
+            - '--checkpoint-action exec'
+            - '--checkpoint-action="exec'
+            - "--checkpoint-action='exec"
+            - '--to-command='
+            - '--to-command '
+            - '--to-command="'
+            - "--to-command='"
+    condition: selection
+falsepositives:
+    - Highly unlikely in production environments. Reading from archives with "--to-command" or invoking shell execution on checkpoints via "--checkpoint-action=exec" is rarely used in legitimate automation.
+level: high
