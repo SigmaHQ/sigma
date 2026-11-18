@@ -1,0 +1,31 @@
+title: Arbitrary File Copy Via Dtutil.EXE
+id: 33171905-1775-497b-a2c6-4d22bec061d4
+status: experimental
+description: |
+    Detects the use of "dtutil.exe" (SQL Server Integration Services package management utility) to copy a file that is not an SSIS package (.dtsx).
+    Adversaries can abuse dtutil's "/COPY FILE;" option to copy arbitrary files, such as payloads or tools, to another location using a signed Microsoft binary.
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/a79893e7ad7fe69e9eeb37c82e90685e10663312/yml/OtherMSBinaries/Dtutil.yml
+    - https://learn.microsoft.com/en-us/sql/integration-services/dtutil-utility
+author: Geovanny Basantes
+date: 2026-11-04
+tags:
+    - attack.command-and-control
+    - attack.t1105
+    - attack.stealth
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\dtutil.exe'
+    selection_cli:
+        CommandLine|contains|windash: '/copy'
+        CommandLine|contains: 'file;'
+    filter_main_dtsx:
+        CommandLine|re: '(?i)file;("[^"]+\.dtsx"|[^\s"]+\.dtsx(\s|$))'
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Legitimate administrative use of dtutil to copy SSIS packages saved with a non-standard extension
+level: medium
