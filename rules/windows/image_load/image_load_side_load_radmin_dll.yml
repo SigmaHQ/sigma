@@ -1,14 +1,30 @@
-
 title: Potential Radmin DLL Sideloading From User AppData
 id: 7b9139bc-caba-464b-a932-dc7e1dca6eb9
 status: experimental
-description: Detects the Radmin executable FamItrfc.exe loading BlkScrDl.dll from a user's local AppData Radmin directory, as observed in a reported supply-chain compromise.
+description: |
+    Detects potential DLL search-order hijacking involving the legitimate
+    Radmin executable FamItrfc.exe loading BlkScrDl.dll from the user's
+    AppData\Local\Radmin directory.
+
+    Google Threat Intelligence Group/Mandiant documented this activity
+    during the AOMEI Backupper supply-chain compromise. The compromised
+    update process delivered a Radmin bundle containing a legitimate
+    signed executable and an attacker-controlled BlkScrDl.dll, which
+    was loaded through DLL search-order hijacking.
+
+    The rule specifically targets the reported AppData location to
+    reduce false positives. During limited local testing of the official
+    Radmin Server 3.5.2.1 installer, FamItrfc.exe was found under
+    System32\rserver30, while BlkScrDl.dll was not found in the
+    extracted Server or Viewer installers.
+
 references:
     - https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering
     - https://www.manageengine.com/threat-analysis-lab/aomei-backupper-supply-chain-compromise.html
     - https://labs.cloudsecurityalliance.org/research/csa-research-note-aomei-backupper-update-server-tampering-20/
 author: brandolphj
 date: 2026-10-21
+modified: 2026-11-18
 tags:
     - attack.execution
     - attack.stealth
@@ -16,13 +32,11 @@ tags:
 logsource:
     category: image_load
     product: windows
-
 detection:
     selection:
         Image|endswith: '\AppData\Local\Radmin\FamItrfc.exe'
         ImageLoaded|endswith: '\AppData\Local\Radmin\BlkScrDl.dll'
     condition: selection
-
 falsepositives:
     - Unknown
 level: high
