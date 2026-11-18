@@ -1,0 +1,28 @@
+title: Suspicious Systemd Service File Creation
+id: 3958c337-ca1a-44ac-bdcb-c03e537f2f48
+status: experimental
+description: Detects the creation of systemd service or timer files in system directories, which is commonly used by threat actors for persistence.
+references:
+    - https://www.freedesktop.org/software/systemd/man/systemd.service.html
+author: Maksym Salyha
+date: 2026/11/18
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1543.003
+logsource:
+    category: file_event
+    product: linux
+detection:
+    selection:
+        TargetFilename|startswith:
+            - '/etc/systemd/system/'
+            - '/lib/systemd/system/'
+            - '/usr/lib/systemd/system/'
+        TargetFilename|endswith:
+            - '.service'
+            - '.timer'
+    condition: selection
+falsepositives:
+    - Legitimate administrative installation of software packages or system services.
+level: medium
