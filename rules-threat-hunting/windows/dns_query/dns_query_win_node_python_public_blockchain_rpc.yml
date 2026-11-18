@@ -1,0 +1,50 @@
+title: DNS Query To Public Blockchain RPC Endpoint By Node Or Python
+id: ed2c5950-1ed4-4ac5-aca7-ff3eeecb3d50
+status: experimental
+description: |
+    Detects a Node.js or Python interpreter resolving a public Polygon, BNB Smart Chain or Ethereum JSON-RPC endpoint or block-explorer API.
+    "EtherHiding" loaders used by DPRK "Contagious Interview" operators read their next-stage C2 address from a smart contract through such endpoints (eth_call), so a script interpreter on a workstation that is not doing Web3 development resolving them is worth reviewing.
+    Use this rule to hunt; it is expected to fire on legitimate Web3 tooling.
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/dprk-adopts-etherhiding
+    - https://www.ic3.gov/CSA/2026/260918.pdf
+    - https://www.virustotal.com/gui/file/677b85d56283a7c22f7f32350c6d81a7873c6c6afe1ff6b0d5a9608ba9614068
+author: Kirill Popov
+date: 2026-10-21
+tags:
+    - attack.command-and-control
+    - attack.t1102.001
+    - attack.t1071.001
+    - detection.threat-hunting
+logsource:
+    product: windows
+    category: dns_query
+detection:
+    selection_img:
+        Image|endswith:
+            - '\node.exe'
+            - '\python.exe'
+            - '\pythonw.exe'
+    selection_query_suffix:
+        QueryName|endswith:
+            - 'polygon-rpc.com'
+            - 'polygon.drpc.org'
+            - 'bsc.drpc.org'
+            - 'eth.drpc.org'
+            - '.publicnode.com'
+            - '1rpc.io'
+            - 'gateway.tenderly.co'
+            - '.quiknode.pro'
+            - 'rpc.ankr.com'
+            - '.llamarpc.com'
+            - 'bsc-dataseed.bnbchain.org'
+            - 'api.blockcypher.com'
+            - 'api.ethplorer.io'
+            - 'api.blockchair.com'
+    selection_query_contains:
+        QueryName|contains: 'bsc-dataseed'
+    condition: selection_img and 1 of selection_query_*
+falsepositives:
+    - Web3 / dApp development, hardhat or foundry tooling, wallets and trading bots written in Node.js or Python
+    - Package test suites that call public RPC endpoints
+level: low
