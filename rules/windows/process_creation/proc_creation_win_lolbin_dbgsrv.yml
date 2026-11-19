@@ -1,0 +1,30 @@
+title: Potential Binary Proxy Execution Via DbgSrv.EXE
+id: f4c96109-01bd-401a-b7f3-981b38cc9ce4
+status: experimental
+description: Detects execution of Microsoft User-Mode Debugger Process Server (dbgsrv.exe) with parameters to launch child processes or establish reverse debugging connections.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Dbgsrv/
+    - https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/dbgsrv-command-line-options
+author: RealFiras
+date: 2026-11-19
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1127
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\dbgsrv.exe'
+        - OriginalFileName: 'dbgsrv.exe'
+    selection_flags:
+        CommandLine|contains:
+            - ' -c '
+            - ' -c"'
+            - 'clicon='
+    condition: all of selection_*
+falsepositives:
+    - Legitimate debugging activities by developers or system administrators.
+level: medium
