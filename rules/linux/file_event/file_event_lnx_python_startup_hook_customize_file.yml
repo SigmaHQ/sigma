@@ -28,6 +28,12 @@ detection:
     filter_main_package_managers:
         # Anchored to the system binary directories, covers usrmerge and non-usrmerge layouts
         Image|re: '^/(usr/)?s?bin/(apk|apt|apt-get|dnf|dnf5|dpkg|rpm|yum|zypper)$'
+        # Only system Python locations, so a package manager writing to /home, /root or other user directories still alerts
+        TargetFilename|startswith:
+            - '/etc/python' # Debian ships /etc/python3.x/sitecustomize.py
+            - '/usr/lib/python'
+            - '/usr/lib64/python'
+            - '/usr/local/lib/python'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Python packages or environment managers legitimately shipping a "sitecustomize.py" (e.g. coverage or profiling tooling)
