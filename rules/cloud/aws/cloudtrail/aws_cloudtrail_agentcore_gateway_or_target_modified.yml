@@ -1,0 +1,38 @@
+title: AWS Bedrock AgentCore Gateway Or Target Modified
+id: b9d429ec-4db5-44e9-acc7-b8ac3a3d41f6
+status: experimental
+description: |
+    Detects updates to an Amazon Bedrock AgentCore gateway, or the creation, update, or deletion
+    of a gateway target. UpdateGateway is the API that attaches a policy engine and sets the
+    enforcement mode (ENFORCE or LOG_ONLY), and it can also change the gateway authorizer.
+    Changing a gateway target can add or swap the tools the gateway exposes.
+references:
+    - https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-event-types.html
+    - https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/understanding-gateway-cloudtrail-log-entries.html
+    - https://docs.aws.amazon.com/bedrock-agentcore-control/latest/APIReference/API_UpdateGateway.html
+    - https://docs.aws.amazon.com/bedrock-agentcore-control/latest/APIReference/API_CreateGatewayTarget.html
+    - https://docs.aws.amazon.com/bedrock-agentcore-control/latest/APIReference/API_UpdateGatewayTarget.html
+    - https://docs.aws.amazon.com/bedrock-agentcore-control/latest/APIReference/API_DeleteGatewayTarget.html
+    - https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/update-gateway-with-policy.html
+author: Raajhesh Kannaa Chidambaram (@raajheshkannaa)
+date: 2026-11-19
+tags:
+    - attack.defense-impairment
+    - attack.persistence
+    - attack.t1685
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: 'bedrock-agentcore.amazonaws.com'
+        eventName:
+            - 'UpdateGateway'
+            - 'CreateGatewayTarget'
+            - 'UpdateGatewayTarget'
+            - 'DeleteGatewayTarget'
+    condition: selection
+falsepositives:
+    - Authorized administrators attaching a policy engine, changing enforcement mode, or adding approved gateway tools.
+    - Infrastructure-as-code or the AgentCore CLI deploying gateway and target updates.
+level: high

@@ -1,0 +1,35 @@
+title: AWS Bedrock Agent Action Group Created Or Updated
+id: d7b761bd-e364-4451-9c00-46b3c991a1fa
+status: experimental
+description: |
+    Detects creation or updates of an Amazon Bedrock agent action group. Action groups wire an
+    agent to a Lambda function or API. Swapping the action group executor, schema, or function
+    definition can make a trusted agent run attacker-controlled code with the agent's permissions.
+    A subsequent PrepareAgent call is required before a draft change becomes live.
+references:
+    - https://docs.aws.amazon.com/bedrock/latest/APIReference/API_agent_CreateAgentActionGroup.html
+    - https://docs.aws.amazon.com/bedrock/latest/APIReference/API_agent_UpdateAgentActionGroup.html
+    - https://docs.aws.amazon.com/bedrock/latest/userguide/logging-using-cloudtrail.html
+    - https://github.com/elastic/detection-rules/blob/c5678aa55127177cd11a23aab25a8715854bdae7/rules/integrations/aws/persistence_bedrock_agent_or_action_group_manipulation.toml
+    - https://github.com/CasimirTerr/Strata/blob/e65c91ca317642f86f5ca11e4d362e1702c77891/sigma/st_006_agent_tool_action_group_added_or_changed.yml
+author: Raajhesh Kannaa Chidambaram (@raajheshkannaa)
+date: 2026-11-19
+tags:
+    - attack.persistence
+    - attack.execution
+    - attack.t1505
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource:
+            - 'bedrock.amazonaws.com'
+            - 'bedrock-agent.amazonaws.com'
+        eventName:
+            - 'CreateAgentActionGroup'
+            - 'UpdateAgentActionGroup'
+    condition: selection
+falsepositives:
+    - Developers or CI/CD pipelines adding or updating approved agent tools and action groups.
+level: high
