@@ -1,0 +1,38 @@
+title: Suspicious LSA Protection Downgrade Via RunAsPPL Registry Value
+id: 56df667a-5ac6-4483-8c2a-39f62b34efbc
+related:
+    - id: 8c0eca51-0f88-4db2-9183-fdfb10c703f9
+      type: similar
+status: experimental
+description: |
+    Detects the "RunAsPPL" value of the LSA control key being set to anything other than 1 or 2, which disables or weakens the Protected Process Light protection of LSASS.
+    Attackers disable LSA protection before dumping credentials from LSASS memory. The modification requires a reboot to take effect, and the process writing the value is not limited to the command line tools covered by the "LSA PPL Protection Setting Modification via CommandLine" rule.
+references:
+    - https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection
+    - https://github.com/redcanaryco/atomic-red-team/blob/04a53f0150b6215b5b47d2c13a3f882942fd289d/atomics/T1685/T1685.md
+    - https://github.com/elastic/detection-rules/blob/f4ef34b1c996da53880053dd497ca546c1b0bbfa/rules/windows/defense_evasion_lsass_ppl_disabled_registry.toml
+author: elhoim
+date: 2026-11-09
+tags:
+    - attack.credential-access
+    - attack.defense-impairment
+    - attack.t1003.001
+    - attack.t1685
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|endswith: '\Control\Lsa\RunAsPPL'
+    filter_main_enabled:
+        Details:
+            - 'DWORD (0x00000001)'
+            - 'DWORD (0x00000002)'
+    filter_optional_security_health:
+        Image|endswith: ':\Windows\System32\SecurityHealthService.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Administrators disabling LSA protection to troubleshoot an incompatible authentication plug-in or driver
+    - Management agents or deployment scripts that enforce the setting by rewriting the value
+level: high
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_lsa_ppl_protection_disabled/info.yml
