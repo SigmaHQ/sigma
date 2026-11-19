@@ -5,15 +5,26 @@ on:
   workflow_dispatch:
 
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   generate-heatmap:
+    name: generate-heatmap
     if: github.repository_owner == 'SigmaHQ'
+    permissions:
+      contents: write # push the PR branch
+      pull-requests: write # open the PR
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
+          persist-credentials: false
 
       - name: Install Sigma
         run: pipx install sigma-cli
@@ -21,7 +32,7 @@ jobs:
       - name: Update Heatmap
         run: sigma analyze attack count --min-score 0 --max-score 20 --min-color '#66b1ffff' --max-color '#ff66f4ff' ./other/sigma_attack_nav_coverage.json rule*
 
-      - name: Create Pull Request
+      - name: Create Pull Request # zizmor: ignore[superfluous-actions] action handles branch reuse/PR updates
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           reviewers: nasbench, frack113, phantinuss
