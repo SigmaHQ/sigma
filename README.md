@@ -128,6 +128,7 @@ Join the Sigma community on [Discord](https://discord.gg/CZhaX3ygdt) to discuss 
 * [Saeros](https://github.com/Saeros-Security/Saeros) - Open-source HIDS for Windows and Active Directory with local Sigma rule matching via ETW
 * [Security Onion](https://docs.securityonion.net/en/3/main/sigma/) - Open-source network security monitoring platform with built-in Sigma detection and automatic daily rule updates
 * [Sekoia.io XDR](https://www.sekoia.io) - XDR supporting Sigma and Sigma Correlation rules languages
+* [sigharvest](https://github.com/threat-hunter-eu/sigharvest) - Open-source aggregator that collects public Sigma rules from many sources, removes duplicates, and provides search, MITRE ATT&CK coverage and export through a CLI and a local web UI
 * [sigma2stix](https://github.com/muchdogesec/sigma2stix) - Converts the entire SigmaHQ Ruleset into STIX 2.1 Objects
 * [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion
 * [SOC Prime](https://my.socprime.com/sigma/) - Threat detection marketplace hosting community Sigma rules with translation to 25+ SIEM, EDR, and XDR platforms
