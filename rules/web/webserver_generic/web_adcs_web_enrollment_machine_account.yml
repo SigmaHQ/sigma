@@ -1,0 +1,31 @@
+title: Suspicious ADCS Web Enrollment Access By Machine Account
+id: 18cee689-1bf7-4c41-a39d-c719dce50275
+status: experimental
+description: |
+    Detects requests to the Active Directory Certificate Services (ADCS) web enrollment pages ("/certsrv/") authenticated as a machine account.
+    Computer accounts normally enroll through DCOM/RPC autoenrollment and do not use the web enrollment interface.
+    A machine account authenticating to web enrollment is a strong indicator of NTLM relay to AD CS HTTP endpoints (ESC8), e.g. after authentication coercion via PetitPotam or PrinterBug.
+references:
+    - https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf
+    - https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation
+    - https://github.com/topotam/PetitPotam
+    - https://support.microsoft.com/en-us/topic/kb5005413-mitigating-ntlm-relay-attacks-on-active-directory-certificate-services-ad-cs-3612b773-4043-4aa9-b23d-b87910cd3429
+author: elhoim
+date: 2026-10-15
+tags:
+    - attack.credential-access
+    - attack.collection
+    - attack.t1557
+    - attack.t1649
+logsource:
+    category: webserver
+    definition: Requires IIS W3C logging on the AD CS web enrollment server with the "cs-username" field enabled
+detection:
+    selection:
+        cs-uri-stem|contains: '/certsrv/'
+        cs-username|endswith: '$'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
+regression_tests_path: regression_data/rules/web/webserver_generic/web_adcs_web_enrollment_machine_account/info.yml
