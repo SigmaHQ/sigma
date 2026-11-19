@@ -1,0 +1,54 @@
+title: Suspicious QoS Policy Throttling Security Product Network Traffic
+id: f56e9a9e-916f-4aca-8dd5-75cb4d4a7ed6
+status: experimental
+description: |
+    Detects the NetQos PowerShell cmdlets "New-NetQosPolicy" or "Set-NetQosPolicy" invoked with a throttle rate and an application match condition that names the executable of an endpoint security product.
+    Such a policy limits the bandwidth available to the security agent and can delay or prevent its telemetry and alerts from reaching the management backend. Legitimate QoS policies target business applications, not security agents.
+references:
+    - https://www.zerosalarium.com/2026/06/edrchoker-choking-telemetry-stream-block-edr.html
+    - https://learn.microsoft.com/en-us/powershell/module/netqos/new-netqospolicy
+    - https://github.com/ByteRay-Labs/Query-Hub/blob/a453fcb09118894840a4e00b0db0f9807ba8441d/queries/edrchoker_qos_policy_abuse_targeting_edr_av_processes.yml
+author: elhoim
+date: 2026-11-10
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cmdlet:
+        CommandLine|contains:
+            - 'New-NetQosPolicy'
+            - 'Set-NetQosPolicy'
+    selection_action:
+        CommandLine|contains:
+            # covers ThrottleRateActionBitsPerSecond and its ThrottleRateAction / ThrottleRate aliases
+            - 'ThrottleRate'
+            - '-Throttle '
+            - '-maxbw'
+    selection_target:
+        CommandLine|contains:
+            - 'carbonblack'
+            - 'cb.exe'
+            - 'CortexXDR'
+            - 'CSFalconService'
+            - 'cyvera'
+            - 'edragent'
+            - 'elastic-agent'
+            - 'elastic-endpoint'
+            - 'falcon-sensor'
+            - 'HarfangLab'
+            - 'MsMpEng'
+            - 'MsSense'
+            - 'pmsu.exe'
+            - 'SenseCncProxy'
+            - 'SenseIR'
+            - 'SentinelAgent'
+            - 'SentinelService'
+            - 'WinDefend'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_powershell_netqospolicy_throttle_security_product/info.yml
