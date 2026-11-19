@@ -1,0 +1,72 @@
+title: Suspicious Svchost Lookalike Process Name Execution
+id: 3b0b5133-4729-492a-b529-4277307f55c5
+related:
+    - id: be58d2e2-06c8-4f58-b666-b99f6dc3b6cd
+      type: similar
+status: experimental
+description: |
+    Detects the execution of a process whose file name is a near-miss misspelling of "svchost.exe" (dropped, swapped, doubled or substituted characters such as "svhost.exe", "scvhost.exe", "svch0st.exe" or "svchostt.exe").
+    Malware commonly picks such names so that the process blends into the many legitimate Service Host entries in Task Manager while escaping exact-match detections on "svchost.exe". No legitimate Windows component uses these names.
+    Limitation: the rule matches an explicit list of 37 file names, not an edit distance. Other single-character insertions or substitutions not in the list (e.g. "svc_host.exe"), names with two or more edits and Unicode homoglyph variants are not detected.
+references:
+    - https://www.zscaler.com/blogs/cybersecurity-best-practices/process-masquerading
+    - https://github.com/elastic/detection-rules/blob/f4ef34b1c996da53880053dd497ca546c1b0bbfa/rules/windows/defense_evasion_masquerading_as_svchost.toml
+author: elhoim
+date: 2026-11-09
+tags:
+    - attack.stealth
+    - attack.t1036.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            # one character dropped
+            - '\schost.exe'
+            - '\svchos.exe'
+            - '\svchot.exe'
+            - '\svchst.exe'
+            - '\svcost.exe'
+            - '\svhost.exe'
+            - '\vchost.exe'
+            # adjacent characters swapped
+            - '\scvhost.exe'
+            - '\svchots.exe'
+            - '\svchsot.exe'
+            - '\svcohst.exe'
+            - '\svhcost.exe'
+            - '\vschost.exe'
+            # one character substituted
+            - '\svch0st.exe'
+            - '\svcho5t.exe'
+            - '\svchos7.exe'
+            - '\svchast.exe'
+            - '\svchoat.exe'
+            - '\svshost.exe'
+            - '\swchost.exe'
+            - '\sychost.exe'
+            # one character added
+            - '\ssvchost.exe'
+            - '\svcchost.exe'
+            - '\svchhost.exe'
+            - '\svchoost.exe'
+            - '\svchosst.exe'
+            - '\svchoste.exe'
+            - '\svchosts.exe'
+            - '\svchostt.exe'
+            - '\svchost1.exe'
+            - '\svchost2.exe'
+            - '\svchost_.exe'
+            - '\svchost-.exe'
+            - '\svvchost.exe'
+            # architecture suffix
+            - '\svchost32.exe'
+            - '\svchost64.exe'
+            # double extension
+            - '\svchost.exe.exe'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_susp_svchost_lookalike_name/info.yml
