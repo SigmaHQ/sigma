@@ -1,0 +1,25 @@
+title: HackTool - EvilClippy Execution
+id: 28e3ab6a-6384-4d80-aefe-0db47f739748
+status: experimental
+description: |
+    Detects the execution of EvilClippy. A dual use tool that assists in hiding malicious VBA macro code inside MS Office documents.
+    Attackers can use it to stomp the VBA source code of a macro enabled document while keeping the compiled p-code, in order to evade static analysis tools.
+references:
+    - https://github.com/outflanknl/EvilClippy
+    - https://www.outflank.nl/blog/2019/05/05/evil-clippy-ms-office-maldoc-assistant/
+author: ali-vrd
+date: 2026-11-10
+tags:
+    - attack.stealth
+    - attack.t1564.007
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith: '\EvilClippy.exe'
+        - OriginalFileName: 'EvilClippy.exe'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
