@@ -1,0 +1,37 @@
+title: msiexec.exe Spawning cmd.exe to Start an LNK File
+id: 9ab49353-da82-4a4e-94e9-603cac795f9e
+status: experimental
+description: |
+    Detects msiexec.exe spawning cmd.exe with the pattern "/d /s /c" plus a ".lnk"
+    target. Matches the PavinLoader MSI masquerades (WiX 3.11.1.2318, hidden custom
+    actions SetCA_*/CA_* of type 51+242 with MsiHiddenProperties=WixSilentExec64CmdLine)
+    which run: cmd.exe /d /s /c "cd /d <dir> && start "" Antlr3Runtime.lnk" (disguised
+    as Qualcomm Killer Network Service) or MasterDataManager.lnk (disguised as NVIDIA
+    PhysX Runtime). Launching a shortcut from an installer command line this way is
+    uncommon in legitimate MSI packages.
+references:
+    - https://github.com/fotedev/pavinloader-easeus-campaign
+    - https://attack.mitre.org/techniques/T1218/007/
+    - https://attack.mitre.org/techniques/T1059/003/
+author: fotedev
+date: 2026-10-29
+tags:
+    - attack.execution
+    - attack.t1059.003
+    - attack.t1218.007
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\msiexec.exe'
+    selection_child_img:
+        Image|endswith: '\cmd.exe'
+    selection_child_cli:
+        CommandLine|contains|all:
+            - '/d /s /c'
+            - '.lnk'
+    condition: all of selection_*
+falsepositives:
+    - MSI installers that legitimately launch shortcuts through cmd.exe after installation (rare)
+level: high
