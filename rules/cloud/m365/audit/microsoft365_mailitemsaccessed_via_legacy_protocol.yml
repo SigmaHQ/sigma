@@ -1,18 +1,24 @@
 title: M365 Mailbox Items Accessed Via Legacy Email Protocol
 id: d812c83f-5bd2-457f-8b18-dd98e2e3cdb1
+related:
+    - id: 60f6535a-760f-42a9-be3f-c9a0a025906e
+      type: similar
 status: experimental
 description: |
     Detects access to mailbox items in the Microsoft 365 unified audit log (MailItemsAccessed)
     where the client used a legacy email protocol (IMAP4 or POP3). MailItemsAccessed is the audit
     event that proves mail was actually read or synced, and it records the protocol and client in
-    ClientInfoString. Legacy protocols are the classic remote-collection vector: they authenticate
-    with basic authentication, which bypasses MFA, so an attacker who has stolen a user's password
-    can connect remotely over IMAP or POP3 and pull the contents of the mailbox without ever
-    triggering a modern-auth sign-in alert. Microsoft recommends disabling legacy protocols for
-    exactly this reason. This rule fires on the collection itself, not on the sign-in, so it also
-    catches cases where the sign-in was not itself flagged as legacy authentication.
+    ClientInfoString. Legacy-protocol access is rare in most tenants, so it is a useful
+    remote-collection signal: an attacker with a user's credentials can connect over IMAP or POP3
+    and pull mailbox contents without ever triggering a modern-auth sign-in alert. (Basic
+    authentication for IMAP and POP3 was removed in Exchange Online in 2022 and these protocols
+    now use OAuth, so the signal here is the rarity of legacy-protocol access, not an MFA bypass.)
+    MailItemsAccessed is only logged for certain Microsoft 365 licence tiers and depends on
+    mailbox auditing being enabled, so this rule fires only where that logging is in place. This
+    rule fires on the collection itself, not on the sign-in, so it also catches cases where the
+    sign-in was not itself flagged as legacy authentication.
 references:
-    - https://learn.microsoft.com/ar-sa/purview/audit-log-investigate-accounts
+    - https://learn.microsoft.com/en-us/purview/audit-log-investigate-accounts
     - https://www.levelblue.com/blogs/spiderlabs-blog/microsoft-365-identifying-mailbox-access
     - https://research.splunk.com/sources/3d5188eb-341a-4b46-9caa-aade4047d027/
 author: Haroon Arshad
@@ -21,8 +27,8 @@ tags:
     - attack.collection
     - attack.t1114.002
 logsource:
-    service: audit
     product: m365
+    service: audit
 detection:
     selection:
         Workload: 'Exchange'
@@ -36,9 +42,3 @@ falsepositives:
     - Shared mailboxes or service accounts accessed by automation that uses IMAP/POP3.
     - Tenants that have not disabled legacy protocols will see this fire for normal users; treat the first hits as an inventory of who still uses legacy mail, then tune.
 level: medium
-related:
-    - id: 60f6535a-760f-42a9-be3f-c9a0a025906e
-      type: similar
-fields:
-    - UserId
-    - ClientInfoString
