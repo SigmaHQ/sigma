@@ -1,0 +1,47 @@
+title: Suspicious Outlook Inbox Rule Created
+id: dfafa3be-4d64-4707-bb47-bfae9f48ec40
+status: experimental
+description: Detects the creation or modification of an Outlook inbox rule that performs potentially suspicious actions such as forwarding, redirecting, deleting or moving messages. Attackers abuse inbox rules for persistence, since rules keep firing even after a password reset, and to collect or hide email, a technique widely used in Business Email Compromise. This rule differs from the threat hunting rule 'Inbox Rules Creation Or Update Activity in O365' (d3577be1-42c9-44a7-b56e-2e8de97349d3), which broadly hunts any rule creation or update activity, by focusing specifically on forwarding and redirecting actions plus message deletion and folder moves - the collection and email-hiding actions observed in BEC.
+references:
+    - https://research.splunk.com/cloud/449f525a-7b42-47be-96a7-d9724e336c19/
+related:
+    - id: d3577be1-42c9-44a7-b56e-2e8de97349d3
+      type: similar
+author: Splunk Threat Research Team (original rule), ali-vrd (sigma rule)
+date: 2026-11-10
+tags:
+    - attack.persistence
+    - attack.t1137.005
+    - attack.collection
+    - attack.t1114.003
+    - attack.stealth
+    - attack.t1564.008
+logsource:
+    product: m365
+    service: audit
+    definition: "Requirements: The 'Parameters' field is a list of dict. A correct mapping to the 'Name' and 'Value' fields inside is recommended to avoid greedy search"
+detection:
+    selection:
+        Operation:
+            - 'New-InboxRule'
+            - 'Set-InboxRule'
+    selection_forward:
+        Parameters.Name|contains:
+            - 'ForwardTo'
+            - 'ForwardAsAttachmentTo'
+            - 'RedirectTo'
+    selection_delete:
+        Parameters.Name|contains:
+            - 'DeleteMessage'
+            - 'SoftDeleteMessage'
+        Parameters.Value|contains:
+            - 'True'
+    selection_move:
+        Operation: 'New-InboxRule'
+        Parameters.Name|contains:
+            - 'MoveToFolder'
+            - 'CopyToFolder'
+    condition: selection and 1 of selection_*
+falsepositives:
+    - Legitimate inbox rules created by users that forward messages to another mailbox or organize them into folders on creation
+level: medium
