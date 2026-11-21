@@ -1,0 +1,24 @@
+title: WMI Test Tool Execution - Wbemtest.EXE
+id: 8b139a50-f170-4d01-80f1-3269e0fee2d6
+status: experimental
+description: |
+    Detects execution of wbemtest.exe, the interactive WMI Test GUI. It is rarely used legitimately on endpoints and can be abused to
+    query WMI, instantiate classes for execution, and create persistence (WMI event subscriptions) interactively.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Wbemtest/
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.execution
+    - attack.t1047
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith: '\wbemtest.exe'
+        - OriginalFileName: 'wbemtest.exe'
+    condition: selection
+falsepositives:
+    - Administrators or developers troubleshooting WMI
+level: medium
