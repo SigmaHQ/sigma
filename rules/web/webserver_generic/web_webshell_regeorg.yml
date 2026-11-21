@@ -1,13 +1,13 @@
 title: Webshell ReGeorg Detection Via Web Logs
 id: 2ea44a60-cfda-11ea-87d0-0242ac130003
 status: test
-description: Certain strings in the uri_query field when combined with null referer and null user agent can indicate activity associated with the webshell ReGeorg.
+description: Detects ReGeorg webshell URL parameters in POST requests with empty referrer and user-agent headers.
 references:
     - https://community.rsa.com/community/products/netwitness/blog/2019/02/19/web-shells-and-netwitness-part-3
     - https://github.com/sensepost/reGeorg
 author: Cian Heasley
 date: 2020-08-04
-modified: 2023-01-02
+modified: 2026-10-09
 tags:
     - attack.persistence
     - attack.t1505.003
@@ -22,8 +22,20 @@ detection:
             - 'cmd=disconnect'
             - 'cmd=forward'
     filter:
-        cs-referer: null
-        cs-user-agent: null
+        # HTTP Server API uses cs(Referrer), while IIS uses cs(Referer).
+        # Both must be empty so a populated header cannot be bypassed by a missing alias.
+        cs(Referrer):
+            - null
+            - ''
+            - '-'
+        cs(Referer):
+            - null
+            - ''
+            - '-'
+        cs(User-Agent):
+            - null
+            - ''
+            - '-'
         cs-method: POST
     condition: selection and filter
 falsepositives:
