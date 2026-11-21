@@ -44,28 +44,26 @@ def init_arguments(arguments: list) -> list:
     )
     arg_status = parser.add_mutually_exclusive_group(required=True)
     arg_status.add_argument(
-        "-s", "--statuses", nargs="*", choices=STATUS, help="Select status of rules"
+        "-s", "--statuses", nargs="+", choices=STATUS, help="Select status of rules"
     )
     arg_status.add_argument(
         "-ms",
         "--min-status",
-        nargs="?",
         choices=STATUS,
         help="Sets the minimum status of rules to select",
     )
     arg_level = parser.add_mutually_exclusive_group(required=True)
     arg_level.add_argument(
-        "-l", "--levels", nargs="*", choices=LEVEL, help="Select level of rules"
+        "-l", "--levels", nargs="+", choices=LEVEL, help="Select level of rules"
     )
     arg_level.add_argument(
         "-ml",
         "--min-level",
-        nargs="?",
         choices=LEVEL,
         help="Sets the minimum level of rules to select",
     )
     parser.add_argument(
-        "-r", "--rule-types", choices=RULES, nargs="*", help="Select type of rules"
+        "-r", "--rule-types", choices=RULES, nargs="+", help="Select type of rules"
     )
     args = parser.parse_args(arguments)
 
