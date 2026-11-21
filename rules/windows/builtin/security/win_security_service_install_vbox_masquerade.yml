@@ -1,0 +1,68 @@
+title: Potential VirtualBox Component Masquerading Via Service Install - Security
+id: 9d2f6a3e-4c1b-4f8a-b7e5-3a6d1c9f2e0b
+related:
+    - id: 5b8e2c71-0f4a-4d93-a6b8-1c7e9d3f2a40
+      type: similar
+status: experimental
+description: |
+    Detects installation of a Windows service via Security EventID 4697 that is named after
+    a VirtualBox Guest Additions component (VBoxGuest, VBoxMouse, VBoxSF, VBoxService,
+    VBoxVideo, VBoxWDDM). Fires when either:
+      (a) the service binary is registered outside the legitimate VirtualBox install/driver
+          paths, or
+      (b) a driver-class component name (VBoxGuest/VBoxMouse/VBoxSF/VBoxVideo/VBoxWDDM) is
+          registered with a ServiceType that is not a kernel driver (0x1) or file-system
+          driver (0x2), which the genuine driver components cannot produce.
+    Adversaries reuse trusted VirtualBox names to blend malicious persistence into expected
+    guest-VM telemetry.
+references:
+    - https://www.vmray.com/execution-level-analysis-of-a-russian-speaking-multi-operator-intrusion-campaign-operation-standoff/
+author: Pavan Pothamsetti (PpT2211)
+date: 2026-08-24
+modified: 2026-11-20
+references:
+    - https://www.vmray.com/execution-level-analysis-of-a-russian-speaking-multi-operator-intrusion-campaign-operation-standoff/
+tags:
+    - attack.stealth
+    - attack.t1036.005
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1543.003
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: The "System Security Extension" audit subcategory need to be enabled to log the EID 4697'
+detection:
+    selection_eventid:
+        EventID: 4697
+    selection_vbox_names:
+        ServiceName|contains:
+            - 'vboxguest'
+            - 'vboxmouse'
+            - 'vboxsf'
+            - 'vboxservice'
+            - 'vboxvideo'
+            - 'vboxwddm'
+    filter_main_legit_path:
+        ServiceFileName|contains:
+            - 'program files\oracle\virtualbox'
+            - 'system32\drivers\vbox'
+            - 'system32\vboxservice'
+    selection_driver_names:
+        ServiceName|contains:
+            - 'vboxguest'
+            - 'vboxmouse'
+            - 'vboxsf'
+            - 'vboxvideo'
+            - 'vboxwddm'
+        ServiceType|exists: true
+    filter_main_driver_type:
+        # 4697 logs ServiceType as hex bit flags; anything else (0x10, 0x20, 0x110, 0x120, ...) is not a driver
+        ServiceType:
+            - '0x1'
+            - '0x2'
+    condition: selection_eventid and ((selection_vbox_names and not filter_main_legit_path) or (selection_driver_names and not filter_main_driver_type))
+falsepositives:
+    - Non-standard but legitimate VirtualBox installs (custom install directory). Tune filter_main_legit_path to your environment
+    - Endpoint tooling that re-registers/repairs VirtualBox Guest Additions services outside the default path
+level: medium
