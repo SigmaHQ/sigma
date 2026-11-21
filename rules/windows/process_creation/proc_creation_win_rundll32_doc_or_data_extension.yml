@@ -1,0 +1,64 @@
+title: Rundll32 Export Call Against Document Or Data File Extension
+id: 3e6b8f1a-2d5c-4a9e-b1f4-7c8d0a2e5f6b
+related:
+    - id: 4aa6040b-3f28-44e3-a769-9208e5feb5ec
+      type: similar
+    - id: c3a99af4-35a9-4668-879e-c09aeb4f2bdf
+      type: similar
+    - id: a7e1d2c4-5b38-4f6a-9c0e-2d4b8f1a6e73
+      type: similar
+status: experimental
+description: |
+    Detects rundll32.exe invoked with a document or data file extension (e.g. .txt, .pdf,
+    .dat, .tmp, .ini, .html, .js) immediately followed by a comma, i.e. in the
+    "module,export" position. rundll32 loads its first argument as a module regardless of
+    extension, so adversaries rename a malicious DLL to a benign-looking extension.
+    This complements the existing image-extension and uncommon-extension rules: it
+    requires the export-call syntax, which keeps it narrower than the uncommon-extension
+    rule, and covers document/data extensions that the image-extension rule does not.
+    Execution with a msiexec.exe parent is excluded, since MSI custom actions routinely
+    run rundll32 against .tmp/.dat staging files.
+references:
+    - https://www.fortinet.com/blog/threat-research/infostealer-malware-formbook-spread-via-phishing-campaign-part-i
+author: Pavan Pothamsetti (PpT2211)
+date: 2026-08-28
+tags:
+    - attack.stealth
+    - attack.t1218.011
+    - attack.t1036.008
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\rundll32.exe'
+        - OriginalFileName: 'RUNDLL32.EXE'
+    selection_cli:
+        CommandLine|contains:
+            - '.pdf,'
+            - '.pdf",'
+            - '.docx,'
+            - '.docx",'
+            - '.ppt,'
+            - '.ppt",'
+            - '.txt,'
+            - '.txt",'
+            - '.dat,'
+            - '.dat",'
+            - '.tmp,'
+            - '.tmp",'
+            - '.ini,'
+            - '.ini",'
+            - '.html,'
+            - '.html",'
+            - '.htm,'
+            - '.htm",'
+            - '.js,'
+            - '.js",'
+    filter_main_msiexec:
+        ParentImage|endswith: '\msiexec.exe'
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Legitimate installers and updaters (e.g. Squirrel-based apps, some ClickOnce deployments) that stage payloads with non-standard extensions before invoking rundll32. Extend filter_main_msiexec if identified in your environment
+    - Rare help or media viewer integrations that pass non-DLL files to rundll32
+level: high
