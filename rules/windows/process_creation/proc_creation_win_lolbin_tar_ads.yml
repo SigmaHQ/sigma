@@ -1,0 +1,27 @@
+title: Tar Archive Into Alternate Data Stream
+id: 0cef5e8e-a59a-4cad-b54b-47f48a963f2b
+status: experimental
+description: |
+    Detects usage of the built-in "tar.exe" (bsdtar) where the archive source or destination is an NTFS Alternate Data Stream (ADS).
+    Adversaries abuse "tar.exe" to compress data into, or extract data from, an ADS in order to hide payloads/collected data and evade detection.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Tar/
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1564.004/T1564.004.md
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.stealth
+    - attack.t1564.004
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\tar.exe'
+        - OriginalFileName: 'bsdtar'
+    selection_ads:
+        CommandLine|re: '\\[^\\ ]+:[^\\/ ]'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
