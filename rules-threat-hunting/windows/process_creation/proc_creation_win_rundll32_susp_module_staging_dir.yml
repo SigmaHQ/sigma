@@ -1,0 +1,42 @@
+title: Rundll32 Execution With Module In User-Writable Staging Directory
+id: a7e1d2c4-5b38-4f6a-9c0e-2d4b8f1a6e73
+related:
+    - id: 3e6b8f1a-2d5c-4a9e-b1f4-7c8d0a2e5f6b
+      type: similar
+    - id: cf879ffb-793a-4753-9a14-bc8f37cc90df
+      type: similar
+status: experimental
+description: |
+    Detects rundll32.exe where the module to be loaded (the argument before the first
+    comma) is located in a user-writable staging directory such as Temp, AppData\Roaming,
+    ProgramData, Users\Public or Downloads. Legitimate rundll32 targets normally live under
+    System32 or Program Files. Paths that appear only as arguments to the export function
+    (e.g. the file passed to shell32.dll,OpenAs_RunDLL) are intentionally not matched.
+    Unlike the Qakbot-specific rule, this is not tied to specific parent processes, so it
+    is broader and intended as a hunting/triage signal.
+    Execution with a msiexec.exe parent is excluded.
+references:
+    - https://www.fortinet.com/blog/threat-research/infostealer-malware-formbook-spread-via-phishing-campaign-part-i
+author: Pavan Pothamsetti (PpT2211)
+date: 2026-08-28
+tags:
+    - attack.stealth
+    - attack.t1218.011
+    - detection.threat-hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\rundll32.exe'
+        - OriginalFileName: 'RUNDLL32.EXE'
+    selection_module:
+        # Staging directory must appear before the first comma (the module position).
+        # Allows an optional quote after the executable name and before the module path.
+        CommandLine|re: '(?i)rundll32(\.exe)?"?\s+"?[^,]*\\(AppData\\Local\\Temp|AppData\\Roaming|ProgramData|Users\\Public|Downloads)\\[^,]*,'
+    filter_main_msiexec:
+        ParentImage|endswith: '\msiexec.exe'
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Browser components, printer/scanner utilities and some updaters load DLLs from AppData or ProgramData during normal operation. Baseline before alerting
+level: medium
