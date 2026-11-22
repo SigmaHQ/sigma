@@ -1,0 +1,38 @@
+title: Transparent Tribe PcDirvs Loader File Creation
+id: 7735e9b5-8afd-4727-a0f0-eb1ba2c6be80
+status: experimental
+description: |
+    Detects the creation of files used by the PcDirvs loader of Transparent Tribe (APT36), as reported by CYFIRMA in December 2025.
+    In this campaign against Indian government entities, a LNK named "NCERT-Whatsapp-Advisory.pdf.lnk" installs a remote MSI.
+    The MSI drops "pdf.dll" and a malicious "wininet.dll" into "C:\ProgramData\PcDirvs\", then drops and runs "PcDirvs.exe".
+    A "PcDirvs.hta" script adds "PcDirvs.exe" to the Run key for persistence.
+references:
+    - https://www.cyfirma.com/research/apt36-lnk-based-malware-campaign-leveraging-msi-payload-delivery/
+author: '@sohankanna'
+date: 2026-11-22
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1574.001
+    - attack.g0134
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_dlls:
+        TargetFilename|contains: '\ProgramData\PcDirvs\'
+        TargetFilename|endswith:
+            - '\pdf.dll'
+            - '\wininet.dll'
+    selection_files:
+        TargetFilename|contains: '\ProgramData\'
+        TargetFilename|endswith:
+            - '\PcDirvs.exe'
+            - '\PcDirvs.hta'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high
