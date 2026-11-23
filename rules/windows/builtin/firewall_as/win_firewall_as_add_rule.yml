@@ -6,7 +6,7 @@ references:
     - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
 author: frack113
 date: 2022-02-19
-modified: 2025-10-08
+modified: 2026-08-27
 tags:
     - attack.defense-impairment
     - attack.t1686.003
@@ -38,9 +38,15 @@ detection:
             - 'C:\Windows\Tasks\'
             - 'C:\Windows\Temp\'
             - '\AppData\Local\Temp\'
-    filter_main_system_dllhost:
-        ApplicationPath: 'System'
-        ModifyingApplication: 'C:\Windows\System32\dllhost.exe'
+    filter_main_system:
+        ApplicationPath: 'SYSTEM'
+        ModifyingApplication:
+            - 'C:\Windows\System32\dllhost.exe'
+            - 'C:\Windows\System32\oobe\Setup.exe'
+            - 'C:\Windows\System32\svchost.exe'
+    filter_main_ehome:
+        ApplicationPath|startswith: 'C:\Windows\ehome\'
+        ModifyingApplication: 'C:\Windows\System32\oobe\Setup.exe'
     filter_main_tiworker:
         ModifyingApplication|startswith: 'C:\Windows\WinSxS\'
         ModifyingApplication|endswith: '\TiWorker.exe'
@@ -61,5 +67,8 @@ detection:
               - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
               - 'C:\Program Files\Windows Defender\'
           ApplicationPath|endswith: '\MsMpEng.exe'
+    filter_optional_systemApps:
+        ApplicationPath|startswith: 'C:\Windows\SystemApps\'
+        ModifyingApplication: 'C:\Windows\System32\svchost.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 level: medium
