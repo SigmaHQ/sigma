@@ -1,0 +1,34 @@
+title: Suspicious WSL Binary Masquerading
+id: 530576ee-3b62-4bce-9a03-9aac6c61788a
+status: experimental
+description: |
+    Detects execution of masqueraded wsl.exe binary.
+    Attackers can rename a malicious payload to wsl.exe to masquerade as the legitimate Windows Subsystem for Linux binary,
+    bypassing detection based on image name alone and abusing user trust in the WSL process name.
+references:
+    - https://cardinalops.com/blog/bash-and-switch-hijacking-via-windows-subsystem-for-linux/
+    - https://blog.qualys.com/vulnerabilities-threat-research/2022/04/20/implications-of-windows-subsystem-for-linux-for-adversaries-defenders-part-2
+    - https://www.bleepingcomputer.com/news/security/new-malware-uses-windows-subsystem-for-linux-for-stealthy-attacks/
+    - https://thehackernews.com/2021/09/new-malware-targets-windows-subsystem.html
+    - https://learn.microsoft.com/en-us/windows/wsl/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-05-05
+tags:
+    - attack.stealth
+    - attack.t1036.005
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\wsl.exe'
+    filter_main_legit_original:
+        OriginalFileName: 'wsl.exe'
+    filter_main_null:
+        OriginalFileName: null
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unlikely
+level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_wsl_masquerading/info.yml

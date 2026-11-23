@@ -1,0 +1,45 @@
+title: ADCS - Certighost Ghost Machine Account Creation
+id: fa0bac5f-d170-4a91-9780-1ad71dc1f49e
+status: experimental
+description: |
+    Detects the creation of a machine account whose name starts with 'GHOST', which is the
+    naming convention used by the CVE-2026-54121 (Certighost) exploit tooling.
+
+    The public proof-of-concept for Certighost creates a temporary machine account with a
+    name of the form GHOST<random>$ before enrolling for a DC certificate via the cdc chase
+    path. The attacker-controlled machine account is used as the requester identity in the
+    certificate request; the cdc attribute then redirects the CA to a rogue host that returns
+    a forged Domain Controller identity. The resulting certificate carries the DC's SID and
+    DNS name, enabling full PKINIT authentication as the targeted DC followed by DCSync.
+
+    A machine account creation event (4741) where TargetUserName starts with 'GHOST' and
+    ends with '$' is a high-fidelity indicator of this attack tool's execution. Legitimate
+    environments very rarely provision machine accounts with this prefix.
+references:
+    - https://github.com/aniqfakhrul/CVE-2026-54121
+    - https://gist.github.com/H0j3n/a5ef2609b5f2944ac2390a191a534c26
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-07-30
+tags:
+    - attack.privilege-escalation
+    - attack.credential-access
+    - attack.persistence
+    - attack.t1136.002
+    - attack.t1649
+    - cve.2026-54121
+    - detection.emerging-threats
+logsource:
+    product: windows
+    service: security
+    definition: |
+        Requirements:
+            Audit Policy : Account Management > Audit Computer Account Management
+detection:
+    selection:
+        EventID: 4741
+        TargetUserName|startswith: 'GHOST'
+        TargetUserName|endswith: '$'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high

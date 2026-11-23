@@ -7,7 +7,7 @@ references:
     - https://isc.sans.edu/forums/diary/Investigating+Microsoft+BITS+Activity/23281/
 author: Florian Roth (Nextron Systems), Tim Shelton
 date: 2019-03-07
-modified: 2023-05-17
+modified: 2026-09-30
 tags:
     - attack.command-and-control
     - attack.execution
@@ -21,14 +21,15 @@ logsource:
 detection:
     selection:
         c-useragent|startswith: 'Microsoft BITS/'
-    falsepositives:
+    filter_main_legit_tlds:
         cs-host|endswith:
             - '.com'
+            - '.microsoft' # Microsoft brand TLD
             - '.net'
             - '.org'
             - '.scdn.co' # spotify streaming
             - '.sfx.ms' # Microsoft domain, example request: https://oneclient.sfx.ms/PreSignInSettings/Prod/2022-08-15-21-xx-xx/PreSignInSettingsConfig.json
-    condition: selection and not falsepositives
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Rare programs that use Bitsadmin and update from regional TLDs e.g. .uk or .ca
 level: high

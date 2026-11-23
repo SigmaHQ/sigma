@@ -1,0 +1,24 @@
+title: AWS Bedrock Guardrail Deleted
+id: 59b70e4d-dd17-44a9-b740-acf07ae3eb6a
+status: experimental
+description: |
+    Detects deletion of an Amazon Bedrock guardrail, which may indicate attempts to remove
+    model safety controls and allow unsafe or unauthorized model responses.
+references:
+    - https://docs.aws.amazon.com/bedrock/latest/APIReference/API_DeleteGuardrail.html
+author: Marco Pedrinazzi (@pedrinazziM) (InTheCyber)
+date: 2026-07-10
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName: 'DeleteGuardrail'
+        eventSource: 'bedrock.amazonaws.com'
+    condition: selection
+falsepositives:
+    - Legitimate guardrail deletion by authorized identities.
+level: medium
