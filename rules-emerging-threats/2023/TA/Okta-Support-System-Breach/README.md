@@ -12,4 +12,4 @@ You can find more information on the threat in the following articles:
 
 ## Rules
 
-- [Okta 2023 Breach Indicator Of Compromise](./okta_apt_suspicious_user_creation.yml.yml)
+- [Okta 2023 Breach Indicator Of Compromise](./okta_apt_suspicious_user_creation.yml)
