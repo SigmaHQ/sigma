@@ -7,9 +7,11 @@ description: |
 references:
     - https://posts.specterops.io/shhmon-silencing-sysmon-via-driver-unload-682b5be57650
     - https://youtu.be/zSihR3lTf7g
+    - https://github.com/trustedsec/SysmonCommunityGuide/blob/557dbd51b98952bc26f698620e48dfc7833b5cf0/chapters/the-sysmon-driver.md
+    - https://medium.com/@matterpreter/shhmon-silencing-sysmon-via-driver-unload-682b5be57650
 author: B.Talebi
 date: 2022-07-28
-modified: 2024-03-25
+modified: 2026-11-16
 tags:
     - attack.defense-impairment
     - attack.t1685
@@ -20,7 +22,9 @@ detection:
     selection:
         TargetObject|contains: '\Services\'
         TargetObject|endswith: '\Instances\Sysmon Instance\Altitude'
-    condition: selection
+    filter_main_default_altitude:
+        Details: 385201
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Legitimate driver altitude change to hide sysmon
 level: high
