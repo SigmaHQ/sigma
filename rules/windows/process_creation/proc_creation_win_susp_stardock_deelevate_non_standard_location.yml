@@ -1,0 +1,35 @@
+title: Stardock DeElevate Binary Execution From Non-Standard Location
+id: 534a4361-51b2-4eca-9bc6-e6b1b4cc0484
+status: experimental
+description: |
+    Detects execution of Stardock's signed `DeElevate64.exe` / `DeElevate.exe` outside the Stardock installation folders in Program Files.
+    Attackers copy the signed host into a user-writable folder (for example `%LOCALAPPDATA%\Programs\Stardock Smart DeElevation Tool\`) next to a patched `DeElevator64.dll` so the signed binary side-loads their loader (ROMULUS ClickFix chain, BabaDeda/CNCMachineRMS).
+references:
+    - https://www.huntress.com/blog/chatgpt-custom-gpts-clickfix-rat
+    - https://blackpointcyber.com/blog/romulus-cncmachinerms/
+    - https://hijacklibs.net/entries/3rd_party/stardock/deelevator64.html
+author: Harper Johns
+date: 2026-11-24
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.execution
+    - attack.stealth
+    - attack.t1574.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith:
+              - '\DeElevate64.exe'
+              - '\DeElevate.exe'
+        - OriginalFileName: 'DeElevate.exe'
+    filter_main_legit_path:
+        Image|startswith:
+            - 'C:\Program Files\Stardock\'
+            - 'C:\Program Files (x86)\Stardock\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Portable or per-user installations of Stardock products (Fences, Start11, Groupy)
+level: medium

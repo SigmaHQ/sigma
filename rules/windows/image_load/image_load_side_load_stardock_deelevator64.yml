@@ -1,0 +1,33 @@
+title: Potential DeElevator64.DLL Sideloading
+id: 917c1620-70d6-41e6-b2d7-4067f9b66b68
+status: experimental
+description: |
+    Detects `DeElevate64.exe` loading `DeElevator64.dll` from outside the Stardock folders in Program Files.
+    In the ROMULUS ClickFix chain the signed Stardock executable and a patched `DeElevator64.dll` (one added import, `I++u.dll`) are installed together from an MSI into the user profile; the DLL pulls in the loader that decodes a shellcode from `Build.dat`.
+references:
+    - https://www.huntress.com/blog/chatgpt-custom-gpts-clickfix-rat
+    - https://blackpointcyber.com/blog/romulus-cncmachinerms/
+    - https://hijacklibs.net/entries/3rd_party/stardock/deelevator64.html
+author: Harper Johns
+date: 2026-11-24
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.execution
+    - attack.stealth
+    - attack.t1574.001
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\DeElevate64.exe'
+        ImageLoaded|endswith: '\DeElevator64.dll'
+    filter_main_legit_path:
+        ImageLoaded|startswith:
+            - 'C:\Program Files\Stardock\'
+            - 'C:\Program Files (x86)\Stardock\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Portable or per-user installations of Stardock products
+level: medium

