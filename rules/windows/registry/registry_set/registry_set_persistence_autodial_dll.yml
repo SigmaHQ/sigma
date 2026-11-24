@@ -7,7 +7,7 @@ references:
     - https://persistence-info.github.io/Data/autodialdll.html
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-08-10
-modified: 2023-08-17
+modified: 2026-11-16
 tags:
     - attack.persistence
 logsource:
@@ -16,7 +16,19 @@ logsource:
 detection:
     selection:
         TargetObject|contains: '\Services\WinSock2\Parameters\AutodialDLL'
-    condition: selection
+    filter_main_default_value:
+        Details:
+            - '%%SystemRoot%%\System32\rasadhlp.dll'
+            - '%%SystemRoot%%\SysWOW64\rasadhlp.dll'
+            - '%%windir%%\System32\rasadhlp.dll'
+            - '%%windir%%\SysWOW64\rasadhlp.dll'
+            - '%SystemRoot%\System32\rasadhlp.dll'
+            - '%SystemRoot%\SysWOW64\rasadhlp.dll'
+            - '%windir%\System32\rasadhlp.dll'
+            - '%windir%\SysWOW64\rasadhlp.dll'
+            - 'C:\Windows\System32\rasadhlp.dll'
+            - 'C:\Windows\SysWOW64\rasadhlp.dll'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unlikely
 level: high
