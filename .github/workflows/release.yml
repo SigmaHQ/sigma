@@ -64,7 +64,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" --draft --title "Release $GITHUB_REF_NAME" --notes-file changelog.txt \
+          # create-or-update, so a rerun repairs a half-finished draft
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" --title "Release $GITHUB_REF_NAME" --notes-file changelog.txt
+          else
+            gh release create "$GITHUB_REF_NAME" --draft --verify-tag --title "Release $GITHUB_REF_NAME" --notes-file changelog.txt
+          fi
+          gh release upload "$GITHUB_REF_NAME" --clobber \
             sigma_core.zip \
             sigma_core+.zip \
             sigma_core++.zip \
