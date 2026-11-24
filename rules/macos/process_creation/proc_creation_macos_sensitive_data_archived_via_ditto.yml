@@ -2,12 +2,13 @@ title: Sensitive Data Archived Via Ditto - MacOS
 id: 7b1f4c62-9e83-4a51-bb27-6d0c3e5a8f14
 status: experimental
 description: |
-    Detects the "ditto" utility archiving a path that holds credentials, browser secrets or cryptocurrency wallet data.
-    "ditto" is Apple's own copy and archive tool and preserves resource forks and extended attributes, which is why macOS infostealers use it to stage collected data into a single archive before exfiltration.
-    AMOS collects Keychain files, browser credentials and wallet data and compresses them with "ditto" into an archive in "/tmp" prior to upload.
+    Detects the "ditto" utility creating an archive from a path that holds credentials, browser secrets or cryptocurrency wallet data.
+    "ditto" is Apple's own copy and archive tool and preserves resource forks and extended attributes, which makes it a convenient way to package collected data into a single archive before exfiltration.
+    The "/Cookies" value covers both the Chromium "Cookies" database and the "Library/Cookies" folder that holds Safari's "Cookies.binarycookies".
+    Plain copies are not matched, because a copy into one of these paths, such as restoring SSH keys, would otherwise alert.
+    Infostealers such as AMOS archive a staging folder that they filled beforehand, so their archive command line does not contain these paths and is not covered by this rule.
 references:
     - https://www.loobins.io/binaries/ditto/
-    - https://www.cyberproof.com/blog/inside-amos-stealer-how-this-threat-targets-macos-credentials-and-keychains/
 author: clivoa
 date: 2026-08-15
 tags:
@@ -20,6 +21,9 @@ logsource:
 detection:
     selection_img:
         Image|endswith: '/ditto'
+    selection_archive:
+        # "-c" creates an archive and can be grouped with other short options, as in "-ck" or "-Vck"
+        CommandLine|re: '\s-[jkvVXz]*c[jkvVXz]*\s'
     selection_paths:
         CommandLine|contains:
             - '/.ssh'
