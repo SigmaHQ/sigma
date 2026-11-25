@@ -141,11 +141,44 @@ def load_info_yaml(
     if not test_data:
         return results, missing_files, missing_rules
 
+    # Reject missing or empty rules list: without a valid rule binding the
+    # test cases cannot be assigned to any rule, so report it instead of
+    # silently returning empty results.
+    if not rules:
+        missing_rules.append(
+            {
+                "rule_id": "",
+                "info_path": info_path,
+                "issue": "missing_or_empty_rules",
+                "message": (
+                    f"{info_path}: 'rules' list is missing or empty; "
+                    "no rule binding for test cases"
+                ),
+            }
+        )
+        return results, missing_files, missing_rules
+
     for rule_entry in rules:
         if not isinstance(rule_entry, dict):
+            missing_rules.append(
+                {
+                    "rule_id": "",
+                    "info_path": info_path,
+                    "issue": "invalid_rule_entry",
+                    "message": f"{info_path}: rule entry is not a mapping",
+                }
+            )
             continue
         rule_id = rule_entry.get("id")
         if not rule_id:
+            missing_rules.append(
+                {
+                    "rule_id": "",
+                    "info_path": info_path,
+                    "issue": "missing_rule_id",
+                    "message": f"{info_path}: rule entry missing 'id'",
+                }
+            )
             continue
 
         rule_path = rule_index.get(rule_id)
