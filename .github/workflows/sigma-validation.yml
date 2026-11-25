@@ -2,15 +2,23 @@ name: Validate Sigma rules
 
 on: [push, pull_request, merge_group, workflow_dispatch]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   SIGMA_RULE_SCHEMA_VERSION: v2.1.0
 
 jobs:
   sigma-rules-validator:
+    name: sigma-rules-validator
     runs-on: ubuntu-latest
     steps:
       - name: Validate Sigma rules
-        uses: SigmaHQ/sigma-rules-validator@aa3561cf4c5b577330ce4ace97d363853624b29a # v1
+        uses: SigmaHQ/sigma-rules-validator@aa3561cf4c5b577330ce4ace97d363853624b29a # v1.1.0
         with:
           paths: |-
             ./rules
