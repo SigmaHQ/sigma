@@ -1,64 +1,61 @@
 title: Potential WinAPI Calls Via PowerShell Scripts
 id: 03d83090-8cba-44a0-b02f-0b756a050306
 related:
-- id: ba3f5c1b-6272-4119-9dbd-0bc8d21c2702
-  type: similar
+    - id: ba3f5c1b-6272-4119-9dbd-0bc8d21c2702
+      type: similar
 status: test
-description: 'Detects usage of WinAPI functions in PowerShell scripts.
-
-  It may indicate attempts to perform actions such as process injection, token stealing,
-  or other malicious activities that leverage Windows API calls.
-
-  These techniques are commonly used to evade traditional file-based detections by
-  loading and executing code directly in memory.
-
-  '
+description: |
+    Detects usage of WinAPI functions in PowerShell scripts.
+    It may indicate attempts to perform actions such as process injection, token stealing, or other malicious activities that leverage Windows API calls.
+    These techniques are commonly used to evade traditional file-based detections by loading and executing code directly in memory.
 references:
-- https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
-- https://github.com/PowerShellMafia/PowerSploit/blob/1980f403ee78234eae4d93b50890d02f827a099f/CodeExecution/Invoke-Shellcode.ps1
-- https://thedfirreport.com/2021/08/29/cobalt-strike-a-defenders-guide/
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
+    - https://github.com/PowerShellMafia/PowerSploit/blob/1980f403ee78234eae4d93b50890d02f827a099f/CodeExecution/Invoke-Shellcode.ps1
+    - https://thedfirreport.com/2021/08/29/cobalt-strike-a-defenders-guide/
 author: Nasreddine Bencherchali (Nextron Systems), Nikita Nazarov, oscd.community
 date: 2020-10-06
 modified: 2026-04-29
 tags:
-- attack.execution
-- attack.t1059.001
-- attack.t1106
-- attack.stealth
-- attack.t1620
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1106
+    - attack.stealth
+    - attack.t1620
 logsource:
-  product: windows
-  category: ps_script
-  definition: 'Requirements: Script Block Logging must be enabled'
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-  selection_injection:
-    ScriptBlockText|contains|all:
-    - VirtualAlloc
-    - OpenProcess
-    - WriteProcessMemory
-    - CreateRemoteThread
-  selection_token_steal:
-    ScriptBlockText|contains|all:
-    - OpenProcessToken
-    - LookupPrivilegeValue
-    - AdjustTokenPrivileges
-  selection_duplicate_token:
-    ScriptBlockText|contains|all:
-    - OpenProcessToken
-    - DuplicateTokenEx
-    - CloseHandle
-  selection_process_write_read:
-    ScriptBlockText|contains|all:
-    - WriteProcessMemory
-    - VirtualAlloc
-    - ReadProcessMemory
-    - VirtualFree
-  selection_local_shellcode_injection:
-    ScriptBlockText|contains|all:
-    - VirtualAlloc
-    - GetDelegateForFunctionPointer
-    - Marshal.Copy
-  condition: 1 of selection_*
+    # Note: Add more suspicious combinations in the form of different selections
+    selection_injection:
+        ScriptBlockText|contains|all:
+            - 'VirtualAlloc'
+            - 'OpenProcess'
+            - 'WriteProcessMemory'
+            - 'CreateRemoteThread'
+    selection_token_steal:
+        ScriptBlockText|contains|all:
+            - 'OpenProcessToken'
+            - 'LookupPrivilegeValue'
+            - 'AdjustTokenPrivileges'
+    selection_duplicate_token:
+        ScriptBlockText|contains|all:
+            - 'OpenProcessToken'
+            - 'DuplicateTokenEx'
+            - 'CloseHandle'
+    selection_process_write_read:
+        ScriptBlockText|contains|all:
+            - 'WriteProcessMemory'
+            - 'VirtualAlloc'
+            - 'ReadProcessMemory'
+            - 'VirtualFree'
+    selection_local_shellcode_injection:
+        ScriptBlockText|contains|all:
+            - 'VirtualAlloc'
+            - 'GetDelegateForFunctionPointer'
+            - 'Marshal.Copy'
+    condition: 1 of selection_*
 falsepositives:
-- Unknown
+    - Unknown
 level: high
+regression_tests_path: regression_data/rules/windows/powershell/powershell_script/posh_ps_win_api_susp_access/info.yml

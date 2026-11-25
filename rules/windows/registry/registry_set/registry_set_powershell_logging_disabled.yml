@@ -1,42 +1,41 @@
 title: PowerShell Logging Disabled Via Registry Key Tampering
 id: fecfd1a1-cc78-4313-a1ea-2ee2e8ec27a7
 status: test
-description: Detects changes to the registry for the currently logged-in user. In
-  order to disable PowerShell module logging, script block logging or transcription
-  and script execution logging
+description: Detects changes to the registry for the currently logged-in user. In order to disable PowerShell module logging, script block logging or transcription and script execution logging
 references:
-- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1112/T1112.md#atomic-test-32---windows-powershell-logging-disabled
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1112/T1112.md#atomic-test-32---windows-powershell-logging-disabled
 author: frack113
 date: 2022-04-02
 modified: 2023-08-17
 tags:
-- attack.stealth
-- attack.defense-impairment
-- attack.t1564.001
-- attack.t1112
-- attack.persistence
+    - attack.stealth
+    - attack.defense-impairment
+    - attack.t1564.001
+    - attack.t1112
+    - attack.persistence
 logsource:
-  category: registry_set
-  product: windows
+    category: registry_set
+    product: windows
 detection:
-  selection:
-    TargetObject|contains:
-    - \Microsoft\Windows\PowerShell\
-    - \Microsoft\PowerShellCore\
-    TargetObject|endswith:
-    - \ModuleLogging\EnableModuleLogging
-    - \ScriptBlockLogging\EnableScriptBlockLogging
-    - \ScriptBlockLogging\EnableScriptBlockInvocationLogging
-    - \Transcription\EnableTranscripting
-    - \Transcription\EnableInvocationHeader
-    - \EnableScripts
-    Details: DWORD (0x00000000)
-  condition: selection
+    selection:
+        TargetObject|contains:
+            - '\Microsoft\Windows\PowerShell\' # PowerShell 5
+            - '\Microsoft\PowerShellCore\' # PowerShell 7
+        TargetObject|endswith:
+            - '\ModuleLogging\EnableModuleLogging'
+            - '\ScriptBlockLogging\EnableScriptBlockLogging'
+            - '\ScriptBlockLogging\EnableScriptBlockInvocationLogging'
+            - '\Transcription\EnableTranscripting'
+            - '\Transcription\EnableInvocationHeader'
+            - '\EnableScripts'
+        Details: 'DWORD (0x00000000)'
+    condition: selection
 falsepositives:
-- Unknown
+    - Unknown
 level: high
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_powershell_logging_disabled/info.yml
 simulation:
-- type: atomic-red-team
-  name: Disable PowerShell Logging via Registry
-  technique: T1112
-  atomic_guid: 95b25212-91a7-42ff-9613-124aca6845a8
+    - type: atomic-red-team
+      name: Disable PowerShell Logging via Registry
+      technique: T1112
+      atomic_guid: 95b25212-91a7-42ff-9613-124aca6845a8

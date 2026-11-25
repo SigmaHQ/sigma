@@ -3,73 +3,74 @@ id: 5b80a791-ad9b-4b75-bcc1-ad4e1e89c200
 status: test
 description: Detects usage of bitsadmin downloading a file with a suspicious extension
 references:
-- https://blog.netspi.com/15-ways-to-download-a-file/#bitsadmin
-- https://isc.sans.edu/diary/22264
-- https://lolbas-project.github.io/lolbas/Binaries/Bitsadmin/
+    - https://blog.netspi.com/15-ways-to-download-a-file/#bitsadmin
+    - https://isc.sans.edu/diary/22264
+    - https://lolbas-project.github.io/lolbas/Binaries/Bitsadmin/
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2022-06-28
 modified: 2023-05-30
 tags:
-- attack.persistence
-- attack.execution
-- attack.stealth
-- attack.t1197
-- attack.s0190
-- attack.t1036.003
-- attack.command-and-control
-- attack.t1105
+    - attack.persistence
+    - attack.execution
+    - attack.stealth
+    - attack.t1197
+    - attack.s0190
+    - attack.t1036.003
+    - attack.command-and-control
+    - attack.t1105
 logsource:
-  category: process_creation
-  product: windows
+    category: process_creation
+    product: windows
 detection:
-  selection_img:
-  - Image|endswith: \bitsadmin.exe
-  - OriginalFileName: bitsadmin.exe
-  selection_flags:
-    CommandLine|contains:
-    - ' /transfer '
-    - ' /create '
-    - ' /addfile '
-  selection_extension:
-    CommandLine|contains:
-    - .7z
-    - .asax
-    - .ashx
-    - .asmx
-    - .asp
-    - .aspx
-    - .bat
-    - .cfm
-    - .cgi
-    - .chm
-    - .cmd
-    - .dll
-    - .gif
-    - .jpeg
-    - .jpg
-    - .jsp
-    - .jspx
-    - .log
-    - .png
-    - .ps1
-    - .psm1
-    - .rar
-    - .scf
-    - .sct
-    - .txt
-    - .vbe
-    - .vbs
-    - .war
-    - .wsf
-    - .wsh
-    - .xll
-    - .zip
-  condition: all of selection_*
+    selection_img:
+        - Image|endswith: '\bitsadmin.exe'
+        - OriginalFileName: 'bitsadmin.exe'
+    selection_flags:
+        CommandLine|contains:
+            - ' /transfer '
+            - ' /create '
+            - ' /addfile '
+    selection_extension:
+        CommandLine|contains:
+            - '.7z'
+            - '.asax'
+            - '.ashx'
+            - '.asmx'
+            - '.asp'
+            - '.aspx'
+            - '.bat'
+            - '.cfm'
+            - '.cgi'
+            - '.chm'
+            - '.cmd'
+            - '.dll'
+            - '.gif'
+            - '.jpeg'
+            - '.jpg'
+            - '.jsp'
+            - '.jspx'
+            - '.log'
+            - '.png'
+            - '.ps1'
+            - '.psm1'
+            - '.rar'
+            - '.scf'
+            - '.sct'
+            - '.txt'
+            - '.vbe'
+            - '.vbs'
+            - '.war'
+            - '.wsf'
+            - '.wsh'
+            - '.xll'
+            - '.zip'
+    condition: all of selection_*
 falsepositives:
-- Unknown
+    - Unknown
 level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_bitsadmin_download_susp_extensions/info.yml
 simulation:
-- type: atomic-red-team
-  name: Windows - BITSAdmin BITS Download
-  technique: T1105
-  atomic_guid: a1921cd3-9a2d-47d5-a891-f1d0f2a7a31b
+    - type: atomic-red-team
+      name: Windows - BITSAdmin BITS Download
+      technique: T1105
+      atomic_guid: a1921cd3-9a2d-47d5-a891-f1d0f2a7a31b

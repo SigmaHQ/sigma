@@ -1,19 +1,18 @@
 title: Potential Persistence Via AutodialDLL
 id: e6fe26ee-d063-4f5b-b007-39e90aaf50e3
 status: test
-description: Detects change the the "AutodialDLL" key which could be used as a persistence
-  method to load custom DLL via the "ws2_32" library
+description: Detects change the the "AutodialDLL" key which could be used as a persistence method to load custom DLL via the "ws2_32" library
 references:
-- https://www.hexacorn.com/blog/2015/01/13/beyond-good-ol-run-key-part-24/
-- https://persistence-info.github.io/Data/autodialdll.html
+    - https://www.hexacorn.com/blog/2015/01/13/beyond-good-ol-run-key-part-24/
+    - https://persistence-info.github.io/Data/autodialdll.html
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-08-10
 modified: 2026-11-16
 tags:
-- attack.persistence
+    - attack.persistence
 logsource:
-  category: registry_set
-  product: windows
+    category: registry_set
+    product: windows
 detection:
     selection:
         TargetObject|contains: '\Services\WinSock2\Parameters\AutodialDLL'
@@ -31,5 +30,6 @@ detection:
             - 'C:\Windows\SysWOW64\rasadhlp.dll'
     condition: selection and not 1 of filter_main_*
 falsepositives:
-- Unlikely
+    - Unlikely
 level: high
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_persistence_autodial_dll/info.yml

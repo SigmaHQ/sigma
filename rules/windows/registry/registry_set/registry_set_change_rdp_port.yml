@@ -1,27 +1,22 @@
 title: Default RDP Port Changed to Non Standard Port
 id: 509e84b9-a71a-40e0-834f-05470369bd1e
 status: test
-description: 'Detects changes to the default RDP port.
-
-  Remote desktop is a common feature in operating systems. It allows a user to log
-  into a remote system using an interactive session with a graphical user interface.
-
-  Microsoft refers to its implementation of the Remote Desktop Protocol (RDP) as Remote
-  Desktop Services (RDS).
-
-  '
+description: |
+    Detects changes to the default RDP port.
+    Remote desktop is a common feature in operating systems. It allows a user to log into a remote system using an interactive session with a graphical user interface.
+    Microsoft refers to its implementation of the Remote Desktop Protocol (RDP) as Remote Desktop Services (RDS).
 references:
-- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1021.001/T1021.001.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1021.001/T1021.001.md
 author: frack113
 date: 2022-01-01
 modified: 2026-11-12
 tags:
-- attack.privilege-escalation
-- attack.persistence
-- attack.t1547.010
+    - attack.privilege-escalation
+    - attack.persistence
+    - attack.t1547.010
 logsource:
-  category: registry_set
-  product: windows
+    category: registry_set
+    product: windows
 detection:
     selection:
         TargetObject|endswith: '\Control\Terminal Server\WinStations\RDP-Tcp\PortNumber'
@@ -30,14 +25,15 @@ detection:
         - Details: 3389 # plain
     condition: selection and not 1 of filter_main_*
 falsepositives:
-- Unknown
+    - Unknown
 level: high
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_change_rdp_port/info.yml
 simulation:
-- type: atomic-red-team
-  name: Changing RDP Port to Non Standard Port via Powershell
-  technique: T1021.001
-  atomic_guid: 2f840dd4-8a2e-4f44-beb3-6b2399ea3771
-- type: atomic-red-team
-  name: Changing RDP Port to Non Standard Port via Command_Prompt
-  technique: T1021.001
-  atomic_guid: 74ace21e-a31c-4f7d-b540-53e4eb6d1f73
+    - type: atomic-red-team
+      name: Changing RDP Port to Non Standard Port via Powershell
+      technique: T1021.001
+      atomic_guid: 2f840dd4-8a2e-4f44-beb3-6b2399ea3771
+    - type: atomic-red-team
+      name: Changing RDP Port to Non Standard Port via Command_Prompt
+      technique: T1021.001
+      atomic_guid: 74ace21e-a31c-4f7d-b540-53e4eb6d1f73

@@ -1,30 +1,30 @@
 title: Potential In-Memory Execution Using Reflection.Assembly
 id: ddcd88cb-7f62-4ce5-86f9-1704190feb0a
 status: test
-description: Detects usage of "Reflection.Assembly" load functions to dynamically
-  load assemblies in memory
+description: Detects usage of "Reflection.Assembly" load functions to dynamically load assemblies in memory
 references:
-- https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=50
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=50
 author: frack113
 date: 2022-12-25
 modified: 2026-10-19
 tags:
-- attack.stealth
-- attack.t1620
+    - attack.stealth
+    - attack.t1620
 logsource:
-  product: windows
-  category: ps_script
-  definition: Script Block Logging must be enable
+    product: windows
+    category: ps_script
+    definition: Script Block Logging must be enable
 detection:
-  selection:
-    ScriptBlockText|contains: '[Reflection.Assembly]::load'
-  filter_optional_sqlserver:
-    Path|startswith:
-    - C:\Program Files (x86)\Microsoft SQL Server\
-    - C:\Program Files\Microsoft SQL Server\
-    Path|endswith: \Tools\PowerShell\Modules\SQLPS\SqlPsPostScript.ps1
-    ScriptBlockText|contains: 'SQLSERVER: { Set-Location'
-  condition: selection and not 1 of filter_optional_*
+    selection:
+        ScriptBlockText|contains: '[Reflection.Assembly]::load'
+    filter_optional_sqlserver:
+        Path|startswith:
+            - 'C:\Program Files (x86)\Microsoft SQL Server\'
+            - 'C:\Program Files\Microsoft SQL Server\'
+        Path|endswith: '\Tools\PowerShell\Modules\SQLPS\SqlPsPostScript.ps1'
+        ScriptBlockText|contains: 'SQLSERVER: { Set-Location'
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
-- Legitimate use of the library
+    - Legitimate use of the library
 level: medium
+regression_tests_path: regression_data/rules/windows/powershell/powershell_script/posh_ps_dotnet_assembly_from_file/info.yml

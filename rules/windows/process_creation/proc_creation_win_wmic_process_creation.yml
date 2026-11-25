@@ -1,21 +1,14 @@
 title: Process Creation Attempt via Wmic.EXE
 id: 526be59f-a573-4eea-b5f7-f0973207634d
 related:
-- id: 3c89a1e8-0fba-449e-8f1b-8409d6267ec8
-  type: derived
+    - id: 3c89a1e8-0fba-449e-8f1b-8409d6267ec8 # For suspicious process creation
+      type: derived
 status: test
-description: 'Detects the attempt to create a process via "wmic" with the "process
-  call create" flag, which might
-
-  indicate an attempt to execute a malicious process on the compromised host. Adversaries
-  may use
-
-  wmic to execute a process on the compromised host as part of their attack. This
-  event is triggered on
-
-  on attempt and process creation can be either successful or unsuccessful.
-
-  '
+description: |
+    Detects the attempt to create a process via "wmic" with the "process call create" flag, which might
+    indicate an attempt to execute a malicious process on the compromised host. Adversaries may use
+    wmic to execute a process on the compromised host as part of their attack. This event is triggered on
+    on attempt and process creation can be either successful or unsuccessful.
 references:
     - https://web.archive.org/web/20250115052252/https://www.sans.org/blog/wmic-for-incident-response/
     - https://github.com/redcanaryco/atomic-red-team/blob/84215139ee5127f8e3a117e063b604812bd71928/atomics/T1047/T1047.md#atomic-test-5---wmi-execute-local-process
@@ -23,27 +16,28 @@ author: Michael Haag, Florian Roth (Nextron Systems), juju4, oscd.community
 date: 2019-01-16
 modified: 2023-02-14
 tags:
-- attack.execution
-- attack.t1047
-- car.2016-03-002
+    - attack.execution
+    - attack.t1047
+    - car.2016-03-002
 logsource:
-  category: process_creation
-  product: windows
+    category: process_creation
+    product: windows
 detection:
-  selection_img:
-  - Image|endswith: \wmic.exe
-  - OriginalFileName: wmic.exe
-  selection_cli:
-    CommandLine|contains|all:
-    - process
-    - call
-    - create
-  condition: all of selection_*
+    selection_img:
+        - Image|endswith: '\wmic.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_cli:
+        CommandLine|contains|all:
+            - 'process'
+            - 'call'
+            - 'create'
+    condition: all of selection_*
 falsepositives:
-- Unknown
+    - Unknown
 level: medium
 simulation:
-- type: atomic red team
-  name: WMI Execute Local Process
-  technique: T1047
-  atomic_guid: b3bdfc91-b33e-4c6d-a5c8-d64bee0276b3
+    - type: atomic red team
+      name: WMI Execute Local Process
+      technique: T1047
+      atomic_guid: b3bdfc91-b33e-4c6d-a5c8-d64bee0276b3
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_wmic_process_creation/info.yml

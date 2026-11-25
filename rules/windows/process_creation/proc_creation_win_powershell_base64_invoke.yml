@@ -1,47 +1,51 @@
 title: PowerShell Base64 Encoded Invoke Keyword
 id: 6385697e-9f1b-40bd-8817-f4a91f40508e
 related:
-- id: fd6e2919-3936-40c9-99db-0aa922c356f7
-  type: obsolete
+    - id: fd6e2919-3936-40c9-99db-0aa922c356f7
+      type: obsolete
 status: test
 description: Detects UTF-8 and UTF-16 Base64 encoded powershell 'Invoke-' calls
 references:
-- https://thedfirreport.com/2022/05/09/seo-poisoning-a-gootloader-story/
+    - https://thedfirreport.com/2022/05/09/seo-poisoning-a-gootloader-story/
 author: pH-T (Nextron Systems), Harjot Singh, @cyb3rjy0t
 date: 2022-05-20
 modified: 2023-04-06
 tags:
-- attack.execution
-- attack.stealth
-- attack.t1059.001
-- attack.t1027
+    - attack.execution
+    - attack.stealth
+    - attack.t1059.001
+    - attack.t1027
 logsource:
-  category: process_creation
-  product: windows
+    category: process_creation
+    product: windows
 detection:
-  selection_img:
-  - Image|endswith:
-    - \powershell.exe
-    - \pwsh.exe
-  - OriginalFileName:
-    - PowerShell.EXE
-    - pwsh.dll
-  selection_cli_enc:
-    CommandLine|contains: ' -e'
-  selection_cli_invoke:
-    CommandLine|contains:
-    - SQBuAHYAbwBrAGUALQ
-    - kAbgB2AG8AawBlAC0A
-    - JAG4AdgBvAGsAZQAtA
-    - SW52b2tlL
-    - ludm9rZS
-    - JbnZva2Ut
-  condition: all of selection_*
+    selection_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_cli_enc:
+        CommandLine|contains: ' -e'
+    selection_cli_invoke:
+        CommandLine|contains:
+            # Invoke-
+            # UTF-16LE
+            - 'SQBuAHYAbwBrAGUALQ'
+            - 'kAbgB2AG8AawBlAC0A'
+            - 'JAG4AdgBvAGsAZQAtA'
+            # UTF-8
+            - 'SW52b2tlL'
+            - 'ludm9rZS'
+            - 'JbnZva2Ut'
+    condition: all of selection_*
 falsepositives:
-- Unknown
+    - Unknown
 level: high
 simulation:
-- type: atomic red team
-  name: Create a Process using WMI Query and an Encoded Command
-  technique: T1047
-  atomic_guid: 7db7a7f9-9531-4840-9b30-46220135441c
+    - type: atomic red team
+      name: Create a Process using WMI Query and an Encoded Command
+      technique: T1047
+      atomic_guid: 7db7a7f9-9531-4840-9b30-46220135441c
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_powershell_base64_invoke/info.yml

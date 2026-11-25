@@ -1,30 +1,30 @@
 title: Allow RDP Remote Assistance Feature
 id: 37b437cf-3fc5-4c8e-9c94-1d7c9aff842b
 status: test
-description: Detect enable rdp feature to allow specific user to rdp connect on the
-  targeted machine
+description: Detect enable rdp feature to allow specific user to rdp connect on the targeted machine
 references:
-- https://github.com/redcanaryco/atomic-red-team/blob/40b77d63808dd4f4eafb83949805636735a1fd15/atomics/T1112/T1112.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/40b77d63808dd4f4eafb83949805636735a1fd15/atomics/T1112/T1112.md
 author: frack113
 date: 2022-08-19
 modified: 2023-08-17
 tags:
-- attack.persistence
-- attack.defense-impairment
-- attack.t1112
+    - attack.persistence
+    - attack.defense-impairment
+    - attack.t1112
 logsource:
-  category: registry_set
-  product: windows
+    category: registry_set
+    product: windows
 detection:
-  selection:
-    TargetObject|endswith: System\CurrentControlSet\Control\Terminal Server\fAllowToGetHelp
-    Details: DWORD (0x00000001)
-  condition: selection
+    selection:
+        TargetObject|endswith: 'System\CurrentControlSet\Control\Terminal Server\fAllowToGetHelp'
+        Details: DWORD (0x00000001)
+    condition: selection
 falsepositives:
-- Legitimate use of the feature (alerts should be investigated either way)
+    - Legitimate use of the feature (alerts should be investigated either way)
 level: medium
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_allow_rdp_remote_assistance_feature/info.yml
 simulation:
-- type: atomic-red-team
-  name: Allow RDP Remote Assistance Feature
-  technique: T1112
-  atomic_guid: 86677d0e-0b5e-4a2b-b302-454175f9aa9e
+    - type: atomic-red-team
+      name: Allow RDP Remote Assistance Feature
+      technique: T1112
+      atomic_guid: 86677d0e-0b5e-4a2b-b302-454175f9aa9e

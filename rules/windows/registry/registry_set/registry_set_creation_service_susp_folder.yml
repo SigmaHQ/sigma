@@ -1,53 +1,54 @@
 title: Service Binary in Suspicious Folder
 id: a07f0359-4c90-4dc4-a681-8ffea40b4f47
 related:
-- id: c0abc838-36b0-47c9-b3b3-a90c39455382
-  type: obsolete
+    - id: c0abc838-36b0-47c9-b3b3-a90c39455382
+      type: obsolete
 status: test
-description: Detect the creation of a service with a service binary located in a suspicious
-  directory
+description: Detect the creation of a service with a service binary located in a suspicious directory
 references:
-- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
 author: Florian Roth (Nextron Systems), frack113
 date: 2022-05-02
 modified: 2025-10-07
 tags:
-- attack.persistence
-- attack.defense-impairment
-- attack.t1112
+    - attack.persistence
+    - attack.defense-impairment
+    - attack.t1112
 logsource:
-  category: registry_set
-  product: windows
+    category: registry_set
+    product: windows
 detection:
-  selection_service_start:
-    TargetObject|startswith: HKLM\System\CurrentControlSet\Services\
-    TargetObject|endswith: \Start
-    Image|contains:
-    - \Users\Public\
-    - \Perflogs\
-    - \ADMIN$\
-    - \Temp\
-    Details:
-    - DWORD (0x00000000)
-    - DWORD (0x00000001)
-    - DWORD (0x00000002)
-  selection_service_imagepath:
-    TargetObject|startswith: HKLM\System\CurrentControlSet\Services\
-    TargetObject|endswith: \ImagePath
-    Details|contains:
-    - \Users\Public\
-    - \Perflogs\
-    - \ADMIN$\
-    - \Temp\
-  filter_optional_avast:
-    Image|contains|all:
-    - \Common Files\
-    - \Temp\
-  filter_optional_mbamservice:
-    TargetObject|endswith: \CurrentControlSet\Services\MBAMInstallerService\ImagePath
-    Details|endswith: \AppData\Local\Temp\MBAMInstallerService.exe"
-    Image: C:\Windows\system32\services.exe
-  condition: 1 of selection_* and not 1 of filter_optional_*
+    selection_service_start:
+        TargetObject|startswith: 'HKLM\System\CurrentControlSet\Services\'
+        TargetObject|endswith: '\Start'
+        Image|contains:
+            - '\Users\Public\'
+            - '\Perflogs\'
+            - '\ADMIN$\'
+            - '\Temp\'
+        Details:
+            - 'DWORD (0x00000000)'  # boot
+            - 'DWORD (0x00000001)'  # System
+            - 'DWORD (0x00000002)'  # Automatic
+            # 3 - Manual , 4 - Disabled
+    selection_service_imagepath:
+        TargetObject|startswith: 'HKLM\System\CurrentControlSet\Services\'
+        TargetObject|endswith: '\ImagePath'
+        Details|contains:
+            - '\Users\Public\'
+            - '\Perflogs\'
+            - '\ADMIN$\'
+            - '\Temp\'
+    filter_optional_avast:
+        Image|contains|all: # Filter FP with Avast software
+            - '\Common Files\'
+            - '\Temp\'
+    filter_optional_mbamservice:
+        TargetObject|endswith: '\CurrentControlSet\Services\MBAMInstallerService\ImagePath'
+        Details|endswith: '\AppData\Local\Temp\MBAMInstallerService.exe"'
+        Image: 'C:\Windows\system32\services.exe'
+    condition: 1 of selection_* and not 1 of filter_optional_*
 falsepositives:
-- Unknown
+    - Unknown
 level: high
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_creation_service_susp_folder/info.yml

@@ -1,41 +1,38 @@
 title: New TimeProviders Registered With Uncommon DLL Name
 id: e88a6ddc-74f7-463b-9b26-f69fc0d2ce85
 status: test
-description: 'Detects processes setting a new DLL in DllName in under HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\W32Time\TimeProvider.
-
-  Adversaries may abuse time providers to execute DLLs when the system boots.
-
-  The Windows Time service (W32Time) enables time synchronization across and within
-  domains.
-
-  '
+description: |
+    Detects processes setting a new DLL in DllName in under HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\W32Time\TimeProvider.
+    Adversaries may abuse time providers to execute DLLs when the system boots.
+    The Windows Time service (W32Time) enables time synchronization across and within domains.
 references:
-- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1547.003/T1547.003.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1547.003/T1547.003.md
 author: frack113
 date: 2022-06-19
 modified: 2024-03-26
 tags:
-- attack.persistence
-- attack.privilege-escalation
-- attack.t1547.003
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1547.003
 logsource:
-  category: registry_set
-  product: windows
+    category: registry_set
+    product: windows
 detection:
-  selection:
-    TargetObject|contains: \Services\W32Time\TimeProviders
-    TargetObject|endswith: \DllName
-  filter_main_w32time:
-    Details:
-    - '%SystemRoot%\System32\vmictimeprovider.dll'
-    - '%systemroot%\system32\w32time.dll'
-    - C:\Windows\SYSTEM32\w32time.DLL
-  condition: selection and not 1 of filter_main_*
+    selection:
+        TargetObject|contains: '\Services\W32Time\TimeProviders'
+        TargetObject|endswith: '\DllName'
+    filter_main_w32time:
+        Details:
+            - '%SystemRoot%\System32\vmictimeprovider.dll'
+            - '%systemroot%\system32\w32time.dll'
+            - 'C:\Windows\SYSTEM32\w32time.DLL'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
-- Unknown
+    - Unknown
 level: high
 simulation:
-- type: atomic-red-team
-  name: Create a new time provider
-  technique: T1547.003
-  atomic_guid: df1efab7-bc6d-4b88-8be9-91f55ae017aa
+    - type: atomic-red-team
+      name: Create a new time provider
+      technique: T1547.003
+      atomic_guid: df1efab7-bc6d-4b88-8be9-91f55ae017aa
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_timeproviders_dllname/info.yml

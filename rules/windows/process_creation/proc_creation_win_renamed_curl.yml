@@ -1,28 +1,28 @@
 title: Renamed CURL.EXE Execution
 id: 7530cd3d-7671-43e3-b209-976966f6ea48
 status: test
-description: Detects the execution of a renamed "CURL.exe" binary based on the PE
-  metadata fields
+description: Detects the execution of a renamed "CURL.exe" binary based on the PE metadata fields
 references:
-- https://twitter.com/Kostastsale/status/1700965142828290260
+    - https://twitter.com/Kostastsale/status/1700965142828290260
 author: X__Junior (Nextron Systems)
 date: 2023-09-11
 modified: 2023-10-12
 tags:
-- attack.execution
-- attack.stealth
-- attack.t1059
-- attack.t1202
+    - attack.execution
+    - attack.stealth
+    - attack.t1059
+    - attack.t1202
 logsource:
-  category: process_creation
-  product: windows
+    category: process_creation
+    product: windows
 detection:
-  selection:
-  - OriginalFileName: curl.exe
-  - Description: The curl executable
-  filter_main_img:
-    Image|contains: \curl
-  condition: selection and not 1 of filter_main_*
+    selection:
+        - OriginalFileName: 'curl.exe'
+        - Description: 'The curl executable'
+    filter_main_img:
+        Image|contains: '\curl'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
-- Unknown
+    - Unknown
 level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_renamed_curl/info.yml
