@@ -16,7 +16,7 @@ references:
 - https://lolbas-project.github.io/#/download
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-12-10
-modified: 2026-10-14
+modified: 2026-10-26
 tags:
 - attack.stealth
 - attack.t1218
@@ -26,60 +26,79 @@ logsource:
   product: windows
   category: file_event
 detection:
-  selection_img:
-    Image|endswith:
-    - \eqnedt32.exe
-    - \wordpad.exe
-    - \wordview.exe
-    - \cmdl32.exe
-    - \certutil.exe
-    - \certoc.exe
-    - \CertReq.exe
-    - \bitsadmin.exe
-    - \Desktopimgdownldr.exe
-    - \esentutl.exe
-    - \expand.exe
-    - \extrac32.exe
-    - \replace.exe
-    - \mshta.exe
-    - \ftp.exe
-    - \Ldifde.exe
-    - \RdrCEF.exe
-    - \hh.exe
-    - \finger.exe
-    - \findstr.exe
-  selection_locations:
-    TargetFilename|contains:
-    - :\Perflogs
-    - :\ProgramData\
-    - :\Temp\
-    - :\Users\Public\
-    - :\Windows\
-    - \$Recycle.Bin\
-    - \AppData\Local\
-    - \AppData\Roaming\
-    - \Contacts\
-    - \Desktop\
-    - \Favorites\
-    - \Favourites\
-    - \inetpub\wwwroot\
-    - \Music\
-    - \Pictures\
-    - \Start Menu\Programs\Startup\
-    - \Users\Default\
-    - \Videos\
-  filter_optional_dell_techhub_repair:
-    Image|endswith: \esentutl.exe
-    TargetFilename|startswith:
-    - C:\Windows\System32\SRUDB_
-    - C:\Windows\System32\TEMPREPAIR
-    TargetFilename|endswith:
-    - .INTEG.RAW
-    - .EDB
-  filter_optional_dell_techhub_copy:
-    Image|endswith: \esentutl.exe
-    TargetFilename|startswith: C:\ProgramData\Dell\DTP\DB\SRUDBData\
-  condition: all of selection_* and not 1 of filter_optional_*
+    selection_img:
+        Image|endswith:
+            # Microsoft Office Programs Dropping Executables / Rest of the apps are covered in: c7a74c80-ba5a-486e-9974-ab9e682bc5e4
+            - '\eqnedt32.exe'
+            - '\wordpad.exe'
+            - '\wordview.exe'
+            # LOLBINs that can be used to download executables
+            - '\cmdl32.exe'
+            - '\certutil.exe'
+            - '\certoc.exe'
+            - '\CertReq.exe'
+            - '\bitsadmin.exe'
+            - '\Desktopimgdownldr.exe'
+            - '\esentutl.exe'
+            - '\expand.exe'
+            - '\extrac32.exe'
+            - '\replace.exe'
+            - '\mshta.exe'
+            - '\ftp.exe'
+            - '\Ldifde.exe'
+            - '\RdrCEF.exe'
+            - '\hh.exe'
+            - '\finger.exe'
+            - '\findstr.exe'
+    selection_locations:
+        TargetFilename|contains:
+            - ':\Perflogs'
+            - ':\ProgramData\'
+            - ':\Temp\'
+            - ':\Users\Public\'
+            - ':\Windows\'
+            - '\$Recycle.Bin\'
+            - '\AppData\Local\'
+            - '\AppData\Roaming\'
+            - '\Contacts\'
+            - '\Desktop\'
+            - '\Favorites\'
+            - '\Favourites\'
+            - '\inetpub\wwwroot\'
+            - '\Music\'
+            - '\Pictures\'
+            - '\Start Menu\Programs\Startup\'
+            - '\Users\Default\'
+            - '\Videos\'
+    filter_optional_dell_techhub_repair:
+        # Dell TechHub runs "esentutl /p" on its SRUDB copy; the repair scratch files land in the working directory (System32)
+        Image|endswith: '\esentutl.exe'
+        TargetFilename|startswith:
+            - 'C:\Windows\System32\SRUDB_'
+            - 'C:\Windows\System32\TEMPREPAIR'
+        TargetFilename|endswith:
+            - '.INTEG.RAW'
+            - '.EDB'
+    filter_optional_dell_techhub_copy:
+        Image|endswith: '\esentutl.exe'
+        TargetFilename|startswith: 'C:\ProgramData\Dell\DTP\DB\SRUDBData\'
+    filter_optional_expand_system_dpx_scratch:
+        # expand.exe run as SYSTEM by services (e.g. the Waves MaxxAudio driver service unpacking MaxxAudio_Data.cab) writes its own "<hex>$dpx$.tmp" scratch files into the Windows Temp folder
+        Image|endswith: '\expand.exe'
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+        TargetFilename|startswith: 'C:\Windows\Temp\'
+        TargetFilename|endswith: '$dpx$.tmp'
+    filter_optional_certutil_rootcas_sst:
+        # "certutil -generateSSTFromWU" run as SYSTEM (e.g. by EDR agents refreshing the trusted root list) writes RootCAs.sst into a SystemTemp subfolder
+        Image|endswith: '\certutil.exe'
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+        TargetFilename|startswith: 'C:\Windows\SystemTemp\'
+        TargetFilename|endswith: '\RootCAs.sst'
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
 - Unknown
 level: high

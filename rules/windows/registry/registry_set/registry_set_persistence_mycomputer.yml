@@ -6,7 +6,7 @@ references:
     - https://www.hexacorn.com/blog/2017/01/18/beyond-good-ol-run-key-part-55/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-08-09
-modified: 2024-01-11
+modified: 2026-11-16
 tags:
     - attack.persistence
 logsource:
@@ -15,8 +15,32 @@ logsource:
 detection:
     selection:
         TargetObject|contains: '\Microsoft\Windows\CurrentVersion\Explorer\MyComputer'
-        TargetObject|endswith: '(Default)'
-    condition: selection
+        TargetObject|endswith: 'path\(Default)'
+    filter_main_default:
+        Details|startswith:
+            - '%%SystemRoot%%\'
+            - '%%Windir%%\'
+            - '%SystemRoot%\'
+            - '%Windir%\'
+            - 'C:\Windows\'
+    filter_main_path_backup:
+        TargetObject|endswith: '\MyComputer\BackupPath\(Default)'
+        Details|endswith:
+            - '\System32\sdclt.exe'
+            - '\SysWOW64\sdclt.exe'
+    filter_main_path_cleanup:
+        TargetObject|endswith: '\MyComputer\cleanuppath\(Default)'
+        Details|endswith:
+            - '\System32\cleanmgr.exe /D %c'
+            - '\SysWOW64\cleanmgr.exe /D %c'
+            - '\System32\cleanmgr.exe /D %%c'
+            - '\SysWOW64\cleanmgr.exe /D %%c'
+    filter_main_path_defrag:
+        TargetObject|endswith: '\MyComputer\DefragPath\(Default)'
+        Details|endswith:
+            - '\System32\dfrgui.exe'
+            - '\SysWOW64\dfrgui.exe'
+    condition: selection and not (filter_main_default and 1 of filter_main_path_*)
 falsepositives:
     - Unlikely but if you experience FPs add specific processes and locations you would like to monitor for
 level: high
