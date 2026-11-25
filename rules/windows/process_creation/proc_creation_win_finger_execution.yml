@@ -1,34 +1,41 @@
 title: Finger.EXE Execution
 id: af491bca-e752-4b44-9c86-df5680533dbc
 related:
-    - id: c082c2b0-525b-4dbc-9a26-a57dc4692074
-      type: similar
-    - id: 2fdaf50b-9fd5-449f-ba69-f17248119af6
-      type: similar
+- id: c082c2b0-525b-4dbc-9a26-a57dc4692074
+  type: similar
+- id: 2fdaf50b-9fd5-449f-ba69-f17248119af6
+  type: similar
 status: test
-description: |
-    Detects execution of the "finger.exe" utility.
-    Finger.EXE or "TCPIP Finger Command" is an old utility that is still present on modern Windows installation. It Displays information about users on a specified remote computer (typically a UNIX computer) that is running the finger service or daemon.
-    Due to the old nature of this utility and the rareness of machines having the finger service. Any execution of "finger.exe" can be considered "suspicious" and worth investigating.
+description: 'Detects execution of the "finger.exe" utility.
+
+  Finger.EXE or "TCPIP Finger Command" is an old utility that is still present on
+  modern Windows installation. It Displays information about users on a specified
+  remote computer (typically a UNIX computer) that is running the finger service or
+  daemon.
+
+  Due to the old nature of this utility and the rareness of machines having the finger
+  service. Any execution of "finger.exe" can be considered "suspicious" and worth
+  investigating.
+
+  '
 references:
-    - https://twitter.com/bigmacjpg/status/1349727699863011328?s=12
-    - https://app.any.run/tasks/40115012-a919-4208-bfed-41e82cb3dadf/
-    - http://hyp3rlinx.altervista.org/advisories/Windows_TCPIP_Finger_Command_C2_Channel_and_Bypassing_Security_Software.txt
+- https://twitter.com/bigmacjpg/status/1349727699863011328?s=12
+- https://app.any.run/tasks/40115012-a919-4208-bfed-41e82cb3dadf/
+- http://hyp3rlinx.altervista.org/advisories/Windows_TCPIP_Finger_Command_C2_Channel_and_Bypassing_Security_Software.txt
 author: Florian Roth (Nextron Systems), omkar72, oscd.community
 date: 2021-02-24
 modified: 2024-06-27
 tags:
-    - attack.command-and-control
-    - attack.t1105
+- attack.command-and-control
+- attack.t1105
 logsource:
-    category: process_creation
-    product: windows
+  category: process_creation
+  product: windows
 detection:
-    selection:
-        - OriginalFileName: 'finger.exe'
-        - Image|endswith: '\finger.exe'
-    condition: selection
+  selection:
+  - OriginalFileName: finger.exe
+  - Image|endswith: \finger.exe
+  condition: selection
 falsepositives:
-    - Admin activity (unclear what they do nowadays with finger.exe)
+- Admin activity (unclear what they do nowadays with finger.exe)
 level: high
-regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_finger_execution/info.yml

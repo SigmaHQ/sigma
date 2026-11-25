@@ -1,35 +1,33 @@
 title: Powershell Sensitive File Discovery
 id: 7d416556-6502-45b2-9bad-9d2f05f38997
 related:
-    - id: d23f2ba5-9da0-4463-8908-8ee47f614bb9
-      type: derived
+- id: d23f2ba5-9da0-4463-8908-8ee47f614bb9
+  type: derived
 status: test
 description: Detect adversaries enumerate sensitive files
 references:
-    - https://twitter.com/malmoeb/status/1570814999370801158
+- https://twitter.com/malmoeb/status/1570814999370801158
 author: frack113
 date: 2022-09-16
 modified: 2026-10-14
 tags:
-    - attack.discovery
-    - attack.t1083
+- attack.discovery
+- attack.t1083
 logsource:
-    product: windows
-    category: ps_script
-    definition: 'Requirements: Script Block Logging must be enabled'
+  product: windows
+  category: ps_script
+  definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-    selection_action:
-        # Whole words only: as plain substrings, 'ls' and 'gci' also match words such as 'false' or 'credentials'
-        ScriptBlockText|re|i: '\b(?:get-childitem|gci|ls|dir)\b'
-    selection_recurse:
-        ScriptBlockText|contains: '-recurse'
-    selection_file:
-        ScriptBlockText|contains:
-            - '.pass'
-            - '.kdbx'
-            - '.kdb'
-    condition: all of selection_*
+  selection_action:
+    ScriptBlockText|re|i: \b(?:get-childitem|gci|ls|dir)\b
+  selection_recurse:
+    ScriptBlockText|contains: -recurse
+  selection_file:
+    ScriptBlockText|contains:
+    - .pass
+    - .kdbx
+    - .kdb
+  condition: all of selection_*
 falsepositives:
-    - Unknown
+- Unknown
 level: medium
-regression_tests_path: regression_data/rules/windows/powershell/powershell_script/posh_ps_sensitive_file_discovery/info.yml

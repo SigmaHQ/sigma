@@ -1,43 +1,44 @@
 title: Allow Service Access Using Security Descriptor Tampering Via Sc.EXE
 id: 6c8fbee5-dee8-49bc-851d-c3142d02aa47
 related:
-    - id: a537cfc3-4297-4789-92b5-345bfd845ad0 # Generic SD tampering
-      type: similar
+- id: a537cfc3-4297-4789-92b5-345bfd845ad0
+  type: similar
 status: test
-description: Detects suspicious DACL modifications to allow access to a service from a suspicious trustee. This can be used to override access restrictions set by previous ACLs.
+description: Detects suspicious DACL modifications to allow access to a service from
+  a suspicious trustee. This can be used to override access restrictions set by previous
+  ACLs.
 references:
-    - https://twitter.com/0gtweet/status/1628720819537936386
-    - https://itconnect.uw.edu/tools-services-support/it-systems-infrastructure/msinf/other-help/understanding-sddl-syntax/
-    - https://learn.microsoft.com/en-us/windows/win32/secauthz/sid-strings
+- https://twitter.com/0gtweet/status/1628720819537936386
+- https://itconnect.uw.edu/tools-services-support/it-systems-infrastructure/msinf/other-help/understanding-sddl-syntax/
+- https://learn.microsoft.com/en-us/windows/win32/secauthz/sid-strings
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-02-28
 modified: 2025-10-22
 tags:
-    - attack.privilege-escalation
-    - attack.persistence
-    - attack.t1543.003
+- attack.privilege-escalation
+- attack.persistence
+- attack.t1543.003
 logsource:
-    category: process_creation
-    product: windows
+  category: process_creation
+  product: windows
 detection:
-    selection_sc:
-        - Image|endswith: '\sc.exe'
-        - OriginalFileName: 'sc.exe'
-    selection_sdset:
-        CommandLine|contains|all:
-            - 'sdset'
-            - 'A;' # Allow Access
-    selection_trustee:
-        CommandLine|contains:
-            - ';IU' # Interactively logged-on user
-            - ';SU' # Service logon user
-            - ';BA' # Built-in administrators
-            - ';SY' # Local system
-            - ';WD' # Everyone
-    filter_optional_hexnode:
-        ParentImage: 'C:\Hexnode\Hexnode Agent\Current\HexnodeAgent.exe'
-    condition: all of selection_* and not 1 of filter_optional_*
+  selection_sc:
+  - Image|endswith: \sc.exe
+  - OriginalFileName: sc.exe
+  selection_sdset:
+    CommandLine|contains|all:
+    - sdset
+    - A;
+  selection_trustee:
+    CommandLine|contains:
+    - ;IU
+    - ;SU
+    - ;BA
+    - ;SY
+    - ;WD
+  filter_optional_hexnode:
+    ParentImage: C:\Hexnode\Hexnode Agent\Current\HexnodeAgent.exe
+  condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
-    - Unknown
+- Unknown
 level: high
-regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_sc_sdset_allow_service_changes/info.yml

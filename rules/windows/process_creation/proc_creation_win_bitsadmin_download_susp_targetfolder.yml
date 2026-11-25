@@ -1,72 +1,72 @@
 title: File Download Via Bitsadmin To A Suspicious Target Folder
 id: 2ddef153-167b-4e89-86b6-757a9e65dcac
 related:
-    - id: 6e30c82f-a9f8-4aab-b79c-7c12bce6f248
-      type: obsolete
-    - id: 1cf465a1-2609-4c15-9b66-c32dbe4bfd67
-      type: similar
+- id: 6e30c82f-a9f8-4aab-b79c-7c12bce6f248
+  type: obsolete
+- id: 1cf465a1-2609-4c15-9b66-c32dbe4bfd67
+  type: similar
 status: test
-description: Detects usage of bitsadmin downloading a file to a suspicious target folder
+description: Detects usage of bitsadmin downloading a file to a suspicious target
+  folder
 references:
-    - https://blog.netspi.com/15-ways-to-download-a-file/#bitsadmin
-    - https://isc.sans.edu/diary/22264
-    - https://lolbas-project.github.io/lolbas/Binaries/Bitsadmin/
-    - https://blog.talosintelligence.com/breaking-the-silence-recent-truebot-activity/
+- https://blog.netspi.com/15-ways-to-download-a-file/#bitsadmin
+- https://isc.sans.edu/diary/22264
+- https://lolbas-project.github.io/lolbas/Binaries/Bitsadmin/
+- https://blog.talosintelligence.com/breaking-the-silence-recent-truebot-activity/
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2022-06-28
 modified: 2025-12-10
 tags:
-    - attack.persistence
-    - attack.execution
-    - attack.stealth
-    - attack.t1197
-    - attack.s0190
-    - attack.t1036.003
-    - attack.command-and-control
-    - attack.t1105
+- attack.persistence
+- attack.execution
+- attack.stealth
+- attack.t1197
+- attack.s0190
+- attack.t1036.003
+- attack.command-and-control
+- attack.t1105
 logsource:
-    category: process_creation
-    product: windows
+  category: process_creation
+  product: windows
 detection:
-    selection_img:
-        - Image|endswith: '\bitsadmin.exe'
-        - OriginalFileName: 'bitsadmin.exe'
-    selection_flags:
-        CommandLine|contains:
-            - ' /transfer '
-            - ' /create '
-            - ' /addfile '
-    selection_folder:
-        CommandLine|contains:
-            - ':\Perflogs'
-            - ':\ProgramData\'
-            - ':\Temp\'
-            - ':\Users\Public\'
-            - ':\Windows\'
-            - '\$Recycle.Bin\'
-            - '\AppData\Local\'
-            - '\AppData\Roaming\'
-            - '\Contacts\'
-            - '\Desktop\'
-            - '\Favorites\'
-            - '\Favourites\'
-            - '\inetpub\wwwroot\'
-            - '\Music\'
-            - '\Pictures\'
-            - '\Start Menu\Programs\Startup\'
-            - '\Users\Default\'
-            - '\Videos\'
-            - '%ProgramData%'
-            - '%public%'
-            - '%temp%'
-            - '%tmp%'
-    condition: all of selection_*
+  selection_img:
+  - Image|endswith: \bitsadmin.exe
+  - OriginalFileName: bitsadmin.exe
+  selection_flags:
+    CommandLine|contains:
+    - ' /transfer '
+    - ' /create '
+    - ' /addfile '
+  selection_folder:
+    CommandLine|contains:
+    - :\Perflogs
+    - :\ProgramData\
+    - :\Temp\
+    - :\Users\Public\
+    - :\Windows\
+    - \$Recycle.Bin\
+    - \AppData\Local\
+    - \AppData\Roaming\
+    - \Contacts\
+    - \Desktop\
+    - \Favorites\
+    - \Favourites\
+    - \inetpub\wwwroot\
+    - \Music\
+    - \Pictures\
+    - \Start Menu\Programs\Startup\
+    - \Users\Default\
+    - \Videos\
+    - '%ProgramData%'
+    - '%public%'
+    - '%temp%'
+    - '%tmp%'
+  condition: all of selection_*
 falsepositives:
-    - Unknown
+- Unknown
 level: high
-regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_bitsadmin_download_susp_targetfolder/info.yml
 simulation:
-    - type: atomic-red-team
-      name: Windows - BITSAdmin BITS Download
-      technique: T1105
-      atomic_guid: a1921cd3-9a2d-47d5-a891-f1d0f2a7a31b
+- type: atomic-red-team
+  name: Windows - BITSAdmin BITS Download
+  technique: T1105
+  atomic_guid: a1921cd3-9a2d-47d5-a891-f1d0f2a7a31b

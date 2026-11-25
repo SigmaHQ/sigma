@@ -3,45 +3,44 @@ id: d522eca2-2973-4391-a3e0-ef0374321dae
 status: test
 description: Detection of unusual child processes by different system processes
 references:
-    - https://image.slidesharecdn.com/kheirkhabarovoffzonefinal-181117201458/95/hunting-for-privilege-escalation-in-windows-environment-74-638.jpg
-author: 'Semanur Guneysu @semanurtg, oscd.community'
+- https://image.slidesharecdn.com/kheirkhabarovoffzonefinal-181117201458/95/hunting-for-privilege-escalation-in-windows-environment-74-638.jpg
+author: Semanur Guneysu @semanurtg, oscd.community
 date: 2020-10-28
 modified: 2022-11-11
 tags:
-    - attack.privilege-escalation
-    - attack.t1548
+- attack.privilege-escalation
+- attack.t1548
 logsource:
-    product: windows
-    category: process_creation
+  product: windows
+  category: process_creation
 detection:
-    selection_parent:
-        ParentImage|endswith:
-            - '\winlogon.exe'
-            - '\services.exe'
-            - '\lsass.exe'
-            - '\csrss.exe'
-            - '\smss.exe'
-            - '\wininit.exe'
-            - '\spoolsv.exe'
-            - '\searchindexer.exe'
-        User|contains: # covers many language settings
-            - 'AUTHORI'
-            - 'AUTORI'
-    selection_img:
-        - Image|endswith:
-              - '\powershell.exe'
-              - '\pwsh.exe'
-              - '\cmd.exe'
-        - OriginalFileName:
-              - 'PowerShell.EXE'
-              - 'pwsh.dll'
-              - 'Cmd.Exe'
-    filter:
-        CommandLine|contains|all:
-            - ' route '
-            - ' ADD '
-    condition: all of selection_* and not filter
+  selection_parent:
+    ParentImage|endswith:
+    - \winlogon.exe
+    - \services.exe
+    - \lsass.exe
+    - \csrss.exe
+    - \smss.exe
+    - \wininit.exe
+    - \spoolsv.exe
+    - \searchindexer.exe
+    User|contains:
+    - AUTHORI
+    - AUTORI
+  selection_img:
+  - Image|endswith:
+    - \powershell.exe
+    - \pwsh.exe
+    - \cmd.exe
+  - OriginalFileName:
+    - PowerShell.EXE
+    - pwsh.dll
+    - Cmd.Exe
+  filter:
+    CommandLine|contains|all:
+    - ' route '
+    - ' ADD '
+  condition: all of selection_* and not filter
 falsepositives:
-    - Unknown
+- Unknown
 level: high
-regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_susp_abusing_debug_privilege/info.yml

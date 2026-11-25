@@ -3,31 +3,31 @@ id: 07f8bdc2-c9b3-472a-9817-5a670b872f53
 status: test
 description: Detects usage of cmdkey to look for cached credentials on the system
 references:
-    - https://www.peew.pw/blog/2017/11/26/exploring-cmdkey-an-edge-case-for-privilege-escalation
-    - https://technet.microsoft.com/en-us/library/cc754243(v=ws.11).aspx
-    - https://github.com/redcanaryco/atomic-red-team/blob/b27a3cb25025161d49ac861cb216db68c46a3537/atomics/T1003.005/T1003.005.md#atomic-test-1---cached-credential-dump-via-cmdkey
-author: jmallette, Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+- https://www.peew.pw/blog/2017/11/26/exploring-cmdkey-an-edge-case-for-privilege-escalation
+- https://technet.microsoft.com/en-us/library/cc754243(v=ws.11).aspx
+- https://github.com/redcanaryco/atomic-red-team/blob/b27a3cb25025161d49ac861cb216db68c46a3537/atomics/T1003.005/T1003.005.md#atomic-test-1---cached-credential-dump-via-cmdkey
+author: jmallette, Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron
+  Systems)
 date: 2019-01-16
 modified: 2024-03-05
 tags:
-    - attack.credential-access
-    - attack.t1003.005
+- attack.credential-access
+- attack.t1003.005
 logsource:
-    category: process_creation
-    product: windows
+  category: process_creation
+  product: windows
 detection:
-    selection_img:
-        - Image|endswith: '\cmdkey.exe'
-        - OriginalFileName: 'cmdkey.exe'
-    selection_cli:
-        CommandLine|contains|windash: ' -l'
-    condition: all of selection*
+  selection_img:
+  - Image|endswith: \cmdkey.exe
+  - OriginalFileName: cmdkey.exe
+  selection_cli:
+    CommandLine|contains|windash: ' -l'
+  condition: all of selection*
 falsepositives:
-    - Legitimate administrative tasks
+- Legitimate administrative tasks
 level: high
-regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_cmdkey_recon/info.yml
 simulation:
-    - type: atomic-red-team
-      name: Cached Credential Dump via Cmdkey
-      technique: T1003.005
-      atomic_guid: 56506854-89d6-46a3-9804-b7fde90791f9
+- type: atomic-red-team
+  name: Cached Credential Dump via Cmdkey
+  technique: T1003.005
+  atomic_guid: 56506854-89d6-46a3-9804-b7fde90791f9

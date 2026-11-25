@@ -1,84 +1,83 @@
 title: Windows Binaries Write Suspicious Extensions
 id: b8fd0e93-ff58-4cbd-8f48-1c114e342e62
 related:
-    - id: 1277f594-a7d1-4f28-a2d3-73af5cbeab43
-      type: derived
+- id: 1277f594-a7d1-4f28-a2d3-73af5cbeab43
+  type: derived
 status: test
 description: Detects Windows executables that write files with suspicious extensions
 references:
-    - Internal Research
+- Internal Research
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-08-12
 modified: 2025-10-07
 tags:
-    - attack.stealth
-    - attack.t1036
+- attack.stealth
+- attack.t1036
 logsource:
-    category: file_event
-    product: windows
+  category: file_event
+  product: windows
 detection:
-    selection_generic:
-        Image|endswith:
-            - '\csrss.exe'
-            - '\lsass.exe'
-            - '\RuntimeBroker.exe'
-            - '\sihost.exe'
-            - '\smss.exe'
-            - '\wininit.exe'
-            - '\winlogon.exe'
-        TargetFilename|endswith:
-            - '.bat'
-            - '.dll'
-            - '.exe'
-            - '.hta'
-            - '.iso'
-            - '.ps1'
-            - '.txt'
-            - '.vbe'
-            - '.vbs'
-    selection_special:
-        Image|endswith:
-            - '\dllhost.exe'
-            - '\rundll32.exe'
-            - '\svchost.exe'
-        TargetFilename|endswith:
-            - '.bat'
-            - '.hta'
-            - '.iso'
-            - '.ps1'
-            - '.vbe'
-            - '.vbs'
-    filter_main_AppLockerPolicyTest:
-        Image: 'C:\Windows\System32\dllhost.exe'
-        TargetFilename|contains|all:
-            - ':\Users\'
-            - '\AppData\Local\Temp\__PSScriptPolicyTest_'
-        TargetFilename|endswith: '.ps1'
-    filter_main_script_gpo_machine:
-        Image: 'C:\Windows\system32\svchost.exe'
-        TargetFilename|contains|all:
-            - 'C:\Windows\System32\GroupPolicy\DataStore\'
-            - '\sysvol\'
-            - '\Policies\'
-            - '\Machine\Scripts\Startup\'
-        TargetFilename|endswith:
-            - '.ps1'
-            - '.bat'
-    filter_main_clipchamp:
-        Image: 'C:\Windows\system32\svchost.exe'
-        TargetFilename|contains|all:
-            - 'C:\Program Files\WindowsApps\Clipchamp'
-            - '.ps1'
-    filter_main_powershell_preview:
-        Image:
-            - 'C:\Windows\system32\svchost.exe'
-            - 'C:\Windows\SysWOW64\svchost.exe'
-        TargetFilename|startswith:
-            - 'C:\Program Files\WindowsApps\Microsoft.PowerShellPreview'
-            - 'C:\Program Files (x86)\WindowsApps\Microsoft.PowerShellPreview'
-        TargetFilename|endswith: '.ps1'
-    condition: 1 of selection_* and not 1 of filter_main_*
+  selection_generic:
+    Image|endswith:
+    - \csrss.exe
+    - \lsass.exe
+    - \RuntimeBroker.exe
+    - \sihost.exe
+    - \smss.exe
+    - \wininit.exe
+    - \winlogon.exe
+    TargetFilename|endswith:
+    - .bat
+    - .dll
+    - .exe
+    - .hta
+    - .iso
+    - .ps1
+    - .txt
+    - .vbe
+    - .vbs
+  selection_special:
+    Image|endswith:
+    - \dllhost.exe
+    - \rundll32.exe
+    - \svchost.exe
+    TargetFilename|endswith:
+    - .bat
+    - .hta
+    - .iso
+    - .ps1
+    - .vbe
+    - .vbs
+  filter_main_AppLockerPolicyTest:
+    Image: C:\Windows\System32\dllhost.exe
+    TargetFilename|contains|all:
+    - :\Users\
+    - \AppData\Local\Temp\__PSScriptPolicyTest_
+    TargetFilename|endswith: .ps1
+  filter_main_script_gpo_machine:
+    Image: C:\Windows\system32\svchost.exe
+    TargetFilename|contains|all:
+    - C:\Windows\System32\GroupPolicy\DataStore\
+    - \sysvol\
+    - \Policies\
+    - \Machine\Scripts\Startup\
+    TargetFilename|endswith:
+    - .ps1
+    - .bat
+  filter_main_clipchamp:
+    Image: C:\Windows\system32\svchost.exe
+    TargetFilename|contains|all:
+    - C:\Program Files\WindowsApps\Clipchamp
+    - .ps1
+  filter_main_powershell_preview:
+    Image:
+    - C:\Windows\system32\svchost.exe
+    - C:\Windows\SysWOW64\svchost.exe
+    TargetFilename|startswith:
+    - C:\Program Files\WindowsApps\Microsoft.PowerShellPreview
+    - C:\Program Files (x86)\WindowsApps\Microsoft.PowerShellPreview
+    TargetFilename|endswith: .ps1
+  condition: 1 of selection_* and not 1 of filter_main_*
 falsepositives:
-    - Unknown
+- Unknown
 level: high
-regression_tests_path: regression_data/rules/windows/file/file_event/file_event_win_shell_write_susp_files_extensions/info.yml
