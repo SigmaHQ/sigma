@@ -5,12 +5,19 @@ on:
 
 name: PR Labeler Workflow
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
 jobs:
   triage:
+    name: triage
     if: github.repository_owner == 'SigmaHQ'
     permissions:
-      contents: read
-      pull-requests: write
+      contents: read # read the labeler config
+      pull-requests: write # add labels to the PR
     runs-on: ubuntu-latest
     steps:
       - uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b # v6.0.1
