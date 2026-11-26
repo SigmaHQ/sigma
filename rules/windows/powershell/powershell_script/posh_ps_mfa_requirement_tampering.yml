@@ -1,0 +1,33 @@
+title: PowerShell MFA Requirement Tampering On Entra ID Or AD User Object
+id: c10c6c11-0f72-4025-82ea-6e121ba1ffed
+status: experimental
+description: |
+    Detects PowerShell script blocks that clear or weaken a user's Strong Authentication (MFA) requirements
+    via the legacy MSOnline or AzureAD modules, which can be used to bypass MFA enforcement for a targeted account.
+references:
+    - https://learn.microsoft.com/en-us/powershell/module/msonline/set-msoluser
+author: Krishna Gupta
+date: 2026-08-08
+tags:
+    - attack.defense-evasion
+    - attack.t1556.006
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_cmdlet:
+        ScriptBlockText|contains:
+            - 'Set-MsolUser'
+            - 'Set-AzureADUser'
+    selection_param:
+        ScriptBlockText|contains: 'StrongAuthenticationRequirements'
+    selection_clear:
+        ScriptBlockText|contains:
+            - '$null'
+            - '@()'
+            - '.Clear()'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate administration scripts resetting a user's MFA methods at their request
+level: high
