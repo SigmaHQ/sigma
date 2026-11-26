@@ -5,14 +5,24 @@ name: Goodlog Tests
 
 on: [push, pull_request, merge_group, workflow_dispatch]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   EVTX_BASELINE_VERSION: v0.8.5
 
 jobs:
   check-baseline-win7:
+    name: check-baseline-win7
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - name: Download evtx-sigma-checker
       run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
     - name: Download and extract Windows 7 32-bit baseline
@@ -34,9 +44,12 @@ jobs:
         ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
   check-baseline-win10:
+    name: check-baseline-win10
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - name: Download evtx-sigma-checker
       run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
     - name: Download and extract Windows 10 baseline
@@ -58,9 +71,12 @@ jobs:
         ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
   check-baseline-win11:
+    name: check-baseline-win11
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - name: Download evtx-sigma-checker
       run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
     - name: Download and extract Windows 11 baseline
@@ -82,9 +98,12 @@ jobs:
         ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
   check-baseline-win11-2023:
+    name: check-baseline-win11-2023
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - name: Download evtx-sigma-checker
       run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
     - name: Download and extract Windows 11 baseline
@@ -106,9 +125,12 @@ jobs:
         ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
   check-baseline-win2022:
+    name: check-baseline-win2022
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - name: Download evtx-sigma-checker
       run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
     - name: Download and extract Windows 2022 baseline
@@ -128,9 +150,12 @@ jobs:
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
   check-baseline-win2022-domain-controller:
+    name: check-baseline-win2022-domain-controller
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - name: Download evtx-sigma-checker
       run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
     - name: Download and extract Windows 2022 baseline
@@ -150,9 +175,12 @@ jobs:
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
   check-baseline-win2022-0-20348-azure:
+    name: check-baseline-win2022-0-20348-azure
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - name: Download evtx-sigma-checker
       run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
     - name: Download and extract Windows 2022.0.20348 Azure baseline

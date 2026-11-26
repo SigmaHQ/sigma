@@ -7,7 +7,7 @@ references:
     - https://github.com/DebugPrivilege/CPP/blob/c39d365617dbfbcb01fffad200d52b6239b2918c/Windows%20Defender/RestoreDefenderConfig.cpp
 author: frack113, Nasreddine Bencherchali (Nextron Systems)
 date: 2022-07-04
-modified: 2024-03-25
+modified: 2026-11-06
 tags:
     - attack.defense-impairment
     - attack.t1685.001
@@ -21,6 +21,11 @@ detection:
         Details: 'DWORD (0x00000000)'
     filter_main_wevutil:
         Image: 'C:\Windows\system32\wevtutil.exe' # FP generated during installation of manifests via wevtutil
+    filter_main_drvinst:
+        # FP generated during driver package installs registering the driver's own (disabled by default) event channels
+        Image:
+            - 'C:\Windows\System32\DrvInst.exe'
+            - 'C:\Windows\SysWOW64\DrvInst.exe'
     filter_main_iis:
         Image|startswith: 'C:\Windows\winsxs\'
         Image|endswith: '\TiWorker.exe'  # Many different TargetObjects

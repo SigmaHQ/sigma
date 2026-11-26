@@ -5,16 +5,25 @@ on:
 
 name: Create Release
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     name: Create Release
     if: github.repository_owner == 'SigmaHQ'
+    permissions:
+      contents: write # create the draft release and upload assets
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Generate Changelog
         run: |
           prev_tag=$(git for-each-ref --sort=creatordate --format '%(refname:lstrip=2)' refs/tags | grep ^r | tail -2 | head -1)
@@ -52,18 +61,18 @@ jobs:
           python3 tests/sigma-package-release.py --min-status experimental --min-level medium --rule-types et --outfile sigma_emerging_threats_addon.zip
           python3 tests/sigma-package-release.py --min-status experimental --min-level medium --rule-types generic et --outfile sigma_all_rules.zip
       - name: Create Release with Assets
-        id: create_release
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
-        with:
-          tag_name: ${{ github.ref }}
-          name: Release ${{ github.ref_name }}
-          body_path: changelog.txt
-          token: ${{ secrets.GITHUB_TOKEN }}
-          draft: true
-          prerelease: false
-          files: |
-            sigma_core.zip
-            sigma_core+.zip
-            sigma_core++.zip
-            sigma_emerging_threats_addon.zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # create-or-update, so a rerun repairs a half-finished draft
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" --title "Release $GITHUB_REF_NAME" --notes-file changelog.txt
+          else
+            gh release create "$GITHUB_REF_NAME" --draft --verify-tag --title "Release $GITHUB_REF_NAME" --notes-file changelog.txt
+          fi
+          gh release upload "$GITHUB_REF_NAME" --clobber \
+            sigma_core.zip \
+            sigma_core+.zip \
+            sigma_core++.zip \
+            sigma_emerging_threats_addon.zip \
             sigma_all_rules.zip
