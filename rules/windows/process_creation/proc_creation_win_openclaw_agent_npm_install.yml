@@ -1,0 +1,43 @@
+title: Potential Autonomous AI Agent NPM Install
+id: d36928ed-ae93-4ece-8e23-b6bc2c8c1032
+status: experimental
+description: |
+    Detects an npm install command whose arguments name a package in the OpenClaw agent family or its copycat ecosystem.
+    The npm-cli.js invocation is observed as a child of the user shell with a CommandLine that contains both 'npm-cli.js install' and one of the package names.
+    Catches the install moment, before the workspace is materialized, so it pairs with the working-directory and file-event sister rules for layered coverage.
+references:
+    - https://github.com/openclaw/openclaw/blob/ea16a5e9e10c5b2be28ed46ea77ba5a7aa787d8c/docs/start/getting-started.md
+    - https://github.com/HKUDS/nanobot/blob/9ccef018c222b198991d36db8166cfc0c3aa7ea5/README.md
+    - https://github.com/nanocoai/nanoclaw/blob/975a2f0f5b0ea19bbf35fadfd394df35e5341d3a/README.md
+author: David El (0xdavidel)
+date: 2026-05-15
+tags:
+    - attack.initial-access
+    - attack.t1195.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_npm:
+        CommandLine|contains: 'npm-cli.js'
+    selection_install:
+        CommandLine|contains: ' install '
+    selection_pkg:
+        CommandLine|contains:
+            - 'openclaw'
+            - 'moltbot'
+            - 'moltbook'
+            - 'clawdbot'
+            - 'clawbot'
+            - 'nanobot'
+            - 'nanoclaw'
+            - 'picoclaw'
+            - 'zeroclaw'
+            - 'moltis'
+            - 'agentzero'
+    condition: all of selection_*
+falsepositives:
+    - Sanctioned developer install of any of these packages. Apply a per-host or per-user allowlist filter.
+    - Unrelated package whose name contains a substring collision. Tighten the package list to exact-token matches if seen in practice.
+level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_openclaw_agent_npm_install/info.yml
