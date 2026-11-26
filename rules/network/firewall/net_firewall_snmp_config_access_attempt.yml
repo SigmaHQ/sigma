@@ -1,0 +1,28 @@
+title: Potential Network Device Configuration Theft via SNMP
+id: 4590f85b-97d6-4575-b45f-624d39b2d487
+status: experimental
+description: |
+    Detects network connections to SNMP (UDP/161), consistent with the
+    reconnaissance and configuration-write access described in CISA/NSA/FBI
+    joint advisory AA26-194A, in which FSB Center 16 actors abused exposed
+    SNMP services on routers to trigger configuration-copy operations.
+references:
+    - https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-194a
+author: Zach Vessey
+date: 2026-07-16
+tags:
+    - attack.collection
+    - attack.reconnaissance
+    - attack.t1595.002
+logsource:
+    category: firewall
+detection:
+    selection:
+        dst_port: 161
+        proto: udp
+    condition: selection
+falsepositives:
+    - Legitimate SNMP monitoring/polling traffic from authorized NMS (network
+      management system) hosts — this rule should be scoped with a source-IP
+      allowlist in production deployments.
+level: medium
