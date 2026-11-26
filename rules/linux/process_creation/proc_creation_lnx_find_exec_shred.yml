@@ -1,0 +1,33 @@
+title: File Deletion via Find and Shred
+id: a3c5e7f1-9b2d-4e8a-c6d7-5f3e1a2b4c0d
+status: experimental
+description: |
+    Detects the find command executing shred via the -exec flag to perform bulk secure deletion of files.
+    Unlike plain rm, shred overwrites file contents before unlinking, making recovery significantly harder.
+    Attackers use this combination to wipe forensic artifacts such as logs, credentials, and shell history
+    across entire directory trees in a single command.
+references:
+    - https://man7.org/linux/man-pages/man1/shred.1.html
+    - https://www.virustotal.com/gui/file/759cff11d5b44124c5728663cebb8ed671c1c12c1ce7204fa29d852408b147c7/content
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-21
+tags:
+    - attack.stealth
+    - attack.t1070.004
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        # find /var/log -type f -exec shred -u {} \;
+        # find /home -name "*.log" -exec shred -uz {} +
+        # find / -name "*.key" -exec shred -u {} \;
+        # find /home /root -name '.*history' -exec shred -vfz -n 3 {} + 2>/dev/null
+        Image|endswith: '/find'
+        CommandLine|contains|all:
+            - '-exec'
+            - 'shred'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
