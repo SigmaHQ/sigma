@@ -1,0 +1,36 @@
+title: CVE-2026-21509 - MiniDoor Email Stealer VBA Project Deployment
+id: d1a73e4f-5f6b-4c7d-9e1f-4b8d9e1f2a3c
+status: experimental
+description: |
+    Detects deployment of MiniDoor, a malicious Outlook VBA project used by APT28 to steal emails.
+    MiniDoor modifies Outlook security settings and creates auto-forwarding rules to exfiltrate victim emails.
+references:
+    - https://www.zscaler.com/blogs/security-research/apt28-leverages-cve-2026-21509-operation-neusploit
+author: Jamal Uddin Shaikh
+date: 2026/02/10
+tags:
+    - attack.collection
+    - attack.t1114
+    - attack.persistence
+    - attack.t1137
+    - cve.2026.21509
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_vba_files:
+        TargetFilename|contains:
+            - '\VbaProject.OTM'
+            - '\AppData\Roaming\Microsoft\Outlook\'
+        TargetFilename|endswith:
+            - '.otm'
+            - '.vbaproject'
+    selection_outlook_config:
+        TargetFilename|contains:
+            - '\Microsoft\Outlook\Security'
+        TargetFilename|endswith: '.reg'
+    condition: selection_vba_files or selection_outlook_config
+falsepositives:
+    - Legitimate Outlook VBA macros and add-ins
+    - IT-managed Outlook security policy changes
+level: high

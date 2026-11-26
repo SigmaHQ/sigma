@@ -1,0 +1,48 @@
+title: CVE-2026-21509 - Covenant Grunt Implant Indicators
+id: f3c95f6b-7d8e-4e9f-9a1b-6d0f2e3a4b5c
+status: experimental
+description: |
+    Detects Covenant Grunt implant deployment as final payload in CVE-2026-21509 exploitation chain.
+    Covenant is a .NET C2 framework used by APT28 for command and control with in-memory execution and API abuse.
+references:
+    - https://www.zscaler.com/blogs/security-research/apt28-leverages-cve-2026-21509-operation-neusploit
+    - https://thehackernews.com/2026/02/apt28-uses-microsoft-office-cve-2026.html
+author: Jamal Uddin Shaikh
+date: 2026/02/10
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.command_and_control
+    - attack.t1071.001
+    - attack.defense_evasion
+    - attack.t1055
+    - cve.2026.21509
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_dotnet_suspicious:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\rundll32.exe'
+        CommandLine|contains:
+            - 'System.Reflection.Assembly'
+            - 'Load'
+            - '[Byte[]]'
+            - 'System.Net.WebClient'
+    selection_covenant_strings:
+        CommandLine|contains:
+            - 'GruntStager'
+            - 'Covenant'
+            - 'Grunt'
+    selection_process_injection:
+        Image|endswith: '\rundll32.exe'
+        CommandLine|contains:
+            - 'VirtualAlloc'
+            - 'CreateThread'
+            - 'WriteProcessMemory'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate .NET application loading and execution
+    - Security tools and EDR solutions using process injection
+level: critical
