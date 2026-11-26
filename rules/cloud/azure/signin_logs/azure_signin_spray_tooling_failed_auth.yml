@@ -1,0 +1,38 @@
+title: Failed Entra ID Sign-In Via Azure AD PowerShell Or Azure CLI With Generic User Agent
+id: 7c26981b-492d-46ef-a7eb-719cd84e7a43
+status: experimental
+description: |
+    Detects failed Entra ID (Azure AD) sign-ins (invalid password, Smart Lockout, expired or null password) through the
+    Azure AD PowerShell or Azure CLI first-party public clients with a bare "Mozilla/5.0" user agent.
+    Password-spray tools such as MSOLSpray and TeamFiltration authenticate through these public client IDs with a
+    generic user agent, while the genuine PowerShell module and Azure CLI do not send a bare "Mozilla/5.0".
+    Each event carries the source address, which makes it suitable for automated blocking of rotating proxy IPs.
+references:
+    - https://github.com/dafthack/MSOLSpray
+    - https://github.com/Flangvik/TeamFiltration
+    - https://learn.microsoft.com/en-us/entra/identity-platform/reference-error-codes
+author: Tim Shelton (HAWK.io)
+date: 2026-10-07
+tags:
+    - attack.credential-access
+    - attack.t1110.003
+logsource:
+    product: azure
+    service: signinlogs
+detection:
+    selection_failure:
+        ResultType:
+            - 50126 # Invalid username or password
+            - 50053 # Account locked (Smart Lockout)
+            - 50055 # Password expired
+            - 50056 # Invalid or null password
+    selection_client:
+        AppId:
+            - '1b730954-1685-4b74-9bfd-dac224a7b894' # Azure Active Directory PowerShell
+            - '04b07795-8ddb-461a-bbee-02f9e1bf7b46' # Microsoft Azure CLI
+    selection_agent:
+        userAgent: 'Mozilla/5.0'
+    condition: all of selection_*
+falsepositives:
+    - Custom scripts that call these public clients with a minimal user agent and a wrong password
+level: high
