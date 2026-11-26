@@ -7,6 +7,7 @@ references:
     - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/invoke-command?view=powershell-7.4
 author: frack113
 date: 2022-01-07
+modified: 2026-10-14
 tags:
     - attack.lateral-movement
     - attack.t1021.006
@@ -19,8 +20,13 @@ detection:
         ScriptBlockText|contains|all:
             - 'invoke-command '
             - ' -ComputerName '
-    condition: selection_cmdlet
+    filter_optional_bccontainerhelper:
+        # Microsoft BcContainerHelper (Business Central container module) opens a WinRM session to a local container
+        Path|contains: '\Modules\BcContainerHelper\'
+        ScriptBlockText|contains: '$bcContainerHelperConfig.WinRmCredentials'
+    condition: selection_cmdlet and not 1 of filter_optional_*
 falsepositives:
     - Legitimate script
+    - Microsoft Dynamics 365 Business Central BcContainerHelper module
 level: medium
 regression_tests_path: regression_data/rules/windows/powershell/powershell_script/posh_ps_invoke_command_remote/info.yml
