@@ -1,0 +1,36 @@
+title: Suspicious Bpftool State Modification
+id: a444680c-0216-4f1a-8a4f-8e88b7d1b632
+status: experimental
+description: |
+    Detects the execution of the 'bpftool' command to load, attach, or pin eBPF programs and maps.
+    Adversaries and rootkits (e.g., BPFDoor, Symbiote) often leverage eBPF for stealthy persistence and network evasion.
+    While 'bpftool' is a legitimate administrative utility for introspection, unauthorized usage to load or modify eBPF objects outside of known administrative scripts is highly suspicious.
+references:
+    - https://www.elastic.co/security-labs/getting-bpfdoor-off-its-hinges
+    - https://redcanary.com/blog/ebpf-for-security/
+    - https://attack.mitre.org/techniques/T1547/006/
+author: Sri Charan
+date: 2026-07-28
+tags:
+    - attack.persistence
+    - attack.defense-evasion
+    - attack.t1547.006
+    - attack.t1562
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        - Image|endswith: '/bpftool'
+        - CommandLine|contains: 'bpftool '
+    selection_cmd:
+        CommandLine|contains:
+            - ' prog load'
+            - ' prog attach'
+            - ' prog pin'
+            - ' map pin'
+            - ' prog detach'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate execution of bpftool by system administrators for network troubleshooting or observability tool deployments (e.g., Cilium, Datadog).
+level: high
