@@ -1,0 +1,35 @@
+title: Moodle Cron Endpoint Accessed From External Address
+id: eb36448d-2512-482d-ad99-9feab85ef500
+status: experimental
+description: |
+    Detects requests to Moodle's web cron endpoint from an address outside RFC1918 space.
+    Moodle documentation recommends restricting web cron to the local host or to a defined set of
+    trusted addresses. Where it is left open, an unauthenticated attacker can repeatedly trigger the
+    full scheduled task run, which is both a denial of service primitive and a way to force execution
+    of tasks registered by an installed plugin.
+references:
+    - https://docs.moodle.org/en/Cron
+    - https://docs.moodle.org/en/Site_security_settings
+author: Sanket Taware (@sankettaware16)
+date: 2026-07-31
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1053
+logsource:
+    category: webserver
+detection:
+    selection:
+        cs-uri-stem|endswith: '/admin/cron.php'
+    filter_main_internal:
+        c-ip|cidr:
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Sites that deliberately drive web cron from an external scheduler or uptime monitor
+    - Reverse proxies and load balancers that do not preserve the original client address, which will make every request appear external
+level: high
