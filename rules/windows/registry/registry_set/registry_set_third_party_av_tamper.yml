@@ -1,0 +1,71 @@
+title: Potential Third-Party Antivirus Protection Disabled Via Registry
+id: 1c486b8b-0357-4589-930b-1671314462e3
+related:
+    - id: 9f4662ac-17ca-43aa-8f12-5d7b989d0101
+      type: obsolete
+status: experimental
+description: |
+    Detects registry modifications that disable antivirus protection or self-defense mechanisms of
+    common third-party security products. Ransomware and targeted attackers commonly disable these
+    protections before deploying their payload to prevent the AV from blocking or removing malicious
+    activity.
+references:
+    - https://github.com/Siradankullanici/OpenSourceViruses/blob/3267564a35f6e13559a3119eb68d0da8d2e91a0a/suspiciousregchangesandtaskkils
+author: Nasreddine Bencherchali (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-14
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_avast:
+        # reg add "HKEY_LOCAL_MACHINE\SOFTWARE\AVAST Software\Avast" /v "aswidsagenta" /t REG_DWORD /d "0" /f
+        TargetObject|contains: '\SOFTWARE\AVAST Software\Avast\aswidsagenta'
+        Details: 'DWORD (0x00000000)'
+    selection_avg:
+        # reg add "HKEY_LOCAL_MACHINE\SOFTWARE\AVG" /v "DisableAv" /t REG_DWORD /d "1" /f
+        TargetObject|contains: '\SOFTWARE\AVG\DisableAv'
+        Details: 'DWORD (0x00000001)'
+    selection_avira:
+        # reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Avira" /v "ProductEnabled" /t REG_DWORD /d "0" /f
+        TargetObject|contains: '\SOFTWARE\Avira\ProductEnabled'
+        Details: 'DWORD (0x00000000)'
+    selection_bitdefender:
+        # reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Bitdefender" /v "BlockUserModeAccess" /t REG_DWORD /d "1" /f
+        TargetObject|contains: '\SOFTWARE\Bitdefender\BlockUserModeAccess'
+        Details: 'DWORD (0x00000001)'
+    selection_eset:
+        # reg add "HKEY_LOCAL_MACHINE\SOFTWARE\ESET\ESET Security" /v "ProtectEnabled" /t REG_DWORD /d "0" /f
+        # reg add "HKEY_LOCAL_MACHINE\SOFTWARE\ESET\ESET Security" /v "EnableHIPS" /t REG_DWORD /d "0" /f
+        TargetObject|contains:
+            - '\SOFTWARE\ESET\ESET Security\ProtectEnabled'
+            - '\SOFTWARE\ESET\ESET Security\EnableHIPS'
+        Details: 'DWORD (0x00000000)'
+    selection_kaspersky:
+        # reg add "HKEY_LOCAL_MACHINE\SOFTWARE\KasperskyLab" /v "Enable" /t REG_DWORD /d "0" /f
+        TargetObject|contains: '\SOFTWARE\KasperskyLab\Enable'
+        Details: 'DWORD (0x00000000)'
+    selection_malwarebytes:
+        # reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Malwarebytes" /v "MalwareProtectionEnabled" /t REG_DWORD /d "0" /f
+        TargetObject|contains: '\SOFTWARE\Malwarebytes\MalwareProtectionEnabled'
+        Details: 'DWORD (0x00000000)'
+    selection_mcafee:
+        # reg add "HKEY_LOCAL_MACHINE\SOFTWARE\McAfee" /v "bDisableSelfProtection" /t REG_DWORD /d "1" /f
+        TargetObject|contains: '\SOFTWARE\McAfee\bDisableSelfProtection'
+        Details: 'DWORD (0x00000001)'
+    selection_norton:
+        # reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Norton" /v "Enable" /t REG_DWORD /d "0" /f
+        TargetObject|contains: '\SOFTWARE\Norton\Enable'
+        Details: 'DWORD (0x00000000)'
+    selection_sopphos:
+        TargetObject|contains:
+            - '\Sophos Endpoint Defense\TamperProtection\Config\SAVEnabled'
+            - '\Sophos Endpoint Defense\TamperProtection\Config\SEDEnabled'
+            - '\Sophos\SAVService\TamperProtection\Enabled'
+        Details: DWORD (0x00000000)
+    condition: 1 of selection_*
+falsepositives:
+    - Some FP may occur when the feature is disabled by the AV itself, you should always investigate if the action was legitimate
+level: high

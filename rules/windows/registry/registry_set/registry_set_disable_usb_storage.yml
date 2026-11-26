@@ -1,0 +1,26 @@
+title: USB Storage Service Disabled Via Registry
+id: 24e9f7a6-4fb6-4f75-b43f-c53adee748cd
+status: experimental
+description: |
+    Detects when the USBSTOR service is disabled via the registry by setting its Start value to 4
+    (disabled). Malware uses this to prevent USB storage devices from being mounted, which stops
+    defenders from introducing recovery tools or bootable media via USB, and prevents potential
+    data exfiltration paths from being used.
+references:
+    - https://github.com/Siradankullanici/OpenSourceViruses/blob/3267564a35f6e13559a3119eb68d0da8d2e91a0a/suspiciousregchangesandtaskkils
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-08-14
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|endswith: '\SYSTEM\CurrentControlSet\Services\USBSTOR\Start'
+        Details: 'DWORD (0x00000004)'
+    condition: selection
+falsepositives:
+    - Legitimate administrative hardening policies that disable USB storage on corporate endpoints
+level: medium
