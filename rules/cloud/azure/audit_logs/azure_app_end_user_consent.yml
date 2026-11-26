@@ -4,8 +4,12 @@ status: test
 description: Detects when an end user consents to an application
 references:
     - https://learn.microsoft.com/en-us/entra/architecture/security-operations-applications#end-user-consent
+    - https://research.splunk.com/cloud/10ec9031-015b-4617-b453-c0c1ab729007/
+    - https://mashtitle.com/2025/06/23/husky-corp/
+    - https://www.microsoft.com/en-us/security/blog/2024/01/25/midnight-blizzard-guidance-for-responders-on-nation-state-attack/
 author: Bailey Bercik '@baileybercik', Mark Morowczynski '@markmorow'
 date: 2022-07-28
+modified: 2026-05-09
 tags:
     - attack.credential-access
     - attack.t1528
@@ -14,7 +18,10 @@ logsource:
     service: auditlogs
 detection:
     selection:
-        ConsentContext.IsAdminConsent: 'false'
+        operationName: 'Consent to application'
+        properties.targetResources|contains|all:
+            - 'ConsentContext.IsAdminConsent'
+            - 'False'
     condition: selection
 falsepositives:
     - Unknown

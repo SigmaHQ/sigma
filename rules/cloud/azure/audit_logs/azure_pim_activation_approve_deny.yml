@@ -4,8 +4,10 @@ status: test
 description: Detects when a PIM elevation is approved or denied. Outside of normal operations should be investigated.
 references:
     - https://learn.microsoft.com/en-us/entra/architecture/security-operations-privileged-identity-management#azure-ad-roles-assignment
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities#access-reviews
 author: Mark Morowczynski '@markmorow', Yochana Henderson, '@Yochana-H'
 date: 2022-08-09
+modified: 2026-05-09
 tags:
     - attack.persistence
     - attack.initial-access
@@ -17,7 +19,9 @@ logsource:
     service: auditlogs
 detection:
     selection:
-        properties.message: Request Approved/Denied
+        operationName:
+            - Request Approved
+            - Request Denied
     condition: selection
 falsepositives:
     - Actual admin using PIM.
