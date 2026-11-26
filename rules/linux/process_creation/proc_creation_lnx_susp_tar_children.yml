@@ -28,13 +28,14 @@ detection:
     selection_parent:
         ParentImage|endswith: '/tar'
     selection_susp_img:
-        # src/system.c xexec() hardcodes execv("/bin/sh", ["/bin/sh", "-c", cmd]) for all command execution paths
+         # src/system.c xexec() hardcodes execv("/bin/sh", ["/bin/sh", "-c", cmd]) for all command execution paths
         # (--to-command, --checkpoint-action=exec, -I/--use-compress-program, --info-script)
-        # so the direct child of tar is always /bin/sh or /dash (via symlink on Debian/Ubuntu)
+        # so the direct child of tar is always /bin/sh or /dash or /busybox or /bash (via symlink on Debian/Ubuntu)
         # other shells here catch cases where a non-default shell is explicitly passed as the payload
         Image|endswith:
             - '/ash'
-            - '/bash'
+            # - '/bash' # excluded to avoid noise
+            # - '/busybox'
             - '/csh'
             # - '/dash' # on many systems /bin/sh -> /bin/dash; excluded to avoid noise, covered by selection_susp_cli
             - '/fish'
@@ -51,7 +52,6 @@ detection:
             - 'cronjob'
             - 'crontab'
             - 'curl'
-            - 'nc '
             - 'ncat'
             - 'netcat'
             - 'perl'
