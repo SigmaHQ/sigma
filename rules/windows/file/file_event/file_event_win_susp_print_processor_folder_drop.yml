@@ -1,0 +1,35 @@
+title: Drop Binaries Into Print Processor Directory
+id: 26138a6f-5c63-44ea-a341-c114530124bf
+status: experimental
+description: |
+    Detects the creation of executable files inside the Windows print processor directory.
+    Print processors are DLLs that are loaded by the print spooler service (spoolsv.exe), which runs as SYSTEM. Adversaries may drop malicious DLLs in this directory and register them for persistence and/or privilege escalation as seen in the PipeMon campaign.
+references:
+    - https://www.welivesecurity.com/2020/05/21/no-game-over-winnti-group/
+    - https://learn.microsoft.com/en-us/windows/win32/printdocs/addprintprocessor
+author: ialivrd
+date: 2026-10-22
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1547.012
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains: '\spool\prtprocs\'
+        TargetFilename|endswith:
+            - '.dll'
+            - '.exe'
+            - '.sys'
+    filter_main_windows_servicing:
+        Image|endswith:
+            - '\TrustedInstaller.exe'
+            - '\TiWorker.exe'
+    filter_optional_spooler:
+        Image|endswith: '\spoolsv.exe'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Legitimate installation of printer software that ships its own print processor
+level: high
