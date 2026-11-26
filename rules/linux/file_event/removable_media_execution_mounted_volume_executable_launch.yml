@@ -1,0 +1,23 @@
+title: Removable Media Execution (mounted volume executable launch)
+id: b79b13f6-95c3-5984-c7d1-c1f0af30024f
+status: experimental
+description: Detects execution of executables from mounted removable media on Linux systems.
+references:
+    - https://entroprism.net
+author: Entroprism (Beijing Yijun Foreign Trade Co., Ltd.)
+date: 2026/11/03
+tags:
+    - attack.t1091
+    - detection.threat_hunting
+logsource:
+    product: linux
+    category: file_event
+detection:
+  selection_mount:
+    TargetFilename|contains: '/media/'
+  selection_exec:
+    TargetFilename|endswith: '.app' or '.sh'
+  condition: selection_mount and selection_exec
+level: high
+falsepositives:
+  - legitimate removable media content
