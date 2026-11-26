@@ -1,0 +1,52 @@
+title: IDS Signature High Priority Classification
+id: dd19d217-712d-4fbb-b34c-7cfbf28eabb4
+status: experimental
+description: |
+    Detects classic Snort / IDS signature hits (Generator ID not equal to SnortML GID 411)
+    with high-priority classifications commonly associated with malware C2, privilege gain,
+    or known exploits.
+    These events are stronger signature true-positive candidates than ML-only (GID 411) or
+    EVE-only scores and may justify gated remediation after analyst or policy review.
+references:
+    - https://www.cisco.com/c/en/us/td/docs/security/firepower/741/api/FQE/secure_firewall_estreamer_fqe_guide_740.pdf
+    - https://github.com/Cisco-Talos/EvidenceForge/pull/389
+    - https://github.com/splunk/security_content/pull/4221
+    - https://github.com/AAH20/aegis-decision-fabric
+    - https://a2zsoc.com/consultation
+author: Ahmed Hassan (A2Z SOC)
+date: 2026-08-16
+tags:
+    - attack.execution
+    - attack.t1203
+    - attack.command-and-control
+    - attack.t1071
+logsource:
+    category: firewall
+detection:
+    selection_class:
+        Classification|contains:
+            - "A Network Trojan was Detected"
+            - "Successful Administrator Privilege Gain"
+            - "Successful User Privilege Gain"
+            - "Known malware command and control traffic"
+            - "Known malicious file or file based exploit"
+            - "Known client side exploit attempt"
+            - "Large Scale Information Leak"
+    selection_class_alt:
+        class_desc|contains:
+            - "A Network Trojan was Detected"
+            - "Successful Administrator Privilege Gain"
+            - "Successful User Privilege Gain"
+            - "Known malware command and control traffic"
+            - "Known malicious file or file based exploit"
+            - "Known client side exploit attempt"
+            - "Large Scale Information Leak"
+    filter_snortml:
+        GeneratorID: 411
+    filter_snortml_alt:
+        gid: 411
+    condition: (1 of selection_class*) and not 1 of filter_snortml*
+falsepositives:
+    - Noisy signature packs or policy-violation classifications in permissive environments
+    - Vulnerability scanners and malware sandboxes generating simulated attacks
+level: high
