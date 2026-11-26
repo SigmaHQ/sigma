@@ -1,0 +1,36 @@
+title: Command Execution Attempt via Tar - Linux
+id: 5fbd1c84-c13d-414a-9ab5-c20e40a122f5
+status: experimental
+description: |
+    Detects potential arbitrary command execution via the "tar" utility using flags that allow spawning external processes.
+    These techniques are abused to escape restricted shells, exploit sudoers misconfigurations, or gain elevated code execution.
+references:
+    - https://gtfobins.github.io/gtfobins/tar/
+    - https://www.helpnetsecurity.com/2014/06/27/exploiting-wildcards-on-linux/
+    - https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/wildcards-spare-tricks.html#tar
+author: Rafael Soje (@rafaelsoje), Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-10-30
+tags:
+    - attack.execution
+    - attack.privilege-escalation
+    - attack.t1059.004
+    - attack.t1548.003
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: '/tar'
+    selection_cli:
+        - CommandLine|contains|all:
+              - '--checkpoint-action'
+              - 'exec'
+        - CommandLine|contains:
+              - '--to-command'
+              - '--info-script'
+              - '--new-volume-script'
+        - CommandLine|re: '(-I\s{1,3}|--use-compress-program[= ])[''"]?(/bin/)?(ba|da|z|k|c|a)?sh'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate administrative use of tar with these flags in backup, compression, extraction pipelines or other maintenance tasks
+level: medium
