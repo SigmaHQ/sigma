@@ -1,0 +1,35 @@
+title: Evilginx Microsoft KMSI Parameter Force-Enable
+id: d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a
+status: experimental
+description: |
+    Detects forced activation of the Microsoft "Keep Me Signed In" (KMSI) parameter
+    during authentication to /ppsecure/post.srf. Evilginx phishlets force KMSI=on to
+    obtain persistent session cookies (ESTSAUTHPERSISTENT) that remain valid for extended
+    periods, maximizing the attacker's access window after a successful AiTM interception.
+references:
+    - https://github.com/kgretzky/evilginx2
+    - https://attack.mitre.org/techniques/T1539/
+    - https://learn.microsoft.com/en-us/entra/identity/conditional-access/concept-session-lifetime
+author: CyberLeakWatch Investigations
+date: 2026-03-12
+tags:
+    - attack.credential_access
+    - attack.t1539
+    - attack.persistence
+    - attack.t1556
+logsource:
+    category: proxy
+detection:
+    selection_url:
+        cs-uri|contains: '/ppsecure/post.srf'
+    selection_kmsi:
+        cs-body|contains: 'KMSI=on'
+    filter_legitimate_host:
+        cs-host|endswith:
+            - '.microsoft.com'
+            - '.live.com'
+            - '.microsoftonline.com'
+    condition: selection_url and selection_kmsi and not filter_legitimate_host
+falsepositives:
+    - Users legitimately selecting "Keep Me Signed In" through non-Microsoft proxy
+level: medium

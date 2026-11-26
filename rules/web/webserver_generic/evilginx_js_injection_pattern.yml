@@ -1,0 +1,35 @@
+title: Evilginx JavaScript Credential Injection Pattern
+id: c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f
+status: experimental
+description: |
+    Detects Evilginx-specific JavaScript injection patterns in HTTP response bodies.
+    Evilginx injects a polling function (lp) that auto-fills credential fields and monitors
+    for user input via DOM manipulation. This pattern is consistent across LinkedIn,
+    Microsoft, and custom phishlets in Evilginx 3.x.
+references:
+    - https://github.com/kgretzky/evilginx2
+    - https://breakdev.org/evilginx-3-0-update/
+author: CyberLeakWatch Investigations
+date: 2026-03-12
+tags:
+    - attack.initial_access
+    - attack.t1566.002
+    - attack.execution
+    - attack.t1059.007
+logsource:
+    category: webserver
+detection:
+    selection_lp_function:
+        response|contains: 'function lp(){'
+    selection_dom_manipulation:
+        response|contains:
+            - 'document.querySelector'
+            - 'email.value'
+            - 'password.focus()'
+    selection_evilginx_header:
+        response|contains: 'X-Evilginx'
+    condition: (selection_lp_function and selection_dom_manipulation) or selection_evilginx_header
+falsepositives:
+    - Legitimate security testing tools
+    - Penetration testing engagements
+level: critical
