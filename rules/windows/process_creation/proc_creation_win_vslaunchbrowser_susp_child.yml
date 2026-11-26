@@ -1,0 +1,35 @@
+title: Potentially Suspicious Child Process Of VSLaunchBrowser
+id: c3e93803-fb6c-4eba-8c2c-d3a5002d1d5f
+status: experimental
+description: |
+    Detects potentially suspicious command and script interpreters spawned by the Microsoft Visual Studio VSLaunchBrowser utility.
+    VSLaunchBrowser can open local or remote resources through their associated file handlers and could be abused to proxy execution through a trusted developer utility.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/VsLaunchBrowser/
+author: Diablo Research
+date: 2026-10-03
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1127
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\VSLaunchBrowser.exe'
+    selection_child:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\msiexec.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\regsvr32.exe'
+            - '\rundll32.exe'
+            - '\wscript.exe'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate Visual Studio development or debugging workflows that intentionally open command or script files through VSLaunchBrowser
+level: medium
