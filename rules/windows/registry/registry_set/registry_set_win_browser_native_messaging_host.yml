@@ -1,0 +1,37 @@
+title: Potential Suspicious Browser Native Messaging Host
+    Registration
+id: a58b22c1-c860-4ff9-8091-fd6c605923c7
+status: experimental
+description: |
+    Detects the creation of a native messaging host registration
+    via the Windows registry. Native messaging allows browser
+    extensions to communicate with local binaries via stdin/stdout,
+    which can be abused to execute arbitrary commands and escape
+    the browser sandbox. Adversaries such as ChromeAlone
+    (DEF CON 33) register native messaging hosts to achieve
+    shell execution from a malicious extension.
+references:
+    - https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging
+    - https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/native-messaging
+    - https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_manifests
+    - https://github.com/praetorian-inc/ChromeAlone
+author: PersonalRules
+date: 2026-04-23
+tags:
+    - attack.persistence
+    - attack.t1176.001
+    - attack.execution
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\NativeMessagingHosts\'
+    condition: selection
+falsepositives:
+    - Legitimate browser extensions installing native messaging
+      hosts (password managers, screen readers, etc.)
+    - Enterprise software deployment tools installing browser
+      extensions
+    - Browser updates that register new native messaging hosts
+level: medium
