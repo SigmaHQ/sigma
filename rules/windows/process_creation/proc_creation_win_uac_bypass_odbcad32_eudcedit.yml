@@ -1,0 +1,36 @@
+title: UAC Bypass Tool Spawning Shell - Odbcad32/Eudcedit
+id: aa316e63-5945-4b42-a05f-d898c402f579
+status: experimental
+description: |
+    Detects the auto-elevating Windows binaries odbcad32.exe (ODBC Data Source Administrator) and eudcedit.exe (Private Character Editor)
+    spawning a command shell or scripting/proxy-execution child process - a pattern indicative of a UAC bypass used to obtain a high-integrity process.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/odbcad32/
+    - https://lolbas-project.github.io/lolbas/Binaries/Eudcedit/
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1548.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith:
+            - '\odbcad32.exe'
+            - '\eudcedit.exe'
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\rundll32.exe'
+            - '\regsvr32.exe'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
