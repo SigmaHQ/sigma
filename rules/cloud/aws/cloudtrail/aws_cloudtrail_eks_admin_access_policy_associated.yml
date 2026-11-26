@@ -1,0 +1,31 @@
+title: AWS EKS Admin Access Policy Associated With Principal
+id: 8eb7c1dc-7ccb-4340-bd0b-764ac85ddc2d
+status: experimental
+description: |
+    Detects the association of the "AmazonEKSClusterAdminPolicy" or "AmazonEKSAdminPolicy" EKS access policy with an AWS principal through EKS Cluster Access Management.
+    These managed access policies grant administrator privileges inside the Kubernetes cluster, without modifying the "aws-auth" ConfigMap.
+    Adversaries with access to the AWS API can abuse this to grant an attacker-controlled IAM user or role administrator access to an EKS cluster for privilege escalation, lateral movement into the cluster, or persistence.
+references:
+    - https://securitylabs.datadoghq.com/articles/eks-cluster-access-management-deep-dive/
+    - https://stratus-red-team.cloud/attack-techniques/EKS/eks.lateral-movement.create-access-entry/
+    - https://docs.aws.amazon.com/eks/latest/userguide/access-policy-permissions.html
+author: Ahmed Raza Niyaz Shaikh
+date: 2026-11-26
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098.006
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: 'eks.amazonaws.com'
+        eventName: 'AssociateAccessPolicy'
+        requestParameters.policyArn|endswith:
+            - '/AmazonEKSClusterAdminPolicy'
+            - '/AmazonEKSAdminPolicy'
+    condition: selection
+falsepositives:
+    - Administrators or infrastructure-as-code pipelines granting administrator access to a cluster during cluster setup or access management changes. Investigate whether the target principal in "requestParameters.principalArn" is expected to have such access.
+level: medium
