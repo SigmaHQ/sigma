@@ -42,6 +42,9 @@ detection:
             - '/ksh'
             # - '/sh'   # excluded for the same reason as /dash above
             - '/zsh'
+    selection_susp_cli_shell:
+        # catches shell invocations inside the xexec wrapper payload: e.g. /bin/sh -c '/bin/sh 0<&2 1>&2'
+        CommandLine|re: '(?:^|\s)-c\s+[''"]?(/(usr/)?bin/)?(ash|bash|busybox|csh|dash|fish|ksh|mksh|rbash|sh|tcsh|zsh)(?:\s|[''";|&<>()]|$)'
     selection_susp_cli:
         # the payload command string appears here as: /bin/sh -c '<payload>'
         # this catches the grandchild tool (python, nc, wget, etc.) referenced in the shell's CommandLine
