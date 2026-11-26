@@ -1,0 +1,29 @@
+title: Laravel TokenGuard Authentication Bypass Attempt
+id: a8c63e00-bd4b-4742-9dc5-d4c1b0de3679
+status: experimental
+description: |
+    Detects exploitation attempts against Laravel's TokenGuard authentication bypass (CVE-2026-114509).
+    TokenGuard does not validate the credential type before the database lookup: sending api_token as an
+    array (e.g. api_token[]=0 or api_token[0]=0) produces a whereIn('api_token', [0]) query and under
+    MySQL/MariaDB implicit casting matches the first user row, granting unauthenticated access.
+references:
+    - https://github.com/laravel/framework/security/advisories/GHSA-f9x3-7vq9-cph6
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-114509
+    - https://github.com/ArioVeisa/cve-2026-114509-laravel-tokenguard
+author: kosoyyagent
+date: 2026-10-25
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - cve.2026-114509
+logsource:
+    category: webserver
+detection:
+    selection:
+        cs-uri-query|contains:
+            - 'api_token%5b'
+            - 'api_token['
+    condition: selection
+falsepositives:
+    - Legitimate API clients erroneously submitting the token as an array parameter (rare)
+level: high
