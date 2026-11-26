@@ -1,0 +1,37 @@
+title: Python Process Spawning Windows Discovery Utilities
+id: 9e9d430e-f278-4c33-b0a7-f2e024f80d9a
+status: experimental
+description: |
+    Detects Python launching Windows system or network discovery utilities.
+    Observed in the LiteLLM 1.107.0 supply-chain compromise, where a malicious
+    "cook.pth" startup hook caused the Python interpreter to import a
+    credential collector that invokes these utilities during interpreter
+    startup, independent of the script being executed.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/10/23/inside-the-litellm-1-107-0-supply-chain-compromise-credential-theft-through-python-startup-hooks/
+author: Gangadhar
+date: 2026-10-27
+tags:
+    - attack.discovery
+    - attack.t1082
+    - attack.t1016
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith:
+            - '\python.exe'
+            - '\pythonw.exe'
+    selection_child:
+        Image|endswith:
+            - '\systeminfo.exe'
+            - '\ipconfig.exe'
+            - '\route.exe'
+            - '\arp.exe'
+            - '\netstat.exe'
+    condition: all of selection_*
+falsepositives:
+    - Administrative or diagnostic Python scripts
+    - Network automation or inventory tooling written in Python
+level: medium
