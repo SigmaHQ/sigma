@@ -1,0 +1,32 @@
+title: Potential Proxy Execution Via Change.EXE
+id: d352d46b-9569-4d0a-be3e-94467981788b
+status: experimental
+description: |
+    Detects Change.EXE spawning one of its helper binaries (chglogon.exe, chgport.exe, chgusr.exe) from a location other than the Windows system directories.
+    Change.EXE launches the helper that matches its first argument (logon, port, user) from its own folder.
+    Attackers can copy Change.EXE to a writable folder next to a payload renamed to one of these helpers, so the payload runs as a child of a signed Microsoft binary.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Change/
+author: Eduard Marian
+date: 2026-11-27
+tags:
+    - attack.stealth
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\change.exe'
+        Image|endswith:
+            - '\chglogon.exe'
+            - '\chgport.exe'
+            - '\chgusr.exe'
+    filter_main_system_location:
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unlikely
+level: high
