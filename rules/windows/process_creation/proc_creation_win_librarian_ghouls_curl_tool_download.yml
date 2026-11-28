@@ -1,0 +1,31 @@
+title: Librarian Ghouls - Curl Downloading Campaign Tools (driver.exe / blat.exe)
+id: bec4bd10-c5b4-4eec-9a19-403addb226a4
+status: experimental
+description: |
+    Detects curl.exe downloading the tool files (driver.exe, blat.exe) that the Librarian
+    Ghouls installer script fetches from a campaign domain. The embedded plaintext install
+    script of two analysed samples performs exactly this download step as part of a chain
+    built only from legitimate tools.
+references:
+    - https://securelist.com/librarian-ghouls-apt-wakes-up-computers-to-steal-data-and-mine-crypto/116536/
+author: Tomoki Murota
+date: 2026-11-28
+modified: 2026-11-29
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_librarian_ghouls_curl_tool_download/info.yml
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\curl.exe'
+    selection_tools:
+        CommandLine|contains:
+            - 'driver.exe'
+            - 'blat.exe'
+    condition: selection and selection_tools
+falsepositives:
+    - Legitimate software distribution or administration scripts that fetch files named driver.exe or blat.exe with curl
+level: medium
+tags:
+    - attack.command-and-control
+    - attack.t1105
