@@ -1,0 +1,25 @@
+title: DRV File Created In User AppData Folder
+id: d2624ac0-1658-495b-8b90-1101fc952bf1
+status: experimental
+description: |
+    Detects the creation of a file with the ".drv" extension inside a user's AppData folder.
+    Legitimate ".drv" files are drivers and live in Windows system folders, not in user profiles.
+    Malware can use the extension to disguise a DLL. In one observed case, an Inno Setup installer from a pay-per-install bundle wrote a Rust DLL named to resemble a system DLL ("2iphlpapi_7.drv") to "AppData\Roaming".
+references:
+    - https://www.virustotal.com/gui/file/385f0eb87b4baf68ae920bd631be18a7e812b225e183c39be6476404bc1bc081
+author: Edmund
+date: 2026-11-24
+tags:
+    - attack.stealth
+    - attack.t1036
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|contains: '\AppData\'
+        TargetFilename|endswith: '.drv'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
