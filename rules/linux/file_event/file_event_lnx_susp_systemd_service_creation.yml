@@ -1,0 +1,43 @@
+title: Suspicious Systemd Service File Creation
+id: 3958c337-ca1a-44ac-bdcb-c03e537f2f48
+status: experimental
+description: |
+    Detects the creation of systemd service or timer unit files in administrator-controlled, user and runtime directories.
+    Threat actors can use these unit files to establish persistence or escalate privileges.
+references:
+    - https://www.freedesktop.org/software/systemd/man/systemd.service.html
+author: Maksym Salyha
+date: 2026-11-18
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1543.002
+logsource:
+    category: file_event
+    product: linux
+detection:
+    selection_dirs_system:
+        TargetFilename|startswith:
+            - '/etc/systemd/system/'
+            - '/etc/systemd/user/'
+            - '/run/systemd/system/'
+    selection_dirs_user:
+        TargetFilename|contains: '/.config/systemd/user/'
+    selection_ext:
+        TargetFilename|endswith:
+            - '.service'
+            - '.timer'
+    filter_main_package_managers:
+        Image|endswith:
+            - '/apt'
+            - '/apt-get'
+            - '/dpkg'
+            - '/dnf'
+            - '/yum'
+            - '/rpm'
+    condition: 1 of selection_dirs_* and selection_ext and not 1 of filter_main_*
+falsepositives:
+    - Legitimate administrators creating or modifying service and timer units
+    - Configuration management tools (Ansible, Puppet, Chef)
+    - Software installers that are not covered by the package manager filter
+level: low
