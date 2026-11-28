@@ -1,0 +1,26 @@
+title: NTLM (MD4/MD5-Based) Authentication Observed
+id: 9d26bf7f-412d-47a9-9fb3-3d5347a14e05
+status: experimental
+description: An NTLM authentication event was logged. NTLM relies on MD4/MD5, which
+  are classically weak and trivially accelerated by Grover's algorithm, and NTLM is
+  separately exposed to Pass-the-Hash. Surfaces quantum-and-classically weak authentication
+  for migration to Kerberos with PQC-capable PKINIT or to modern password hashing.
+references:
+- https://csrc.nist.gov/pubs/ir/8547/ipd
+author: TAI Creative LLC
+date: '2026-07-16'
+tags:
+- attack.credential-access
+- attack.t1110
+- attack.t1550.002
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4776
+  condition: selection
+falsepositives:
+- Legacy applications requiring NTLM; expected in unmigrated domains.
+level: medium
+license: DRL-1.1
