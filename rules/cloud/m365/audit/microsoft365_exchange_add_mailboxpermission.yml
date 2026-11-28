@@ -1,0 +1,44 @@
+title: M365 Exchange Mailbox Permission Granted
+id: 132c3d79-6921-43a6-80ee-26dacc43a77a
+status: experimental
+description: |
+    Detects when an administrator grants mailbox permissions to a user in Microsoft 365
+    (Add-MailboxPermission in the unified audit log). The usual grant is FullAccess, which
+    lets the delegate open another person's mailbox and read and manage its contents — a
+    classic persistence move: an attacker with an admin account grants themselves (or a
+    second account they control) FullAccess to a target mailbox and keeps reading mail
+    long after the initial compromise, without needing the victim's password again.
+    The operation is logged with Workload Exchange in the unified audit log, and
+    Microsoft's own audit-log documentation names Add-MailboxPermission as the operation
+    for assigning delegate permissions. Exchange's own service accounts also generate
+    this event during scheduled maintenance (verifying the Discovery Management role
+    group's FullAccess on the DiscoverySearchMailbox system mailbox), so those system
+    accounts are filtered out below — the filter values come verbatim from Microsoft's
+    documentation, not from guesswork.
+references:
+    - https://learn.microsoft.com/en-us/purview/audit-log-activities
+    - https://learn.microsoft.com/en-us/powershell/module/exchange/add-mailboxpermission
+    - https://attack.mitre.org/techniques/T1098/002/
+author: Haroon Arshad
+date: 2026-11-26
+tags:
+    - attack.persistence
+    - attack.t1098.002
+logsource:
+    product: m365
+    service: audit
+detection:
+    selection:
+        Workload: 'Exchange'
+        Operation: 'Add-MailboxPermission'
+        ResultStatus: 'Succeeded'
+    filter_main_system_accounts:
+        UserId:
+            - 'NT AUTHORITY\SYSTEM'
+            - 'NT SERVICE\MSExchangeAdminApiNetCore'
+            - 'Administrator@apcprd03.prod.outlook.com'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Legitimate delegate grants by helpdesk or Exchange admins (executive assistants, shared-mailbox access, eDiscovery preparation). Baseline which admins grant FullAccess in the tenant and exclude them by UserId if the volume is high.
+    - The DiscoverySearchMailbox maintenance activity is already filtered out via the system accounts above; if Microsoft changes the maintenance account, those events will surface again as a known pattern.
+level: medium
