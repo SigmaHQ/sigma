@@ -1,0 +1,26 @@
+title: Azure AD Device Created
+id: fc268053-ae1f-4055-8b0e-e7802342fdfb
+status: experimental
+description: Detects the creation of a device object in Microsoft Entra ID (Azure AD) through the 'Add device' directory audit operation. A registered device can satisfy device-based Conditional Access requirements, so an attacker who can register a device of their own gains a foothold inside the tenant's device trust boundary (technique T1078.004). This is the audit-log side of device registration; the shipped sign-in-log rule only covers registrations where MFA was not performed.
+references:
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities#core-directory
+    - https://learn.microsoft.com/en-us/entra/architecture/security-operations-devices#device-registrations-and-joins-outside-policy
+related:
+    - id: 5afa454e-030c-4ab4-9253-a90aa7fcc581
+      type: similar
+author: 'Haroon Arshad'
+date: 2026-11-15
+tags:
+    - attack.persistence
+    - attack.t1078.004
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        operationName: 'Add device'
+    condition: selection
+falsepositives:
+    - Legitimate device joins and enrollments, for example new laptops and phones joining during onboarding, Autopilot enrollments, and hybrid join sync.
+    - Bulk enrollment and device-management service principals also register devices with the 'Add device' operation; if they generate noise, exclude the known enrollment service principals.
+level: medium
