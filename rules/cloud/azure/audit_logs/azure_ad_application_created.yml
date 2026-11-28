@@ -1,0 +1,22 @@
+title: Azure AD Application Created
+id: c408d82b-6aea-470d-81d9-460de6955875
+status: experimental
+description: Detects the creation of an application registration in Microsoft Entra ID (Azure AD) through the 'Add application' directory audit operation. Adversaries who obtain administrative access may register a new application to maintain persistent access to the tenant, then add credentials to it and operate through its service principal, so a new app registration from an unexpected actor is worth investigating (technique T1136.003).
+references:
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities
+author: 'Haroon Arshad'
+date: 2026-10-29
+tags:
+    - attack.persistence
+    - attack.t1136.003
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        operationName: 'Add application'
+    condition: selection
+falsepositives:
+    - Legitimate application registrations by administrators, for example when onboarding a new service or a CI/CD pipeline.
+    - Tenants that let regular users register applications will see steady volume from benign self-service registrations; if that generates noise, scope the rule to registrations by actors outside the known admin and automation groups, or exclude known provisioning service principals.
+level: medium
