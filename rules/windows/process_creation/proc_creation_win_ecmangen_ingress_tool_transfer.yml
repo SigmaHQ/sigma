@@ -1,0 +1,29 @@
+title: Potential Ingress Tool Transfer Via ECMangen.EXE
+id: f9b360f9-11a5-47af-875e-630c85820643
+status: experimental
+description: |
+    Detects execution of "ECMangen.exe" with a remote URL on the command line.
+    ECMangen.exe is a utility that ships with the Windows SDK and with Microsoft Exchange Server. It does not take a URL as part of its normal usage.
+    When given a URL, it downloads the remote content and stores it in the INetCache folder, which attackers can abuse to transfer tools onto a host.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/ECMangen/
+author: Geovanny Basantes
+date: 2026-10-28
+tags:
+    - attack.command-and-control
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\ECMangen.exe'
+        - OriginalFileName: 'ECMangen.exe'
+    selection_cli:
+        CommandLine|contains:
+            - 'http://'
+            - 'https://'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
