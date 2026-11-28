@@ -1,0 +1,42 @@
+title: Fastjson AutoType JNDI Deserialization Attempt In Web Request
+id: e32a067f-2808-4128-97ca-a72b8a38006b
+status: test
+description: |
+    Detects a Fastjson autoType payload in a web request that points @type at
+    com.sun.rowset.JdbcRowSetImpl. This is the canonical gadget for turning Fastjson
+    deserialization into a JNDI lookup: the class resolves a remote reference during
+    deserialization, so the attacker only has to host an LDAP/RMI endpoint and return a
+    serialized object that runs code on unmarshal.
+
+    Both the raw and the URL-encoded form of @type are matched, because the payload
+    reaches the log either verbatim (request body logging on a reverse proxy or WAF) or
+    percent-encoded (payload carried in a URI parameter or reflected in an error page).
+
+    Note on log sources: this rule needs request body content. It fires on ModSecurity /
+    Coraza audit logs, nginx with `$request_body`, Apache with mod_dumpio, or any WAF
+    that records POST bodies. A plain Common Log Format line only carries the URI, so the
+    rule will stay silent there unless the payload was sent as a query parameter.
+references:
+    - https://github.com/alibaba/fastjson/wiki/security_update_20220523
+    - https://github.com/alibaba/fastjson/wiki/enable_autotype
+    - https://nvd.nist.gov/vuln/detail/CVE-2022-25845
+author: yliucherish
+date: 2026-11-05
+tags:
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    category: webserver
+detection:
+    selection_autotype:
+        - '@type'
+        - '%40type'
+    selection_gadget:
+        - 'com.sun.rowset.JdbcRowSetImpl'
+    condition: selection_autotype and selection_gadget
+falsepositives:
+    - Applications that intentionally round-trip JdbcRowSetImpl through Fastjson. Keep it
+      out of production payloads, but it does happen in legacy internal tooling.
+    - Automated vulnerability scanners exercising Fastjson endpoints on assets you own
+level: critical
+regression_tests_path: regression_data/rules/web/webserver_generic/web_fastjson_autotype_jndi/info.yml
