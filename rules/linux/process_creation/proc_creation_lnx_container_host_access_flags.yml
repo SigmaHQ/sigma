@@ -1,0 +1,48 @@
+title: Potential Container Escape Via Docker Socket Or Host Namespace Access
+id: 0efe4005-85b1-46f0-a83c-3c942cfe455a
+status: experimental
+description: |
+    Detects the start of a container that shares the host PID namespace, mounts the Docker socket or the host root filesystem, or is granted the SYS_ADMIN capability.
+    Each of these options removes a part of the isolation between the container and the host and is a well-known path to escape from a container to the host.
+    An attacker with access to the Docker CLI or API can use these options to gain root privileges on the host.
+    Some monitoring agents, reverse proxies and container management tools legitimately require these options. It is recommended to baseline those and filter them by image name.
+references:
+    - https://docs.docker.com/engine/security/
+    - https://docs.docker.com/engine/containers/run/
+    - https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html
+    - https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/
+author: Aaron Sawit
+date: 2026-09-21
+tags:
+    - attack.privilege-escalation
+    - attack.execution
+    - attack.t1611
+    - attack.t1610
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith:
+            - '/docker'
+            - '/nerdctl'
+            - '/podman'
+    selection_subcommand:
+        CommandLine|contains:
+            - ' create '
+            - ' run '
+    selection_flags:
+        CommandLine|contains:
+            - '--cap-add SYS_ADMIN'
+            - '--cap-add=SYS_ADMIN'
+            - '--pid host'
+            - '--pid=host'
+            - '-v /:/'
+            - '--volume /:/'
+            - '/var/run/docker.sock:'
+            - '/run/docker.sock:'
+    condition: all of selection_*
+falsepositives:
+    - Monitoring agents, reverse proxies and container management tools that require access to the Docker socket
+    - Administrators debugging the host from a container
+level: medium
