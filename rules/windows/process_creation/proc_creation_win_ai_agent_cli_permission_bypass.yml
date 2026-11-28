@@ -1,0 +1,43 @@
+title: AI Coding Agent CLI Execution With Permission or Sandbox Bypass
+id: 9eb7d82c-a991-4ac4-9d76-9d6a7d9fa2b3
+status: experimental
+description: |
+    Detects Claude Code or the OpenAI Codex CLI being started with an option that disables approval prompts or the sandbox, which lets the agent run any command without a human confirming it.
+    The s1ngularity supply chain attack (malicious Nx packages, August 2025) launched locally installed AI coding agents with such options from an npm install script and asked them to search the host for secrets.
+    These options are also used legitimately to run agents unattended inside containers or disposable VMs.
+references:
+    - https://github.com/nrwl/nx/security/advisories/GHSA-cxm3-wv7p-598c
+    - https://www.wiz.io/blog/s1ngularity-supply-chain-attack
+    - https://code.claude.com/docs/en/cli-reference
+    - https://developers.openai.com/codex/cli/reference
+    - https://github.com/yug3009p/agent-attack-samples
+author: Yug Patel
+date: 2026-11-04
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith:
+            - '\claude.exe'
+            - '\codex.exe'
+    selection_cli_flag:
+        CommandLine|contains:
+            - '--dangerously-skip-permissions'
+            - 'bypassPermissions'
+            - '--dangerously-bypass-approvals-and-sandbox'
+            - 'danger-full-access'
+    selection_cli_codex_policy:
+        CommandLine|contains|all:
+            - 'approval_policy'
+            - 'never'
+    condition: selection_img and 1 of selection_cli_*
+falsepositives:
+    - Developers or CI jobs running an agent unattended inside a container or disposable VM, which is what these options are intended for
+level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_ai_agent_cli_permission_bypass/info.yml
