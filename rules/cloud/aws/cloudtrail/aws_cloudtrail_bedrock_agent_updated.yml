@@ -1,0 +1,32 @@
+title: AWS Bedrock Agent Instructions Or Settings Updated
+id: 8fab048e-c0a5-4ce9-89a9-6e4c58925e89
+status: experimental
+description: |
+    Detects updates to an existing Amazon Bedrock agent, including its instructions, foundation
+    model, or prompt override configuration. Changing a trusted agent's instructions can make it
+    leak data or follow an attacker's goals on later InvokeAgent calls. A subsequent PrepareAgent
+    call is required before a draft change becomes live.
+references:
+    - https://docs.aws.amazon.com/bedrock/latest/APIReference/API_agent_UpdateAgent.html
+    - https://docs.aws.amazon.com/bedrock/latest/userguide/logging-using-cloudtrail.html
+    - https://github.com/elastic/detection-rules/blob/c5678aa55127177cd11a23aab25a8715854bdae7/rules/integrations/aws/persistence_bedrock_agent_or_action_group_manipulation.toml
+    - https://github.com/CasimirTerr/Strata/blob/e65c91ca317642f86f5ca11e4d362e1702c77891/sigma/st_005_agent_instructions_or_settings_changed.yml
+author: Raajhesh Kannaa Chidambaram (@raajheshkannaa)
+date: 2026-11-19
+tags:
+    - attack.persistence
+    - attack.t1505
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource:
+            - 'bedrock.amazonaws.com'
+            - 'bedrock-agent.amazonaws.com'
+        eventName: 'UpdateAgent'
+    condition: selection
+falsepositives:
+    - Prompt engineers or developers updating approved agent instructions.
+    - Infrastructure-as-code or CI/CD pipelines that call UpdateAgent on every release.
+level: medium

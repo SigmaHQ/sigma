@@ -1,0 +1,36 @@
+title: AWS Bedrock Model Invocation Logging Deleted Or Modified
+id: 65a5b4cc-2a26-45e5-929e-3c7a9153377e
+status: experimental
+description: |
+    Detects deletion or overwriting of the Amazon Bedrock model invocation logging configuration.
+    Deleting the configuration turns off prompt and response logging. Putting a new configuration
+    can redirect those logs to an attacker-controlled or unmonitored S3 bucket or CloudWatch log group,
+    which blinds most data-plane Bedrock detections.
+references:
+    - https://docs.aws.amazon.com/bedrock/latest/APIReference/API_DeleteModelInvocationLoggingConfiguration.html
+    - https://docs.aws.amazon.com/bedrock/latest/APIReference/API_PutModelInvocationLoggingConfiguration.html
+    - https://docs.aws.amazon.com/bedrock/latest/userguide/model-invocation-logging.html
+    - https://github.com/elastic/detection-rules/blob/c5678aa55127177cd11a23aab25a8715854bdae7/rules/integrations/aws/defense_evasion_bedrock_model_invocation_logging_disabled_or_modified.toml
+    - https://github.com/panther-labs/panther-analysis/blob/539e96ee4fa4c19ba3cff1226d88073ff201afe1/rules/aws_cloudtrail_rules/aws_bedrock_deletemodelinvocationloggingconfiguration.yml
+    - https://github.com/CasimirTerr/Strata/blob/e65c91ca317642f86f5ca11e4d362e1702c77891/sigma/st_001_bedrock_invocation_logging_turned_off.yml
+    - https://github.com/CasimirTerr/Strata/blob/e65c91ca317642f86f5ca11e4d362e1702c77891/sigma/st_002_bedrock_invocation_logs_sent_somewhere_new.yml
+author: Raajhesh Kannaa Chidambaram (@raajheshkannaa)
+date: 2026-11-19
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+    - attack.t1685.002
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: 'bedrock.amazonaws.com'
+        eventName:
+            - 'DeleteModelInvocationLoggingConfiguration'
+            - 'PutModelInvocationLoggingConfiguration'
+    condition: selection
+falsepositives:
+    - Authorized administrators turning logging off in a test account or decommissioning Bedrock.
+    - Planned moves of invocation logs to a new, organization-owned S3 bucket or CloudWatch log group.
+level: high
