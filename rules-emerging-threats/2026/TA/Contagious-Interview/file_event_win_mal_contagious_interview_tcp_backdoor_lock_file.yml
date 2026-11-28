@@ -1,0 +1,28 @@
+title: Contagious Interview TCP Backdoor Lock File Creation
+id: 11cecd50-bf2f-46cb-93a5-1369d6ab5624
+status: experimental
+description: |
+    Detects node.exe creating the file "vscode-ext.lock" in a temp directory.
+    The Node.js backdoor delivered through the Contagious Interview git hook lure, which talks to its C2 over plain TCP using newline-delimited JSON, uses this file as a single-instance lock and rewrites it every ten minutes.
+    VS Code itself does not create a file with this name.
+references:
+    - https://n4uu.github.io/2026/raw-tcp-backdoor-cleverstack/
+author: n4uu
+date: 2026-11-05
+tags:
+    - attack.execution
+    - attack.t1059.007
+    - attack.stealth
+    - attack.t1480.002
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\node.exe'
+        TargetFilename|endswith: '\Temp\vscode-ext.lock'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
