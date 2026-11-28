@@ -1,0 +1,72 @@
+title: Local Credential Validation Via Dscl Authonly By Non-Root User
+id: 7f3a1c2e-9b4d-4e2a-8c6f-1d5e7a9b3c4f
+related:
+    - id: c4d9b6e2-8a17-4f03-9e5b-2f6a1d8c7b39
+      type: similar
+status: experimental
+description: |
+    Detects a single execution of the macOS Directory Service command line utility (dscl)
+    with the -authonly option by a non-root user. -authonly checks a username and password
+    against the local directory without creating a session. It is used by some IT scripts,
+    but also by macOS infostealers (e.g. CrashStealer) to confirm that a password captured
+    through a fake prompt is valid, and it can be used to test guessed passwords locally.
+    This rule matches individual executions only. It cannot distinguish a one-off check from
+    repeated attempts; see the related correlation rule for the repetition (brute-force) case.
+    Executions as root are excluded to reduce noise from MDM and helpdesk tooling. As a
+    consequence, this rule does not see an attacker who has already escalated to root.
+references:
+    - https://ss64.com/mac/dscl.html
+    - https://www.jamf.com/blog/crashstealer-macos-infostealer-analysis/
+author: Pavan Pothamsetti (PpT2211)
+date: 2026-08-23
+tags:
+    - attack.credential-access
+    - attack.t1110.001
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection:
+        Image|endswith: '/dscl'
+        CommandLine|contains: '-authonly'
+    filter_main_root:
+        User: 'root'
+    condition: selection and not filter_main_root
+falsepositives:
+    - IT, helpdesk or MDM scripts that prompt the user for a password and validate it (for example before FileVault or secure token operations) when run in the user context
+    - Administrators manually testing credentials
+level: medium
+---
+title: Multiple Dscl Authonly Executions By The Same User
+id: c4d9b6e2-8a17-4f03-9e5b-2f6a1d8c7b39
+related:
+    - id: 7f3a1c2e-9b4d-4e2a-8c6f-1d5e7a9b3c4f
+      type: similar
+status: experimental
+description: |
+    Detects repeated dscl -authonly executions by the same user on the same host within a
+    short window, which is consistent with local password guessing or with a stealer that
+    re-prompts and re-validates until it receives a working password.
+    Built on the single-event rule, so it inherits its root exclusion. The threshold and
+    window are starting values and should be tuned against your baseline.
+references:
+    - https://ss64.com/mac/dscl.html
+    - https://www.jamf.com/blog/crashstealer-macos-infostealer-analysis/
+author: Pavan Pothamsetti (PpT2211)
+date: 2026-11-21
+tags:
+    - attack.credential-access
+    - attack.t1110.001
+correlation:
+    type: event_count
+    rules:
+        - 7f3a1c2e-9b4d-4e2a-8c6f-1d5e7a9b3c4f
+    group-by:
+        - Computer
+        - User
+    timespan: 5m
+    condition:
+        gte: 5
+falsepositives:
+    - Scripts that validate credentials for several accounts in a loop in the user context
+level: medium
