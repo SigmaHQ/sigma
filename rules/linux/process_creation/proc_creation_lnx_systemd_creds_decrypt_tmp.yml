@@ -1,0 +1,28 @@
+title: Potential Systemd Credential Exposure Via Temporary Directory
+id: 66a786dd-39c9-43b6-bc31-224735278a4a
+status: experimental
+description: |
+    Detects the use of systemd-creds to decrypt credentials
+    into temporary directories such as /tmp, /var/tmp, or
+    /dev/shm. This activity may expose plaintext credentials
+    and should be investigated if unexpected.
+references:
+    - https://www.freedesktop.org/software/systemd/man/latest/systemd-creds.html
+author: Sairus Santosh
+date: 2026-11-09
+tags:
+    - attack.credential-access
+    - attack.t1552.001
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_image:
+        Image|endswith: '/systemd-creds'
+    selection_output:
+        CommandLine|re: '(?:^|\s)decrypt\s+(?:--[^\s]+\s+)*[^\s-][^\s]*\s+"?(?:/tmp/|/var/tmp/|/dev/shm/)'
+    condition: selection_image and selection_output
+falsepositives:
+    - Legitimate administrative credential decryption
+    - Authorized testing or maintenance involving temporary files
+level: medium
