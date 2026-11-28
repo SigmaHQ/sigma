@@ -1,0 +1,25 @@
+title: Inno Setup Uninstaller Created In Windows Root Folder
+id: 92b8ffe5-bff1-4db4-aff1-1065b9faa1b5
+status: experimental
+description: |
+    Detects the creation of an Inno Setup uninstaller ("unins000.exe" or its "unins000.dat" log) directly in the Windows folder.
+    By default, Inno Setup writes its "unins*" files to the installation folder, so their presence in "C:\Windows" usually means an installer chose the Windows folder as its installation folder.
+    Legitimate software rarely installs there. In one observed case, a fake "Cloudflare Setup" dropper installed to "C:\Windows" and placed a pay-per-install bundle there.
+references:
+    - https://jrsoftware.org/ishelp/topic_setup_uninstallfilesdir.htm
+    - https://www.virustotal.com/gui/file/93330938600704cff0498e82dad6fa31e9954bb8eaade16d0400f33ac7301c89
+author: Edmund
+date: 2026-11-24
+tags:
+    - attack.stealth
+    - attack.t1036.005
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|re|i: '^[a-z]:\\Windows\\unins\d{3}\.(exe|dat)$'
+    condition: selection
+falsepositives:
+    - Legacy software that installs into the Windows folder
+level: medium
