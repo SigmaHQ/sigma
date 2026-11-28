@@ -1,0 +1,44 @@
+title: Administrator Changed Authentication Method Of Another User
+id: bf01ebb6-7dde-40f4-b502-cd22cb121859
+related:
+    - id: 4d78a000-ab52-4564-88a5-7ab5242b20c7
+      type: similar
+    - id: fa84aaf5-8142-43cd-9ec2-78cfebf878ce
+      type: similar
+status: test
+description: |
+    Detects an administrator registering, updating or deleting MFA security info on another user's
+    account in Entra ID. An attacker holding administrative access can attach a factor they control
+    to a victim account, satisfying MFA without changing the password and without the account owner
+    noticing. Temporary Access Pass registrations are excluded, as they are already covered by
+    "Temporary Access Pass Added To An Account".
+references:
+    - https://learn.microsoft.com/en-us/entra/identity/authentication/howto-mfa-userdevicesettings
+    - https://learn.microsoft.com/en-us/entra/architecture/security-operations-privileged-accounts
+author: descambiado
+date: 2026-05-13
+tags:
+    - attack.persistence
+    - attack.credential-access
+    - attack.defense-impairment
+    - attack.t1556.006
+logsource:
+    product: azure
+    service: auditlogs
+    definition: 'Requirements: The TargetResources array needs to be mapped accurately in order for the Temporary Access Pass exclusion to work'
+detection:
+    selection:
+        LoggedByService: 'Authentication Methods'
+        Category: 'UserManagement'
+        OperationName:
+            - 'Admin registered security info'
+            - 'Admin updated security info'
+            - 'Admin deleted security info'
+    filter_main_temporary_access_pass:
+        TargetResources.modifiedProperties|contains: 'TemporaryAccessPass'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Help desk MFA resets on behalf of locked-out users
+    - Onboarding workflows registering initial MFA for new hires
+    - Identity governance automation managing security info
+level: medium
