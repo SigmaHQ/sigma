@@ -9,6 +9,7 @@ references:
     - https://news.sophos.com/en-us/2021/11/11/bazarloader-call-me-back-attack-abuses-windows-10-apps-mechanism/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-01-11
+modified: 2026-11-28
 tags:
     - attack.stealth
 logsource:
@@ -22,7 +23,7 @@ detection:
             - ':/Perflogs/'
             - ':/Users/Public/'
             - ':/Windows/Temp/'
-            - '/AppdData/Local/Temp/'
+            - '/AppData/Local/Temp/'
             - '/Desktop/'
             - '/Downloads/'
     selection_paths_back:
@@ -30,10 +31,14 @@ detection:
             - ':\PerfLogs\'
             - ':\Users\Public\'
             - ':\Windows\Temp\'
-            - '\AppdData\Local\Temp\'
+            - '\AppData\Local\Temp\'
             - '\Desktop\'
             - '\Downloads\'
-    condition: selection_eid and 1 of selection_paths_*
+    filter_optional_winget:
+        Path|contains:
+            - '/AppData/Local/Temp/WinGet/Microsoft.Winget.Source'
+            - '\AppData\Local\Temp\WinGet\Microsoft.Winget.Source'
+    condition: selection_eid and 1 of selection_paths_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
-level: high
+level: medium

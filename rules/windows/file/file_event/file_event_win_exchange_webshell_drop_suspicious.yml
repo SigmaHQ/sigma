@@ -11,6 +11,7 @@ references:
     - https://en.gteltsc.vn/blog/cap-nhat-nhe-ve-lo-hong-bao-mat-0day-microsoft-exchange-dang-duoc-su-dung-de-tan-cong-cac-to-chuc-tai-viet-nam-9685.html
 author: Florian Roth (Nextron Systems)
 date: 2022-10-04
+modified: 2026-11-26
 tags:
     - attack.persistence
     - attack.t1190
@@ -19,9 +20,11 @@ tags:
 logsource:
     product: windows
     category: file_event
+    definition: 'Requirements: The "CommandLine" field is not available by default on EID 11 of Sysmon logs. To be able to use this rule you need to enrich the log with the CommandLine of the process that created the file'
 detection:
     selection:
         Image|endswith: '\w3wp.exe'
+        # Note: CommandLine is a custom field and is not available by default on Sysmon EID 11
         CommandLine|contains: 'MSExchange'
     selection_types:
         TargetFilename|endswith:
