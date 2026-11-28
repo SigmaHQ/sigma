@@ -1,0 +1,35 @@
+title: SquidDoor - Renamed CDB (fontdrvhost.exe) Executing config.ini Script
+id: 7c1a5e42-9d3b-4f6a-8c21-5b0e7d4a9301
+status: experimental
+description: |
+    Detects the SquidDoor launch chain in which the Microsoft console debugger cdb.exe,
+    delivered by the attackers and renamed to fontdrvhost.exe (Unit 42 reports it saved
+    under C:\ProgramData), executes a file named config.ini. That file is not an INI file
+    but a cdb script that writes shellcode byte-by-byte with .dvalloc/eb commands and
+    transfers execution to it; the script format was confirmed on an analysed sample.
+    The rule requires the image to be fontdrvhost.exe while the Sysmon OriginalFileName
+    still says cdb.exe, so a genuine fontdrvhost.exe process cannot fire it.
+references:
+    - https://unit42.paloaltonetworks.com/advanced-backdoor-squidoor/
+author: Tomoki Murota
+date: 2026-11-28
+modified: 2026-11-29
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_squidoor_cdb_script_execution/info.yml
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_image_renamed:
+        Image|endswith: '\fontdrvhost.exe'
+        OriginalFileName: 'cdb.exe'
+    selection_cli_config:
+        CommandLine|re: '(?i)(^|[\s"''\\/])config\.ini($|[\s"''])'
+    condition: selection_image_renamed and selection_cli_config
+falsepositives:
+    - Legitimate renamed copies of cdb.exe used in debugging (the rename itself is the anomaly this rule keys on)
+level: medium
+tags:
+    - attack.execution
+    - attack.t1059
+    - attack.stealth
+    - attack.t1036
