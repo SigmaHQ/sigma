@@ -7,7 +7,7 @@ references:
     - https://github.com/HackTricks-wiki/hacktricks/blob/e4c7b21b8f36c97c35b7c622732b38a189ce18f7/src/windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md
 author: Florian Roth (Nextron Systems), Markus Neis, Sander Wiebing, Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2018-08-25
-modified: 2025-10-06
+modified: 2026-11-13
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -24,7 +24,7 @@ detection:
     selection_suspicious_paths_1:
         Details|contains:
             - ':\Perflogs'
-            - :\ProgramData'
+            - ':\ProgramData'
             - ':\Windows\Temp'
             - ':\Temp'
             - '\AppData\Local\Temp'
@@ -56,6 +56,16 @@ detection:
         Details|contains:
             - '\AppData\Local\Temp\'
             - 'C:\Windows\Temp\'
+    filter_main_burn_package_cache:
+        # Per-machine WiX Burn bundles (e.g. .NET runtimes, VC++ redistributables) resume setup after a reboot via HKLM RunOnce
+        # Example: "C:\ProgramData\Package Cache\{d21a4f20-968a-4b0c-bf04-a38da5f06e41}\windowsdesktop-runtime-5.0.14-win-x64.exe" /burn.runonce
+        Image|startswith:
+            - 'C:\ProgramData\Package Cache\{'
+            - 'C:\Windows\Temp\{' # Burn engine extracted to a ".be" folder
+        TargetObject|startswith: 'HKLM\SOFTWARE\'
+        TargetObject|contains: '\Microsoft\Windows\CurrentVersion\RunOnce\{'
+        Details|startswith: '"C:\ProgramData\Package Cache\{'
+        Details|endswith: '.exe" /burn.runonce'
     filter_optional_spotify:
         Image|endswith:
             - 'C:\Program Files\Spotify\Spotify.exe'
@@ -63,6 +73,12 @@ detection:
             - '\AppData\Roaming\Spotify\Spotify.exe'
         TargetObject|endswith: 'SOFTWARE\Microsoft\Windows\CurrentVersion\Run\Spotify'
         Details|endswith: 'Spotify.exe --autostart --minimized'
+    filter_optional_squirrel_machine_installs:
+        # Squirrel (Electron) machine-wide installers, e.g. Discord
+        # Example: C:\ProgramData\SquirrelMachineInstalls\Discord.exe --checkInstall
+        TargetObject|contains: '\Microsoft\Windows\CurrentVersion\Run\'
+        Details|startswith: 'C:\ProgramData\SquirrelMachineInstalls\'
+        Details|endswith: '.exe --checkInstall'
     condition: selection_target and (selection_suspicious_paths_1 or (all of selection_suspicious_paths_user_* )) and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Software using weird folders for updates
