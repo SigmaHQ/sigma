@@ -1,0 +1,33 @@
+title: AWS S3 Object Encrypted With Customer-Provided Key (SSE-C)
+id: 829163e4-dd60-48bd-867c-4f05dd013544
+status: experimental
+description: |
+    Detects S3 write requests that encrypt objects using server-side encryption with customer-provided keys (SSE-C).
+    Threat actors such as Codefinger have abused SSE-C with compromised credentials to re-encrypt S3 objects using an AES-256 key only they hold, making the data unrecoverable without paying a ransom.
+    Since April 2026, SSE-C is disabled by default for new buckets and for buckets in accounts without SSE-C encrypted objects, so legitimate SSE-C writes are rare and blocked attempts are logged with an "AccessDenied" error.
+    This rule requires S3 data events to be logged by CloudTrail.
+references:
+    - https://www.halcyon.ai/blog/abusing-aws-native-services-ransomware-encrypting-s3-buckets-with-sse-c
+    - https://aws.amazon.com/blogs/security/preventing-unintended-encryption-of-amazon-s3-objects/
+    - https://aws.amazon.com/blogs/storage/advanced-notice-amazon-s3-to-disable-the-use-of-sse-c-encryption-by-default-for-all-new-buckets-and-select-existing-buckets-in-april-2026/
+    - https://docs.aws.amazon.com/AmazonS3/latest/userguide/ServerSideEncryptionCustomerKeys.html
+author: Ahmed Raza Niyaz Shaikh
+date: 2026-11-26
+tags:
+    - attack.impact
+    - attack.t1486
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: 's3.amazonaws.com'
+        eventName:
+            - 'CopyObject'
+            - 'CreateMultipartUpload'
+            - 'PutObject'
+        requestParameters.x-amz-server-side-encryption-customer-algorithm: 'AES256'
+    condition: selection
+falsepositives:
+    - Applications that deliberately use SSE-C and have explicitly re-enabled it on their buckets. Such usage should be baselined per bucket and principal.
+level: high
