@@ -1,0 +1,23 @@
+title: Potential DbgSrv.EXE Abuse
+id: 90ef0cfb-ccbe-4504-b280-414f9c54d4d0
+status: experimental
+description: Detects child processes spawned by DbgSrv.exe, a Microsoft debugging process server that can be abused to execute arbitrary processes through a trusted developer utility.
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/58c62744ab84ad3049c09ba2c613f0e744d92c9c/yml/OtherMSBinaries/Dbgsrv.yml
+    - https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/dbgsrv-command-line-options
+author: Gage Chisholm
+date: 2026-09-10
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1127
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\dbgsrv.exe'
+    condition: selection
+falsepositives:
+    - Legitimate use of DbgSrv.exe to create processes during debugging sessions
+level: medium
