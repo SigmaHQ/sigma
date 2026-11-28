@@ -1,0 +1,34 @@
+title: Uncommon Child Process Of WFMFormat.EXE
+id: ece66131-245f-4dcc-a630-f3bdf79a4e7a
+status: experimental
+description: |
+    Detects uncommon child processes of WFMFormat.EXE, a command-line tool shipped with the Microsoft Message Farm Analyzer used to pretty-print dump files.
+    WFMFormat.EXE executes "tracerpt.exe" from its own folder, which allows attackers to drop an arbitrary binary named "tracerpt.exe" next to it and proxy its execution through a Microsoft signed binary.
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/WFMFormat/
+    - https://www.microsoft.com/en-us/download/details.aspx?id=103244
+author: Geovanny Basantes
+date: 2026-11-06
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1127
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\WFMFormat.exe'
+    filter_main_legit_tracerpt:
+        Image|endswith:
+            - ':\Windows\System32\tracerpt.exe'
+            - ':\Windows\SysWOW64\tracerpt.exe'
+    filter_main_generic:
+        Image|endswith:
+            - ':\Windows\System32\conhost.exe'
+            - ':\Windows\System32\WerFault.exe'
+            - ':\Windows\SysWOW64\WerFault.exe'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: medium
