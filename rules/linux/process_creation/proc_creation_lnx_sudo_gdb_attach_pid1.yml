@@ -1,0 +1,48 @@
+title: Sudo GDB Attach to PID 1
+id: c6e908ad-59ff-43a3-8884-87ead9dad726
+status: experimental
+description: |
+    Detects sudo executions of gdb attaching to PID 1 with a command file (i.e.,
+    '--command=' or '-x ') located in temporary directories ('/tmp', '/var/tmp',
+    '/dev/shm'). This pattern indicates an attempt to escalate privileges by abusing
+    misconfigured sudoers entries permitting passwordless gdb execution, as observed
+    against Cisco CUCM 15.x where the 'tomcat' user can run
+    'sudo -n /usr/bin/gdb -pid 1 --command=/tmp/gdb_file'.
+references:
+    - https://github.com/0xReadingSteiner/Silent-Call/blob/f91488d674f17b4a3b16754b0dc49f07d61ef35e/poc.sh
+author: mromanode
+date: 2026-08-13
+tags:
+    - attack.privilege-escalation
+    - attack.t1548.003
+logsource:
+    product: linux
+    category: process_creation
+    definition: |
+        Requires process creation logs from auditd (/var/log/audit/audit.log) or
+        logging systems that capture the executed image and full command line.
+detection:
+    selection_sudo:
+        Image|endswith: '/sudo'
+    selection_gdb:
+        CommandLine|contains: 'gdb'
+    selection_pid_1:
+        CommandLine|re: '(-pid\s+1|--pid[=\s]1|-p\s+1)'
+    selection_command_file:
+        CommandLine|contains:
+            - '--command='
+            - '--command '
+            - '-x '
+    selection_temp_path:
+        CommandLine|re: '/tmp/|/var/tmp/|/dev/shm/'
+    filter_optional_devel_env:
+        ParentImage|contains:
+            - 'eclipse'
+            - 'vscode'
+            - 'intellij'
+    condition: all of selection_* and not 1 of filter_optional_*
+falsepositives:
+    - Legitimate system administrators debugging PID 1 (rare in production)
+    - Development environments with authorized debugging of the init process
+    - Security or monitoring tooling legitimately attaching debuggers to system processes
+level: high
