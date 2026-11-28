@@ -1,0 +1,32 @@
+title: Librarian Ghouls - Tool Staging Under C:\Intel and rezet.cmd Creation
+id: 6bd8d8ce-90f1-4d61-8503-ac70cc8b0a66
+status: experimental
+description: |
+    Detects creation of a file named rezet.cmd in any directory, or creation of
+    driver.exe, blat.exe or AnyDesk.exe under C:\Intel. This matches the staging
+    behaviour read from the plaintext embedded install script of two analysed Librarian
+    Ghouls installer samples, which generate rezet.cmd and place the chain's tools under
+    C:\Intel.
+references:
+    - https://securelist.com/librarian-ghouls-apt-wakes-up-computers-to-steal-data-and-mine-crypto/116536/
+author: Tomoki Murota
+date: 2026-11-28
+modified: 2026-11-29
+regression_tests_path: regression_data/rules/windows/file/file_event/file_event_win_librarian_ghouls_intel_staging/info.yml
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_stage:
+        TargetFilename|startswith: 'C:\Intel\'
+    selection_tools:
+        TargetFilename|endswith:
+            - '\driver.exe'
+            - '\blat.exe'
+            - '\AnyDesk.exe'
+    selection_cmd:
+        TargetFilename|endswith: '\rezet.cmd'
+    condition: selection_cmd or (selection_stage and selection_tools)
+falsepositives:
+    - Intel driver/software packages legitimately writing under C:\Intel (the rezet.cmd selection has no known legitimate use)
+level: medium
