@@ -1,13 +1,19 @@
 title: Credentials from Password Stores - Keychain
 id: b120b587-a4c2-4b94-875d-99c9807d6955
 status: test
-description: Detects passwords dumps from Keychain
+description: |
+    Detects credential access against the macOS Keychain, covering three behaviours.
+    Use of the security binary to dump, export or alter access control on keychain contents.
+    Use of find-generic-password or find-internet-password together with the flags that print the secret itself, since reading an entry without -w or -g returns only item metadata and is routine in developer and CI tooling.
+    Direct access to the keychain database files by copy, archive or transfer tools, which is how the files are exfiltrated rather than read through the API.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1555.001/T1555.001.md
     - https://gist.github.com/Capybara/6228955
-author: Tim Ismilyaev, oscd.community, Florian Roth (Nextron Systems)
+    - https://www.trendmicro.com/en_us/research/25/i/an-mdr-analysis-of-the-amos-stealer-campaign.html
+    - https://securelist.com/macsync-new-version/121383/
+author: Tim Ismilyaev, oscd.community, Florian Roth (Nextron Systems), Yana Ivanov
 date: 2020-10-19
-modified: 2021-11-27
+modified: 2026-11-15
 tags:
     - attack.credential-access
     - attack.t1555.001
@@ -20,11 +26,34 @@ detection:
         CommandLine|contains:
             - 'find-certificate'
             - ' export '
+            - 'set-generic-password-partition-list'
+            - 'set-internet-password-partition-list'
     selection2:
         CommandLine|contains:
             - ' dump-keychain '
             - ' login-keychain '
-    condition: 1 of selection*
+    selection_find_password:
+        Image: '/usr/bin/security'
+        CommandLine|contains:
+            - 'find-generic-password'
+            - 'find-internet-password'
+    selection_secret_flag:
+        CommandLine|re: '\s-[wg](\s|$)'
+    selection_keychain_file:
+        Image|endswith:
+            - '/cp'
+            - '/ditto'
+            - '/rsync'
+            - '/tar'
+            - '/zip'
+            - '/curl'
+            - '/sqlite3'
+        CommandLine|contains:
+            - 'Library/Keychains/login.keychain'
+            - 'Library/Keychains/System.keychain'
+    condition: selection1 or selection2 or selection_keychain_file or (selection_find_password and selection_secret_flag)
 falsepositives:
     - Legitimate administration activities
+    - Backup and synchronisation tools that copy the user home directory, which includes the keychain files
+    - Developer and CI tooling that reads keychain secrets, where the -w or -g flag is expected
 level: medium
