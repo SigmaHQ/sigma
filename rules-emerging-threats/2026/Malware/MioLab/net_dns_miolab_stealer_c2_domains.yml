@@ -1,0 +1,31 @@
+title: DNS Query To MioLab Stealer Domains
+id: 25f9da5e-42d5-4550-b4d1-fd85124050a2
+status: experimental
+description: |
+    Detects DNS queries for domains used by the MioLab (Nova) macOS stealer: the four C2 hosts in the sample config (also used for agent and wallet-app downloads), the agent C2, the seed-phrase exfiltration domain of the trojanised Ledger Wallet and Trezor Suite builds, and the throwaway update-feed domain in the trojanised Ledger app.
+    Domains were collected from static analysis of the samples on 2026-11-13; some were already suspended by their registrars.
+references:
+    - https://github.com/harperjohnsai/detections/blob/dbb735ea2a1459f67c922b5ef8410cca140e67e1/iocs/2026-11-revstealer-setup-center/README.md
+    - https://github.com/PaloAltoNetworks/Unit42-timely-threat-intel/blob/47b53a06affd56b4fefbbcb1fb9fdaf88e3cca5e/2026-06-20-ClickFix-campaign-delivers-macOS-infostealer-via-DMG.txt
+    - https://bazaar.abuse.ch/sample/2b4f61c274bf8e4a79cf77e7b36d18d1dd265e8e894f5f2b6d8babc6323d556a/
+author: Harper Johns
+date: 2026-11-13
+tags:
+    - attack.command-and-control
+    - attack.t1071.004
+    - detection.emerging-threats
+logsource:
+    category: dns
+detection:
+    selection:
+        query|endswith:
+            - 'lewokodwqko.icu'
+            - 'shopguoerve.pro'
+            - 'dfsjfisafosdikfos.info'
+            - 'isosissisisossfiof.com'
+            - 'owqkoqoqoqoqoqqoqoo.info'
+            - 'miov2iaiaoubqosiqoiajwowiwjso.online'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
