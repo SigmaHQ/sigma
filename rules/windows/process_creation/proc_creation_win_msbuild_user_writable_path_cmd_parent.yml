@@ -1,0 +1,38 @@
+title: MSBuild.exe Execution from User-Writable Directory via cmd.exe
+id: a5280adc-4014-4201-bd72-ec3a3085aa64
+status: experimental
+description: |
+    Detects MSBuild.exe running from a user-writable directory (for example
+    %LOCALAPPDATA% or %TEMP%) with cmd.exe as the parent process. Observed in the
+    PavinLoader incident: a fake .NET solution ("CatalogIngestor" / "Ingestion Labs")
+    ships a bundled MSBuild.exe (255,904 bytes, 4.8.9032.0, Authenticode HashMismatch)
+    that build.cmd invokes from %LOCALAPPDATA% after setting
+    MSBUILDENABLEALLPROPERTYFUNCTIONS=1. In-memory assembly loading follows via
+    Internal.targets property functions.
+references:
+    - https://github.com/fotedev/pavinloader-easeus-campaign
+    - https://attack.mitre.org/techniques/T1127/001/
+author: fotedev
+date: 2026-10-29
+tags:
+    - attack.execution
+    - attack.defense-impairment
+    - attack.t1127.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\cmd.exe'
+    selection_image:
+        Image|endswith: '\MSBuild.exe'
+    selection_path:
+        Image|contains:
+            - '\AppData\Local\'
+            - '\AppData\Roaming\'
+            - '\Users\Public\'
+            - '\Windows\Temp\'
+    condition: all of selection_*
+falsepositives:
+    - Developer workstations or CI agents that intentionally run portable MSBuild copies from user-writable directories
+level: medium
