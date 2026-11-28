@@ -1,0 +1,39 @@
+title: Suspicious VbaProject.Bin File Creation
+id: dd187074-7e0f-4e40-8af9-994a62e96a3b
+status: experimental
+description: |
+    Detects the creation of a "vbaProject.bin" file by an uncommon process.
+    This file contains the VBA macro code embedded in MS Office documents.
+    Attackers can manipulate this file directly outside of the Office applications in order to hide the malicious VBA source code while keeping the compiled p-code. A technique known as VBA stomping.
+references:
+    - https://github.com/outflanknl/EvilClippy
+    - https://medium.com/@fsx30/vba-stomping-ba6ff790057b
+author: ali-vrd
+date: 2026-11-10
+tags:
+    - attack.stealth
+    - attack.t1564.007
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith: '\vbaProject.bin'
+    filter_main_office:
+        Image|endswith:
+            - '\excel.exe'
+            - '\winword.exe'
+            - '\powerpnt.exe'
+            - '\outlook.exe'
+            - '\msaccess.exe'
+            - '\mspub.exe'
+    filter_main_archive:
+        Image|endswith:
+            - '\7z.exe'
+            - '\7zFM.exe'
+            - '\winrar.exe'
+            - '\bandizip.exe'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Legitimate macro analysis activities on a host
+level: medium
