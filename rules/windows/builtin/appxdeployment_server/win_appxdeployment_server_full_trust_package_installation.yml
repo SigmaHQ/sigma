@@ -6,6 +6,7 @@ references:
     - https://www.splunk.com/en_us/blog/security/msix-weaponization-threat-detection-splunk.html
 author: Michael Haag, Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-11-03
+modified: 2026-11-05
 tags:
     - attack.execution
     - attack.defense-impairment
@@ -35,6 +36,10 @@ detection:
         PackageSourceUri|startswith: 'x-windowsupdate://'
     filter_optional_microsoftclient:
         PackageFullName|startswith: 'MicrosoftWindows.Client.'
+    filter_optional_onedrivesetup:
+        PackageFullName|startswith: 'Microsoft.OneDrive'
+        PackageSourceUri|startswith: 'file:///C:/Users/'
+        PackageSourceUri|contains: '/AppData/Local/Microsoft/OneDrive/'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Some legitimate applications installation which have been missed from filtering can generate fps, thus baselining and tuning is recommended before deploying to production
