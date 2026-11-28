@@ -1,0 +1,68 @@
+title: Suspicious Child Process Spawned By Tar
+id: a6f9e1fc-83d2-4b2e-a7e6-30c1f2e8b4d9
+related:
+    - id: 5fbd1c84-c13d-414a-9ab5-c20e40a122f5
+      type: similar
+status: experimental
+description: |
+    Detects suspicious child processes spawned by the "tar" utility, such as uncommon shells or shell command payloads invoking suspicious utilities.
+    This may indicate exploitation of GTFOBins techniques via "--checkpoint-action=exec" or "--to-command" flags,
+    wildcard injection attacks, or sudoers misconfiguration abuse to achieve command execution or privilege escalation.
+references:
+    - https://gtfobins.github.io/gtfobins/tar/
+    - https://www.helpnetsecurity.com/2014/06/27/exploiting-wildcards-on-linux/
+    - https://cgit.git.savannah.gnu.org/cgit/tar.git/tree/src/system.c?id=4e76fbad0b19c912305d53ff9a57baf8e9c63819
+    - https://cgit.git.savannah.gnu.org/cgit/tar.git/tree/src/checkpoint.c?id=4e76fbad0b19c912305d53ff9a57baf8e9c63819
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-11-26
+tags:
+    - attack.execution
+    - attack.privilege-escalation
+    - attack.t1059.004
+    - attack.t1548.003
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_parent:
+        ParentImage|endswith: '/tar'
+    selection_susp_img:
+         # src/system.c xexec() hardcodes execv("/bin/sh", ["/bin/sh", "-c", cmd]) for all command execution paths
+        # (--to-command, --checkpoint-action=exec, -I/--use-compress-program, --info-script)
+        # so the direct child of tar is always /bin/sh or /dash or /busybox or /bash (via symlink on Debian/Ubuntu)
+        # other shells here catch cases where a non-default shell is explicitly passed as the payload
+        Image|endswith:
+            - '/ash'
+            # - '/bash' # excluded to avoid noise
+            # - '/busybox'
+            - '/csh'
+            # - '/dash' # on many systems /bin/sh -> /bin/dash; excluded to avoid noise, covered by selection_susp_cli
+            - '/fish'
+            - '/ksh'
+            # - '/sh'   # excluded for the same reason as /dash above
+            - '/zsh'
+    selection_susp_cli_shell:
+        # catches shell invocations inside the xexec wrapper payload: e.g. /bin/sh -c '/bin/sh 0<&2 1>&2'
+        CommandLine|re: '(?:^|\s)-c\s+[''"]?(/(usr/)?bin/)?(ash|bash|busybox|csh|dash|fish|ksh|mksh|rbash|sh|tcsh|zsh)(?:\s|[''";|&<>()]|$)'
+    selection_susp_cli:
+        # the payload command string appears here as: /bin/sh -c '<payload>'
+        # this catches the grandchild tool (python, nc, wget, etc.) referenced in the shell's CommandLine
+        # even though those tools run as grandchildren of tar, not direct children
+        CommandLine|contains:
+            - 'chgrp'
+            - 'chown'
+            - 'cronjob'
+            - 'crontab'
+            - 'curl'
+            - 'ncat'
+            - 'netcat'
+            - 'perl'
+            - 'php'
+            - 'python'
+            - 'ruby'
+            - 'wget'
+            - 'whoami'
+    condition: selection_parent and 1 of selection_susp_*
+falsepositives:
+    - Unlikely
+level: high
