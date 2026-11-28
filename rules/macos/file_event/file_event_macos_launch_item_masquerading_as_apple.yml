@@ -1,0 +1,38 @@
+title: Potential Launch Agent/Daemon Masquerading As Apple
+id: 5d1b6981-6999-4da8-9f82-22410cad9c37
+status: experimental
+description: |
+    Detects the creation of a launch agent or launch daemon property list named after Apple ("com.apple.*") outside of "/System/Library".
+    macOS ships its own launch agents and daemons in "/System/Library", so a "com.apple.*" plist written to "/Library/LaunchAgents", "/Library/LaunchDaemons" or a user's "~/Library/LaunchAgents" is likely a program hiding behind Apple's name to persist.
+    EvilQuest installed "com.apple.questd.plist" in both "/Library/LaunchDaemons" and "~/Library/LaunchAgents", and CookieMiner installed "com.apple.rig2.plist" in "~/Library/LaunchAgents".
+references:
+    - https://www.intego.com/mac-security-blog/new-mac-ransomware-spyware-thiefquest-in-the-wild/
+    - https://objective-see.org/blog/blog_0x53.html
+    - https://unit42.paloaltonetworks.com/mac-malware-steals-cryptocurrency-exchanges-cookies/
+author: Bouliw
+date: 2026-10-12
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1543.001
+    - attack.t1543.004
+    - attack.t1036.005
+logsource:
+    category: file_event
+    product: macos
+detection:
+    selection:
+        TargetFilename|contains:
+            - '/Library/LaunchAgents/com.apple.'
+            - '/Library/LaunchDaemons/com.apple.'
+        TargetFilename|endswith: '.plist'
+    filter_main_system:
+        TargetFilename|startswith: '/System/Library/'
+    filter_main_upgrade_cleanup:
+        # Written by the macOS upgrade installer, and left behind after the upgrade
+        TargetFilename: '/Library/LaunchDaemons/com.apple.installer.cleanupinstaller.plist'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Apple software installed outside of macOS that ships its own launch agents or daemons
+level: medium
