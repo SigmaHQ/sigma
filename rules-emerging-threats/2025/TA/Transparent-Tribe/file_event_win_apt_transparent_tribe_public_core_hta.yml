@@ -1,0 +1,27 @@
+title: Transparent Tribe HTA Dropped In Public Core Folder
+id: 528e397b-f1f2-4e8e-b360-9c9051f1ce26
+status: experimental
+description: |
+    Detects the creation of an HTA file in "C:\Users\Public\core\", the working directory used by Transparent Tribe (APT36), as reported by CYFIRMA in December 2025.
+    In this campaign against Indian government entities, a LNK disguised as a PDF ("Online JLPT Exam Dec 2025.pdf.lnk") runs a remote HTA through mshta.
+    When Kaspersky is installed, the loader creates "C:\Users\Public\core\", writes a second HTA ("flow.hta") and runs it with mshta for persistence.
+references:
+    - https://www.cyfirma.com/research/apt36-multi-stage-lnk-malware-campaign-targeting-indian-government-entities/
+author: '@sohankanna'
+date: 2026-11-22
+tags:
+    - attack.stealth
+    - attack.t1218.005
+    - attack.g0134
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains: ':\Users\Public\core\'
+        TargetFilename|endswith: '.hta'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
