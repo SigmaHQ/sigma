@@ -1,0 +1,31 @@
+title: Esentutl Write To Alternate Data Stream
+id: d6df5c7d-8566-441a-ac2b-f4fdbab4944b
+status: experimental
+description: |
+    Detects usage of "esentutl.exe" in its copy/duplicate mode (/y /d) where the destination is an NTFS Alternate Data Stream (ADS).
+    Adversaries abuse this LOLBin to stash an executable payload inside an ADS in order to hide it from directory listings and evade detection.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Esentutl/
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1564.004/T1564.004.md
+author: EinLamYe
+date: 2026-06-29
+tags:
+    - attack.stealth
+    - attack.t1564.004
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\esentutl.exe'
+        - OriginalFileName: 'esentutl.exe'
+    selection_flags:
+        CommandLine|contains|all:
+            - ' /y'
+            - ' /d'
+    selection_ads:
+        CommandLine|re: '\\[^\\ ]+:[^\\/ ]'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
