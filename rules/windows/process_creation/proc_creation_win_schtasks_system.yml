@@ -1,13 +1,16 @@
 title: Schtasks Creation Or Modification With SYSTEM Privileges
 id: 89ca78fd-b37c-4310-b3d3-81a023f83936
 status: test
-description: Detects the creation or update of a scheduled task to run with "NT AUTHORITY\SYSTEM" privileges
+description: |
+    Detects the creation or modification of a scheduled task configured to run with "NT AUTHORITY\SYSTEM" or "SYSTEM" privileges.
+    Adversaries abuse this technique to establish persistence with escalated privileges, as tasks running under SYSTEM have full control
+    over the local machine and execute regardless of which user is logged in.
 references:
     - https://www.elastic.co/security-labs/exploring-the-qbot-attack-pattern
     - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-07-28
-modified: 2025-02-15
+modified: 2026-11-25
 tags:
     - attack.privilege-escalation
     - attack.execution
@@ -17,14 +20,15 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    selection_root:
-        Image|endswith: '\schtasks.exe'
-        CommandLine|contains:
+    selection_img:
+        - Image|endswith: '\schtasks.exe'
+        - OriginalFileName: 'schtasks.exe'
+    selection_cli_action:
+        CommandLine|contains|windash:
             - ' /change '
             - ' /create '
-    selection_run:
-        CommandLine|contains: '/ru '
-    selection_user:
+    selection_cli_user:
+        CommandLine|contains|windash: '/ru '
         CommandLine|contains:
             - 'NT AUT' # This covers the usual NT AUTHORITY\SYSTEM
             - ' SYSTEM ' # SYSTEM is a valid value for schtasks hence it gets it's own value with space
