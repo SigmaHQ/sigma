@@ -1,0 +1,33 @@
+title: Potential Alerting Impairment Via Microsoft Sentinel Analytics Rule Deletion
+id: 7ee22210-184f-4fba-9ca7-c08d3e91cf58
+status: experimental
+description: |
+    Detects successful deletion of a Microsoft Sentinel analytics rule in Azure Activity Logs.
+    Matches the analytics-rule deletion operation without filtering by rule kind.
+    An adversary could delete analytics rules to prevent alerts from being generated for subsequent malicious activity.
+references:
+    - https://learn.microsoft.com/en-us/azure/sentinel/audit-sentinel-data
+    - https://learn.microsoft.com/en-us/azure/role-based-access-control/permissions/security#microsoftsecurityinsights
+    - https://learn.microsoft.com/en-us/azure/azure-monitor/platform/activity-log-schema#schema-from-storage-account-and-event-hubs
+author: Shah Zaib Sajid (@shahzaibjanjua25)
+date: 2026-11-16
+modified: 2026-11-19
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    product: azure
+    service: activitylogs
+detection:
+    selection:
+        operationName: 'MICROSOFT.SECURITYINSIGHTS/ALERTRULES/DELETE'
+        # The linked Event Hub/storage schema example uses Success.
+        # Succeeded is retained defensively; it has not been confirmed in a captured Sentinel deletion event.
+        resultType:
+            - 'Success'
+            - 'Succeeded'
+    condition: selection
+falsepositives:
+    - Authorized removal of obsolete analytics rules or workspace decommissioning
+    - Infrastructure-as-code deployments that replace analytics rules
+level: medium
