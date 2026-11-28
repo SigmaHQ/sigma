@@ -1,0 +1,31 @@
+title: AWS CloudShell File Transfer
+id: ffa42ddf-bc30-45ef-bec9-4717dc7c791c
+status: experimental
+description: |
+    Detects requests for the pre-signed URLs that AWS CloudShell uses to upload and download
+    files through its web interface. CloudShell has no persistent local storage, so files are
+    moved in and out of the environment through these calls. An adversary who has access to the
+    AWS Management Console can use them to stage tooling into CloudShell or to retrieve
+    collected data without leaving artifacts on a workstation.
+references:
+    - https://docs.aws.amazon.com/cloudshell/latest/userguide/logging-and-monitoring.html
+author: Muhammad Yuga Nugraha
+date: 2026-11-22
+tags:
+    - attack.command-and-control
+    - attack.exfiltration
+    - attack.t1105
+    - attack.t1567
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: 'cloudshell.amazonaws.com'
+        eventName:
+            - 'GetFileUploadUrls'
+            - 'GetFileDownloadUrls'
+    condition: selection
+falsepositives:
+    - Legitimate file transfers performed by users of AWS CloudShell.
+level: medium

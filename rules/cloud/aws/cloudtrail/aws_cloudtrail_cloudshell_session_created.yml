@@ -1,0 +1,30 @@
+title: AWS CloudShell Session Created
+id: 0dda4b63-2d4f-404b-8046-748e69739cd6
+status: experimental
+description: |
+    Detects the creation of an AWS CloudShell session. CloudShell runs the AWS CLI with the
+    credentials of the console session that opened it, so commands executed inside it are
+    recorded with console session markers and originate from AWS-owned IP addresses. An
+    adversary who has access to the AWS Management Console can use CloudShell to run CLI
+    commands without local tooling, blend into legitimate console activity and avoid
+    host-based logging. Review sessions created by principals that do not normally use
+    CloudShell.
+references:
+    - https://docs.aws.amazon.com/cloudshell/latest/userguide/logging-and-monitoring.html
+author: Muhammad Yuga Nugraha
+date: 2026-11-22
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: 'cloudshell.amazonaws.com'
+        eventName: 'CreateSession'
+    condition: selection
+falsepositives:
+    - Legitimate use of AWS CloudShell by administrators and developers.
+    - In environments where CloudShell is an approved tool, tune this rule to the principals that are expected to use it.
+level: low
